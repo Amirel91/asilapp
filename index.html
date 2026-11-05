@@ -126,22 +126,26 @@
       </div>
 
       <div class="calendar" id="menuGrid" role="grid" aria-label="Calendario menù"></div>
-      <p class="hint">Tocca un giorno per compilarlo: i genitori lo vedono subito nell'area famiglia.</p>
+      <p class="hint">I giorni con la pastiglia verde hanno già il menù: toccane uno per compilarlo o correggerlo, la famiglia lo vede subito.</p>
 
       <form class="menu-form" id="menuForm">
-        <p class="drawer-sec">Menù del giorno</p>
-        <label class="field"><span>Giorno</span>
-          <select class="input" id="menuDay"></select>
-        </label>
+        <div class="menu-form-head">
+          <p class="drawer-sec">Menù del giorno</p>
+          <select class="input select" id="menuDay" aria-label="Giorno del menù"></select>
+        </div>
         <div class="menu-fields">
-          <label class="field"><span>Primo</span><input type="text" class="input" id="menuPrimo" maxlength="40" placeholder="Pasta al pomodoro"></label>
-          <label class="field"><span>Secondo</span><input type="text" class="input" id="menuSecondo" maxlength="40" placeholder="Polpettine"></label>
-          <label class="field"><span>Contorno</span><input type="text" class="input" id="menuContorno" maxlength="40" placeholder="Zucchine al vapore"></label>
-          <label class="field"><span>Merenda</span><input type="text" class="input" id="menuMerenda" maxlength="40" placeholder="Frutta fresca"></label>
+          <label class="meal-field"><span class="meal-head"><span class="meal-ico" aria-hidden="true">🍝</span>Primo</span>
+            <input type="text" class="input" id="menuPrimo" maxlength="40" placeholder="Pasta al pomodoro"></label>
+          <label class="meal-field"><span class="meal-head"><span class="meal-ico" aria-hidden="true">🍗</span>Secondo</span>
+            <input type="text" class="input" id="menuSecondo" maxlength="40" placeholder="Polpettine"></label>
+          <label class="meal-field"><span class="meal-head"><span class="meal-ico" aria-hidden="true">🥗</span>Contorno</span>
+            <input type="text" class="input" id="menuContorno" maxlength="40" placeholder="Zucchine al vapore"></label>
+          <label class="meal-field"><span class="meal-head"><span class="meal-ico" aria-hidden="true">🍎</span>Merenda</span>
+            <input type="text" class="input" id="menuMerenda" maxlength="40" placeholder="Frutta fresca"></label>
         </div>
         <div class="menu-actions">
-          <button type="submit" class="btn btn-primary btn-sm">Salva menù</button>
           <button type="button" class="btn btn-ghost btn-sm" data-action="menu-copy">Copia dal giorno prima</button>
+          <button type="submit" class="btn btn-primary btn-sm">Salva menù</button>
         </div>
       </form>
     </section>
@@ -203,9 +207,8 @@
 
     <div class="parent-cols">
       <section class="card">
-        <h3>Menù di oggi</h3>
-        <div class="menu-today" id="parentMenuToday"></div>
-        <h3 class="mt">Prossimi giorni</h3>
+        <div id="parentMenuToday"></div>
+        <h3 class="card-sub">Prossimi giorni</h3>
         <ul class="menu-next" id="parentMenuNext"></ul>
       </section>
       <div class="parent-stack">
