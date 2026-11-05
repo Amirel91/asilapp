@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Le mie note</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <header class="app-bar">
+    <h1>📝 Le mie note</h1>
+    <span class="count" id="noteCount"></span>
+  </header>
+  <form class="note-form" id="noteForm">
+    <input type="text" class="input" id="noteText" placeholder="Scrivi una nuova nota…" maxlength="200" autocomplete="off">
+    <button type="submit" class="btn">Aggiungi</button>
+  </form>
+  <p class="form-error" id="formError" hidden>La nota non può essere vuota.</p>
+  <ul class="note-list" id="noteList"></ul>
+  <p class="empty" id="emptyMsg" hidden>Nessuna nota: scrivi la prima qui sopra.</p>
+  <footer class="app-foot">Le note restano salvate in questo browser (localStorage).</footer>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
