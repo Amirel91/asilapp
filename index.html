@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Asilapp — diario digitale del nido</title>
-<meta name="description" content="Asilapp: gestione asilo nido — presenze, diario giornaliero, scorte e comunicazioni maestre-famiglie.">
+<title>Asilapp — memo, menù e pasti del nido</title>
+<meta name="description" content="Asilapp: memo alle famiglie, menù mensile del nido e bollettino pasti — il ponte digitale tra maestre e genitori.">
+<meta name="theme-color" content="#faf9f7">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -19,7 +20,7 @@
       <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-8"/><path d="M12 13c0-4 3-7 8-7 0 5-3 8-8 8z"/><path d="M12 10C12 6.5 9.5 4 5 4c0 4.5 2.5 7 7 7z"/></svg>
     </div>
     <h1 class="login-title">Asilapp</h1>
-    <p class="login-sub">Il diario digitale tra nido e famiglie</p>
+    <p class="login-sub">Memo, menù e pasti tra nido e famiglie</p>
 
     <div class="seg" role="group" aria-label="Tipo di accesso">
       <button type="button" class="seg-btn" data-action="role-tab" data-role="admin" aria-pressed="true">Maestre</button>
@@ -65,8 +66,9 @@
 
   <nav class="tabs" role="tablist" aria-label="Sezioni">
     <button type="button" class="tab" role="tab" data-tab="kids" aria-selected="true">Bambini</button>
-    <button type="button" class="tab" role="tab" data-tab="diario" aria-selected="false">Diario</button>
-    <button type="button" class="tab" role="tab" data-tab="scorte" aria-selected="false">Scorte</button>
+    <button type="button" class="tab" role="tab" data-tab="memo" aria-selected="false">Memo <span class="tab-count" id="memoTabCount" hidden></span></button>
+    <button type="button" class="tab" role="tab" data-tab="menu" aria-selected="false">Menù</button>
+    <button type="button" class="tab" role="tab" data-tab="pasti" aria-selected="false">Pasti</button>
     <button type="button" class="tab" role="tab" data-tab="avvisi" aria-selected="false">Avvisi</button>
   </nav>
 
@@ -77,36 +79,91 @@
         <h2>I bambini della sezione</h2>
         <div class="pane-tools">
           <input type="search" class="input search" id="kidSearch" placeholder="Cerca un bambino…" aria-label="Cerca bambino">
-          <button type="button" class="btn btn-outline btn-sm" data-action="add-kid">+ Aggiungi</button>
+          <button type="button" class="btn btn-outline btn-sm" data-action="toggle-add-kid">+ Aggiungi</button>
         </div>
       </div>
+
+      <form class="add-form" id="addKidForm" hidden>
+        <label class="field"><span>Nome e cognome</span>
+          <input type="text" class="input" id="addKidName" maxlength="40" placeholder="es. Giulia Rossi" autocomplete="off">
+        </label>
+        <label class="field"><span>Codice famiglia</span>
+          <input type="text" class="input" id="addKidCode" maxlength="8" placeholder="es. B007" autocomplete="off">
+        </label>
+        <button type="submit" class="btn btn-primary btn-sm">Crea</button>
+        <p class="login-err" id="addKidErr" hidden></p>
+      </form>
+
       <div class="kid-grid" id="kidGrid"></div>
-      <p class="empty" id="kidsEmpty" hidden>Nessun bambino trovato con questo nome.</p>
+      <p class="empty" id="kidsEmpty" hidden>Nessun bambino trovato.</p>
     </section>
 
-    <!-- Diario -->
-    <section class="tabpane" id="paneDiario" hidden>
+    <!-- Memo -->
+    <section class="tabpane" id="paneMemo" hidden>
       <div class="pane-head">
-        <h2>Diario della giornata</h2>
-        <select class="input select" id="diarioFilter" aria-label="Filtra per bambino"></select>
+        <h2>Memo alle famiglie</h2>
+        <div class="pane-tools">
+          <select class="input select" id="memoKid" aria-label="Filtra per bambino"></select>
+          <select class="input select" id="memoState" aria-label="Filtra per stato">
+            <option value="tutti">Tutti gli stati</option>
+            <option value="open">In attesa</option>
+            <option value="done">Ricevuti</option>
+          </select>
+        </div>
       </div>
-      <ul class="diario-list" id="diarioList"></ul>
-      <p class="empty" id="diarioEmpty" hidden>Nessuna voce nel diario: aprine una dal pannello Bambini.</p>
+      <ul class="memo-list" id="memoList"></ul>
+      <p class="empty" id="memoEmpty" hidden>Nessun memo: aprine uno dal pannello di un bambino.</p>
     </section>
 
-    <!-- Scorte -->
-    <section class="tabpane" id="paneScorte" hidden>
+    <!-- Menù mensile -->
+    <section class="tabpane" id="paneMenu" hidden>
       <div class="pane-head">
-        <h2>Scorte dei genitori</h2>
-        <button type="button" class="btn btn-outline btn-sm" data-action="export-csv">Esporta CSV</button>
+        <h2 id="menuTitle">Menù del mese</h2>
+        <div class="pane-tools">
+          <button type="button" class="btn btn-ghost btn-sm" data-action="menu-prev" aria-label="Mese precedente">←</button>
+          <button type="button" class="btn btn-ghost btn-sm" data-action="menu-next" aria-label="Mese successivo">→</button>
+        </div>
+      </div>
+
+      <div class="calendar" id="menuGrid" role="grid" aria-label="Calendario menù"></div>
+      <p class="hint">Tocca un giorno per compilarlo: i genitori lo vedono subito nell'area famiglia.</p>
+
+      <form class="menu-form" id="menuForm">
+        <p class="drawer-sec">Menù del giorno</p>
+        <label class="field"><span>Giorno</span>
+          <select class="input" id="menuDay"></select>
+        </label>
+        <div class="menu-fields">
+          <label class="field"><span>Primo</span><input type="text" class="input" id="menuPrimo" maxlength="40" placeholder="Pasta al pomodoro"></label>
+          <label class="field"><span>Secondo</span><input type="text" class="input" id="menuSecondo" maxlength="40" placeholder="Polpettine"></label>
+          <label class="field"><span>Contorno</span><input type="text" class="input" id="menuContorno" maxlength="40" placeholder="Zucchine al vapore"></label>
+          <label class="field"><span>Merenda</span><input type="text" class="input" id="menuMerenda" maxlength="40" placeholder="Frutta fresca"></label>
+        </div>
+        <div class="menu-actions">
+          <button type="submit" class="btn btn-primary btn-sm">Salva menù</button>
+          <button type="button" class="btn btn-ghost btn-sm" data-action="menu-copy">Copia dal giorno prima</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Pasti -->
+    <section class="tabpane" id="panePasti" hidden>
+      <div class="pane-head">
+        <h2>Bollettino pasti</h2>
+        <div class="pane-tools">
+          <input type="month" class="input select" id="mealsMonth" aria-label="Mese del bollettino">
+          <button type="button" class="btn btn-outline btn-sm" data-action="gen-meals">Prepara mese</button>
+          <button type="button" class="btn btn-outline btn-sm" data-action="export-meals">Esporta CSV</button>
+        </div>
       </div>
       <div class="table-wrap">
         <table class="table">
-          <thead><tr><th scope="col">Bambino</th><th scope="col">Pannolini</th><th scope="col">Salviette</th><th scope="col">Crema</th><th scope="col">Latte</th><th scope="col">Bavaglini</th></tr></thead>
-          <tbody id="scorteBody"></tbody>
+          <thead><tr><th scope="col">Bambino</th><th scope="col" class="num">Pasti</th><th scope="col" class="num">Tariffa</th><th scope="col" class="num">Totale</th><th scope="col">Stato</th></tr></thead>
+          <tbody id="mealsBody"></tbody>
+          <tfoot id="mealsFoot"></tfoot>
         </table>
       </div>
-      <p class="hint">Un tocco su una mancanza nel pannello del bambino avvisa subito la famiglia.</p>
+      <p class="hint">A inizio mese prepara il bollettino, compila i pasti usufruiti e la tariffa: il totale si calcola da solo.</p>
     </section>
 
     <!-- Avvisi -->
@@ -137,16 +194,24 @@
 
   <main class="panel parent-panel">
     <div class="kid-hero" id="parentHero"></div>
+
+    <section class="card todo-card" id="parentTodoCard">
+      <h3 id="parentTodoTitle">Da portare in nido</h3>
+      <ul class="todo-list" id="parentTodos"></ul>
+      <p class="empty" id="parentTodoEmpty" hidden>Tutto in regola: per ora non serve portare nulla.</p>
+    </section>
+
     <div class="parent-cols">
       <section class="card">
-        <h3>Diario di oggi</h3>
-        <ul class="diario-list" id="parentDiario"></ul>
-        <p class="empty" id="parentDiarioEmpty" hidden>Le maestre non hanno ancora scritto nulla.</p>
+        <h3>Menù di oggi</h3>
+        <div class="menu-today" id="parentMenuToday"></div>
+        <h3 class="mt">Prossimi giorni</h3>
+        <ul class="menu-next" id="parentMenuNext"></ul>
       </section>
       <div class="parent-stack">
         <section class="card">
-          <h3>Le sue scorte in sezione</h3>
-          <div class="bars" id="parentScorte"></div>
+          <h3>Bollettino pasti</h3>
+          <div id="parentMeals"></div>
         </section>
         <section class="card">
           <h3>Avvisi del nido</h3>
@@ -167,16 +232,14 @@
     <button type="button" class="btn btn-ghost btn-sm" data-action="close-drawer" aria-label="Chiudi pannello">✕</button>
   </header>
   <div class="drawer-body">
-    <p class="drawer-sec">Manca qualcosa? Avvisa i genitori</p>
-    <div class="quick-grid" id="quickSupply"></div>
-    <p class="drawer-sec">Diario rapido</p>
-    <div class="quick-grid" id="quickDiario"></div>
+    <p class="drawer-sec">Memo rapido alla famiglia</p>
+    <div class="quick-grid" id="quickMemo"></div>
     <form class="drawer-note" id="drawerNoteForm">
-      <input type="text" class="input" id="drawerNote" maxlength="160" placeholder="Nota libera per i genitori…" autocomplete="off">
+      <input type="text" class="input" id="drawerNote" maxlength="160" placeholder="Memo libero per i genitori…" autocomplete="off">
       <button type="submit" class="btn btn-primary btn-sm">Invia</button>
     </form>
-    <p class="drawer-sec">Ultime attività</p>
-    <ul class="diario-list" id="drawerHistory"></ul>
+    <p class="drawer-sec">Memo di questo bambino</p>
+    <ul class="memo-list" id="drawerMemoList"></ul>
   </div>
 </aside>
 
