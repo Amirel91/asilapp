@@ -174,7 +174,7 @@ button.cal-cell:hover, button.cal-day:hover { box-shadow: var(--sh-md); transfor
 .menu-row strong { font-size: .76rem; color: var(--sky-ink); white-space: nowrap; }
 .menu-row span { color: var(--ink-soft); text-align: right; overflow-wrap: anywhere; }
 
-/* ---------- tabella (scorte / pasti) ---------- */
+/* ---------- tabella (bollettino pasti) ---------- */
 .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r); background: var(--card); box-shadow: var(--sh-sm); }
 .table { width: 100%; border-collapse: collapse; font-size: .88rem; min-width: 620px; }
 .table th { text-align: left; font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); padding: .7rem .9rem; border-bottom: 1px solid var(--line); background: var(--bg); white-space: nowrap; }
@@ -189,16 +189,9 @@ button.cal-cell:hover, button.cal-day:hover { box-shadow: var(--sh-md); transfor
 .bill-total { display: flex; align-items: baseline; justify-content: space-between; gap: .6rem; flex-wrap: wrap; margin-bottom: .6rem; }
 .bill-total strong { font-size: 1.5rem; letter-spacing: -.02em; color: var(--sky-ink); font-variant-numeric: tabular-nums; }
 .bill-sub { font-size: .78rem; color: var(--muted); }
-
-/* ---------- barre scorte ---------- */
-.bars { display: grid; gap: .75rem; }
-.bar { display: grid; gap: .3rem; }
-.bar-label { display: flex; justify-content: space-between; font-size: .8rem; }
-.bar-label span:first-child { font-weight: 600; color: var(--ink-soft); }
-.bar-label .lv-ok { color: var(--sage); } .bar-label .lv-low { color: var(--amber-ink); } .bar-label .lv-out { color: var(--danger); }
-.bar-track { height: 8px; background: var(--bg); border-radius: 999px; overflow: hidden; border: 1px solid var(--line); }
-.bar-fill { height: 100%; border-radius: 999px; transition: width 350ms ease-out, background var(--t); }
-.bar-fill.ok { background: var(--sage); } .bar-fill.low { background: var(--amber); } .bar-fill.out { background: var(--terra); }
+.bill-status { display: inline-block; font-size: .72rem; font-weight: 700; border-radius: 999px; padding: .18rem .6rem; }
+.bill-status.ok { background: var(--sage-soft); color: var(--sage-ink); }
+.bill-status.pending { background: var(--amber-soft); color: var(--amber-ink); }
 
 /* ---------- avvisi ---------- */
 .broadcast { display: grid; gap: .6rem; background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 1rem; box-shadow: var(--sh-sm); }
@@ -227,6 +220,7 @@ button.cal-cell:hover, button.cal-day:hover { box-shadow: var(--sh-md); transfor
 /* cose da portare al nido (memo della famiglia) */
 .todo-card { background: linear-gradient(135deg, var(--terra-soft), #fdf7f2); border: 1px solid #eed6cc; border-radius: var(--r); padding: 1rem; box-shadow: var(--sh-sm); }
 .todo-card h3 { color: var(--terra-ink); font-size: .95rem; font-weight: 700; margin-bottom: .6rem; letter-spacing: -.01em; }
+.todo-list { display: grid; gap: .15rem; }
 .todo-item { display: flex; gap: .55rem; align-items: flex-start; padding: .5rem 0; border-bottom: 1px dashed #e8d5ca; font-size: .9rem; }
 .todo-item:last-child { border-bottom: 0; }
 .todo-item .todo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--terra); margin-top: .5rem; flex-shrink: 0; }
@@ -250,7 +244,6 @@ button.cal-cell:hover, button.cal-day:hover { box-shadow: var(--sh-md); transfor
 .quick-btn:active { transform: scale(.96); }
 .quick-btn.pressed { background: var(--terra-soft); border-color: #e8cfc4; color: var(--terra-ink); }
 .quick-btn small { font-size: .68rem; font-weight: 500; color: var(--muted); }
-.quick-btn small.lv-out, .quick-btn small.lv-low { color: var(--terra-ink); }
 .drawer-note { display: flex; gap: .5rem; }
 .drawer-note .input { flex: 1; }
 
