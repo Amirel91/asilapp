@@ -1,6 +1,7 @@
 /* ============================================================
-   Asilapp — logica app v3
+   Asilapp — logica app v3.1
    Pivot: memo famiglie · menù mensile · bollettino pasti
+   NEW: flag letto/portato dai genitori + flag/elimina avvisi
    Stato unico in localStorage + render() dalle viste
    ============================================================ */
 'use strict';
@@ -58,9 +59,9 @@ function seed() {
   ].map((k, i) => ({ ...k, color: i % AVS.length }));
 
   const memos = [
-    { id: uid(), kidId: kids[0].id, text: 'Portare pannolini', ts: now - 2 * H, done: false },
-    { id: uid(), kidId: kids[1].id, text: 'Portare un cambio di vestiti completo', ts: now - 6 * H, done: false },
-    { id: uid(), kidId: kids[2].id, text: 'Portare la crema protettiva', ts: now - 28 * H, done: true },
+    { id: uid(), kidId: kids[0].id, text: 'Portare pannolini', ts: now - 2 * H, done: false, doneBy: null, doneTs: null },
+    { id: uid(), kidId: kids[1].id, text: 'Portare un cambio di vestiti completo', ts: now - 6 * H, done: false, doneBy: null, doneTs: null },
+    { id: uid(), kidId: kids[2].id, text: 'Portare la crema protettiva', ts: now - 28 * H, done: true, doneBy: 'parent', doneTs: now - 20 * H },
   ];
 
   const menu = {};
@@ -77,17 +78,27 @@ function seed() {
   [22, 18, 21, 20, 19, 17].forEach((c, i) => { meals[ym][kids[i].id] = { count: c, rate: 6, paid: i === 2 }; });
 
   const msgs = [
-    { id: uid(), text: 'Domani mattina gita al parco: portare k-way e stivali.', ts: now - 5 * H },
-    { id: uid(), text: 'Le prove della recita di fine anno sono ogni venerdì alle 10:00.', ts: now - 30 * H },
+    { id: uid(), text: 'Domani mattina gita al parco: portare k-way e stivali.', ts: now - 5 * H, reads: {} },
+    { id: uid(), text: 'Le prove della recita di fine anno sono ogni venerdì alle 10:00.', ts: now - 30 * H, reads: {} },
   ];
   return { v: 3, role: null, parentKid: null, kids, memos, menu, meals, msgs };
+}
+
+/* patch: dati v3 senza i campi nuovi → li aggiunge senza perdere nulla */
+function patch(data) {
+  (data.memos || []).forEach(m => {
+    if (typeof m.doneBy === 'undefined') m.doneBy = m.done ? 'admin' : null;
+    if (typeof m.doneTs === 'undefined') m.doneTs = m.done ? m.ts : null;
+  });
+  (data.msgs || []).forEach(g => { if (!g.reads || typeof g.reads !== 'object') g.reads = {}; });
+  return data;
 }
 
 function load() {
   try {
     const raw = localStorage.getItem(LS_KEY);
     const data = raw ? JSON.parse(raw) : null;
-    if (data && data.v === 3) return data;
+    if (data && data.v === 3) { const p = patch(data); persist(p); return p; }
   } catch (e) { /* dati corrotti → demo fresca */ }
   const s = seed(); persist(s); return s;
 }
@@ -143,6 +154,13 @@ function renderKids() {
   $('#kidsEmpty').hidden = list.length > 0;
 }
 
+/* etichetta di stato di un memo, condivisa da lista maestre e drawer */
+function memoDoneChip(m) {
+  return m.done && m.doneBy === 'parent'
+    ? '<span class="memo-chip" style="background:var(--sage-soft);color:var(--sage-ink)">✓ dalla famiglia</span>'
+    : '';
+}
+
 function renderMemos() {
   const sel = $('#memoKid'), prevK = sel.value, prevS = $('#memoState').value;
   sel.innerHTML = '<option value="tutti">Tutti i bambini</option>' +
@@ -157,7 +175,7 @@ function renderMemos() {
     const k = kidById(m.kidId);
     return `<li class="memo-row ${m.done ? 'done' : ''}">
       <div class="memo-main">
-        <div class="memo-meta"><span class="memo-chip">${esc(k ? k.name : '?')}</span>${fmtRel(m.ts)}</div>
+        <div class="memo-meta"><span class="memo-chip">${esc(k ? k.name : '?')}</span>${memoDoneChip(m)}${fmtRel(m.ts)}${m.done && m.doneTs ? ' · chiuso ' + fmtRel(m.doneTs) : ''}</div>
         <div class="memo-txt">${esc(m.text)}</div>
       </div>
       <button type="button" class="memo-del" data-action="memo-toggle" data-id="${m.id}">${m.done ? '↺ Riapri' : '✓ Ricevuto'}</button>
@@ -173,26 +191,31 @@ function renderMenu() {
   const dim = new Date(menuY, menuM + 1, 0).getDate();
   const off = (first.getDay() + 6) % 7;
   const todayK = dkey(new Date());
+  const sel = $('#menuDay'), prev = sel.value;
+
   let html = DOWS.map(d => `<div class="cal-dow">${d}</div>`).join('') + '<div class="cal-cell off" aria-hidden="true"></div>'.repeat(off);
-  let opts = '';
+  let opts = '', firstOpt = '', anyPrev = false;
   for (let d = 1; d <= dim; d++) {
     const date = new Date(menuY, menuM, d);
     const k = dkey(date);
-    const m = state.menu[k];
-    if (date.getDay() === 0 || date.getDay() === 6) {
+    const wd = date.getDay();
+    if (wd === 0 || wd === 6) {
       html += `<div class="cal-day off"><span class="cal-num">${d}</span></div>`;
-    } else {
-      const lbl = date.toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'short' });
-      opts += `<option value="${k}">${lbl}</option>`;
-      html += `<button type="button" class="cal-day ${k === todayK ? 'today' : ''}" data-action="pick-day" data-key="${k}">
-        <span class="cal-num">${d}</span>${m ? `<span class="cal-txt">${esc(m.primo)}</span>` : ''}
-      </button>`;
+      continue;
     }
+    const m = state.menu[k];
+    const lbl = date.toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'short' });
+    const isSel = k === prev;
+    if (isSel) anyPrev = true;
+    if (!firstOpt) firstOpt = k;
+    opts += `<option value="${k}"${isSel ? ' selected' : ''}>${lbl}</option>`;
+    html += `<button type="button" class="cal-day${m ? ' has' : ''}${k === todayK ? ' today' : ''}${isSel ? ' sel' : ''}" data-action="pick-day" data-key="${k}" aria-label="${lbl}${m ? ', menù compilato' : ', senza menù'}">
+      <span class="cal-num">${d}${m ? '<span class="cal-dot"></span>' : ''}</span>${m ? `<span class="cal-txt">${esc(m.primo)}</span>` : ''}
+    </button>`;
   }
   $('#menuGrid').innerHTML = html;
-  const sel = $('#menuDay');
   sel.innerHTML = opts;
-  if (![...sel.options].some(o => o.value === sel.value)) sel.value = opts ? $(`#menuDay option:nth-child(${Math.min(new Date().getDate(), opts.split('<option').length - 1) || 1})`)?.value : '';
+  if (!anyPrev) sel.value = [...sel.options].some(o => o.value === todayK) ? todayK : (firstOpt || '');
   fillMenuForm();
 }
 
@@ -230,11 +253,16 @@ function renderPasti() {
 }
 
 function renderMsgs() {
+  const tot = state.kids.length || 1;
   const list = [...state.msgs].sort((a, b) => b.ts - a.ts);
-  $('#msgList').innerHTML = list.map(m => `<li class="msg-row">
-    <div class="msg-body"><div class="msg-text">${esc(m.text)}</div><div class="msg-time">${fmtRel(m.ts)}</div></div>
-    <button type="button" class="msg-del" data-action="msg-del" data-id="${m.id}">Elimina</button>
-  </li>`).join('');
+  $('#msgList').innerHTML = list.map(m => {
+    const n = Object.keys(m.reads || {}).length;
+    return `<li class="msg-row">
+      <div class="msg-body"><div class="msg-text">${esc(m.text)}</div>
+        <div class="msg-time">${fmtRel(m.ts)} · <span class="badge ${n >= tot ? 'ok' : 'off'}" style="font-size:.66rem">${n}/${tot} famiglie l’hanno letto</span></div></div>
+      <button type="button" class="msg-del" data-action="msg-del" data-id="${m.id}">Elimina</button>
+    </li>`;
+  }).join('');
   $('#msgEmpty').hidden = list.length > 0;
 }
 
@@ -247,11 +275,24 @@ function renderParent() {
     <div class="hero-txt"><h2>${esc(k.name)}</h2><span class="badge ok">Sezione Arcobaleno</span></div>
     <span class="hero-code">Codice famiglia ${esc(k.code)}</span>`;
 
-  const todos = state.memos.filter(m => m.kidId === k.id && !m.done).sort((a, b) => b.ts - a.ts);
-  $('#parentTodos').innerHTML = todos.map(m => `<li class="todo-item">
-    <span class="todo-dot"></span>
-    <div>${esc(m.text)}<small>richiesto ${fmtRel(m.ts)}</small></div>
-  </li>`).join('');
+  const todos = state.memos.filter(m => m.kidId === k.id).sort((a, b) => (a.done - b.done) || (b.ts - a.ts));
+  $('#parentTodos').innerHTML = todos.map(m => {
+    const mine = m.done && m.doneBy === 'parent';
+    const label = m.done ? (mine ? '✓ Portato' : '✓ Chiuso dalle maestre') : '';
+    return `<li class="memo-row ${m.done ? 'done' : ''}" style="${m.done ? '' : 'border-left-color:var(--terra)'}">
+      <div class="memo-main">
+        <div class="memo-meta">richiesto ${fmtRel(m.ts)}${m.done && m.doneTs ? ' · ' + (mine ? 'segnato fatto da voi ' : 'chiuso ') + fmtRel(m.doneTs) : ''}</div>
+        <div class="memo-txt">${esc(m.text)}</div>
+      </div>
+      ${m.done
+        ? (mine
+            ? `<button type="button" class="memo-del" data-action="parent-memo-toggle" data-id="${m.id}">↺ Annulla</button>`
+            : '')
+        : `<button type="button" class="memo-del" data-action="parent-memo-toggle" data-id="${m.id}">✓ Fatto / portato</button>`}
+    </li>`;
+  }).join('');
+  const openN = todos.filter(m => !m.done).length;
+  $('#parentTodoTitle').textContent = openN > 0 ? `Da portare in nido (${openN})` : 'Da portare in nido';
   $('#parentTodoEmpty').hidden = todos.length > 0;
   $('#parentTodoCard').hidden = false;
 
@@ -288,9 +329,13 @@ function renderParent() {
   }
 
   const msgs = [...state.msgs].sort((a, b) => b.ts - a.ts);
-  $('#parentMsgs').innerHTML = msgs.map(m => `<li class="msg-row">
-    <div class="msg-body"><div class="msg-text">${esc(m.text)}</div><div class="msg-time">${fmtRel(m.ts)}</div></div>
-  </li>`).join('');
+  $('#parentMsgs').innerHTML = msgs.map(m => {
+    const read = !!(m.reads || {})[k.id];
+    return `<li class="msg-row">
+      <div class="msg-body"><div class="msg-text">${esc(m.text)}</div><div class="msg-time">${fmtRel(m.ts)}${read ? ' · letto ✓' : ''}</div></div>
+      <button type="button" class="memo-del" data-action="msg-read" data-id="${m.id}" style="${read ? 'color:var(--sage-ink);border-color:var(--sage)' : ''}">${read ? '✓ Letto' : 'Segna come letto'}</button>
+    </li>`;
+  }).join('');
   $('#parentMsgEmpty').hidden = msgs.length > 0;
 }
 
@@ -329,7 +374,7 @@ function renderDrawer() {
   const list = state.memos.filter(m => m.kidId === k.id).sort((a, b) => b.ts - a.ts);
   $('#drawerMemoList').innerHTML = list.map(m => `<li class="memo-row ${m.done ? 'done' : ''}">
     <div class="memo-main">
-      <div class="memo-meta">${fmtRel(m.ts)}</div>
+      <div class="memo-meta">${memoDoneChip(m)}${fmtRel(m.ts)}</div>
       <div class="memo-txt">${esc(m.text)}</div>
     </div>
     <button type="button" class="memo-del" data-action="memo-toggle" data-id="${m.id}">${m.done ? '↺' : '✓'}</button>
@@ -339,7 +384,7 @@ function renderDrawer() {
 
 /* ---------- azioni memo ---------- */
 function addMemo(kidId, text) {
-  state.memos.unshift({ id: uid(), kidId, text: text.trim(), ts: Date.now(), done: false });
+  state.memos.unshift({ id: uid(), kidId, text: text.trim(), ts: Date.now(), done: false, doneBy: null, doneTs: null });
   save();
 }
 
@@ -413,17 +458,52 @@ document.addEventListener('click', e => {
     addMemo(drawerKid, t.dataset.text);
     toast('Memo inviato alla famiglia ✓'); renderDrawer(); renderAdmin(); return;
   }
+
+  /* maestra: chiude/riapre un memo (se lo chiude lei → doneBy admin) */
   if (act === 'memo-toggle') {
     const m = state.memos.find(x => x.id === t.dataset.id);
-    if (m) { m.done = !m.done; save(); toast(m.done ? 'Memo segnato come ricevuto' : 'Memo rimesso in attesa'); }
+    if (m) {
+      m.done = !m.done;
+      if (m.done) { m.doneBy = 'admin'; m.doneTs = Date.now(); toast('Memo segnato come ricevuto ✓'); }
+      else { m.doneBy = null; m.doneTs = null; toast('Memo rimesso in attesa'); }
+      save();
+    }
     if (drawerKid) renderDrawer();
     renderAdmin(); return;
   }
+
+  /* genitore: flagga "fatto/portato" (o annulla il proprio flag) */
+  if (act === 'parent-memo-toggle') {
+    if (state.role !== 'parent') return;
+    const m = state.memos.find(x => x.id === t.dataset.id);
+    if (!m || m.kidId !== state.parentKid) return;
+    if (m.done && m.doneBy === 'parent') {
+      m.done = false; m.doneBy = null; m.doneTs = null;
+      toast('Memo rimesso in «da portare»');
+    } else if (!m.done) {
+      m.done = true; m.doneBy = 'parent'; m.doneTs = Date.now();
+      toast('Grazie! Segnalato alle maestre ✓');
+    } else return; /* chiuso dalla maestra: il genitore non può modificarlo */
+    save(); renderParent(); return;
+  }
+
   if (act === 'memo-del') {
     if (!confirm('Eliminare questo memo?')) return;
     state.memos = state.memos.filter(x => x.id !== t.dataset.id);
     save(); if (drawerKid) renderDrawer(); renderAdmin(); return;
   }
+
+  /* genitore: segna un avviso come letto */
+  if (act === 'msg-read') {
+    if (state.role !== 'parent') return;
+    const g = state.msgs.find(x => x.id === t.dataset.id);
+    if (!g) return;
+    if (!g.reads) g.reads = {};
+    if (g.reads[state.parentKid]) delete g.reads[state.parentKid];
+    else { g.reads[state.parentKid] = Date.now(); toast('Avviso segnato come letto ✓'); }
+    save(); renderParent(); return;
+  }
+
   if (act === 'msg-del') {
     if (!confirm('Eliminare questo avviso?')) return;
     state.msgs = state.msgs.filter(x => x.id !== t.dataset.id);
@@ -433,6 +513,7 @@ document.addEventListener('click', e => {
   if (act === 'pick-day') {
     $('#menuDay').value = t.dataset.key;
     fillMenuForm();
+    $$('.cal-day').forEach(b => b.classList.toggle('sel', b.dataset.key === t.dataset.key));
     $('#menuForm').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     return;
   }
@@ -467,6 +548,8 @@ document.addEventListener('click', e => {
     return;
   }
 });
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && drawerKid) closeDrawer(); });
 
 function renderParentIfVisible() { if (!$('#viewParent').hidden) renderParent(); }
 
@@ -505,61 +588,75 @@ $('#addKidForm').addEventListener('submit', e => {
   e.preventDefault();
   const name = $('#addKidName').value.trim();
   const code = $('#addKidCode').value.trim().toUpperCase();
-  const err = $('#addKidErr');
-  if (name.length < 3 || !name.includes(' ')) { err.textContent = 'Inserisci nome e cognome.'; err.hidden = false; return; }
-  if (!/^[A-Z]\d{3}$/.test(code)) { err.textContent = 'Codice non valido: formato atteso es. B007.'; err.hidden = false; return; }
+  const err = $('#addKidErr'); err.hidden = true;
+  if (name.length < 3) { err.textContent = 'Inserisci nome e cognome.'; err.hidden = false; return; }
+  if (!/^[A-Z0-9]{3,8}$/.test(code)) { err.textContent = 'Codice famiglia non valido (3–8 lettere/numeri).'; err.hidden = false; return; }
   if (state.kids.some(k => k.code === code)) { err.textContent = 'Questo codice famiglia esiste già.'; err.hidden = false; return; }
-  err.hidden = true;
   state.kids.push({ id: uid(), name, code, color: state.kids.length % AVS.length });
-  save(); e.target.reset(); e.target.hidden = true;
-  renderKids(); renderMemos(); toast(name + ' aggiunto alla sezione ✓');
+  save(); renderKids();
+  e.target.reset(); $('#addKidForm').hidden = true;
+  toast(name.split(' ')[0] + ' aggiunto alla sezione ✓');
 });
 
 /* form: menù del giorno */
 $('#menuForm').addEventListener('submit', e => {
   e.preventDefault();
   const k = $('#menuDay').value;
-  if (!k) { toast('Prima scegli un giorno dal calendario.'); return; }
-  const vals = ['Primo', 'Secondo', 'Contorno', 'Merenda'].map(f => $('#menu' + f).value.trim());
-  if (vals.every(v => !v)) { delete state.menu[k]; save(); renderMenu(); toast('Menù del giorno rimosso.'); return; }
-  state.menu[k] = { primo: vals[0], secondo: vals[1], contorno: vals[2], merenda: vals[3] };
-  save(); renderMenu(); toast('Menù del giorno salvato ✓');
-});
-
-/* form: avviso a tutte le famiglie */
-$('#avvisoForm').addEventListener('submit', e => {
-  e.preventDefault();
-  const text = $('#avvisoText').value.trim();
-  if (text.length < 5) { toast("L'avviso è troppo corto."); return; }
-  state.msgs.unshift({ id: uid(), text, ts: Date.now() });
-  save(); e.target.reset(); renderMsgs(); renderParentIfVisible();
-  toast('Avviso inviato a tutte le famiglie ✓');
+  if (!k) { toast('Scegli prima un giorno nel calendario.'); return; }
+  const m = {
+    primo: $('#menuPrimo').value.trim(),
+    secondo: $('#menuSecondo').value.trim(),
+    contorno: $('#menuContorno').value.trim(),
+    merenda: $('#menuMerenda').value.trim(),
+  };
+  if (!m.primo && !m.secondo && !m.contorno && !m.merenda) {
+    delete state.menu[k];
+    toast('Menù del giorno rimosso.');
+  } else {
+    state.menu[k] = m;
+    toast('Menù salvato: le famiglie lo vedono subito ✓');
+  }
+  save(); renderMenu();
 });
 
 /* form: memo libero dal drawer */
 $('#drawerNoteForm').addEventListener('submit', e => {
   e.preventDefault();
   const v = $('#drawerNote').value.trim();
-  if (v.length < 3) { toast('Scrivi il memo prima di inviarlo.'); return; }
+  if (v.length < 3) { toast('Scrivi un memo più lungo.'); return; }
   addMemo(drawerKid, v);
   $('#drawerNote').value = '';
-  toast('Memo inviato alla famiglia ✓'); renderDrawer(); renderAdmin();
+  toast('Memo inviato alla famiglia ✓');
+  renderDrawer(); renderAdmin();
 });
 
-/* filtri vivaci */
+/* form: avviso a tutte le famiglie */
+$('#avvisoForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const t = $('#avvisoText').value.trim();
+  if (t.length < 4) { toast('Scrivi un avviso più lungo.'); return; }
+  state.msgs.unshift({ id: uid(), text: t, ts: Date.now(), reads: {} });
+  save(); renderMsgs(); renderParentIfVisible();
+  e.target.reset();
+  toast('Avviso inviato a tutte le famiglie ✓');
+});
+
+/* filtri e controlli */
 $('#kidSearch').addEventListener('input', renderKids);
 $('#memoKid').addEventListener('change', renderMemos);
 $('#memoState').addEventListener('change', renderMemos);
+$('#menuDay').addEventListener('change', () => {
+  fillMenuForm();
+  $$('.cal-day').forEach(b => b.classList.toggle('sel', b.dataset.key === $('#menuDay').value));
+});
 $('#mealsMonth').addEventListener('change', renderPasti);
-$('#menuDay').addEventListener('change', fillMenuForm);
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && drawerKid) closeDrawer(); });
 
 /* ---------- init ---------- */
-state = load();
-const today = new Date();
-menuY = today.getFullYear(); menuM = today.getMonth();
-$('#mealsMonth').value = ymNow();
-setRoleTab('admin');
-if (state.role === 'admin') showAdmin();
-else if (state.role === 'parent' && kidById(state.parentKid)) showParent();
-else show('viewLogin');
+(function init() {
+  state = load();
+  const d = new Date(); menuY = d.getFullYear(); menuM = d.getMonth();
+  setRoleTab('admin');
+  if (state.role === 'admin') showAdmin();
+  else if (state.role === 'parent') showParent();
+  else show('viewLogin');
+})();
