@@ -3,24 +3,183 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Le mie note</title>
+<title>Asilapp — diario digitale del nido</title>
+<meta name="description" content="Asilapp: gestione asilo nido — presenze, diario giornaliero, scorte e comunicazioni maestre-famiglie.">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="app">
-  <header class="app-bar">
-    <h1>📝 Le mie note</h1>
-    <span class="count" id="noteCount"></span>
+
+<!-- TOAST -->
+<div class="toast-wrap" id="toastWrap" aria-live="polite"></div>
+
+<!-- ============ LOGIN ============ -->
+<section class="view login-view" id="viewLogin" hidden>
+  <div class="login-card">
+    <div class="logo" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-8"/><path d="M12 13c0-4 3-7 8-7 0 5-3 8-8 8z"/><path d="M12 10C12 6.5 9.5 4 5 4c0 4.5 2.5 7 7 7z"/></svg>
+    </div>
+    <h1 class="login-title">Asilapp</h1>
+    <p class="login-sub">Il diario digitale tra nido e famiglie</p>
+
+    <div class="seg" role="group" aria-label="Tipo di accesso">
+      <button type="button" class="seg-btn" data-action="role-tab" data-role="admin" aria-pressed="true">Maestre</button>
+      <button type="button" class="seg-btn" data-action="role-tab" data-role="parent" aria-pressed="false">Genitori</button>
+    </div>
+
+    <form id="loginForm" novalidate>
+      <label class="field" id="fUser"><span>Username</span>
+        <input type="text" class="input" id="loginUser" autocomplete="username" placeholder="admin">
+      </label>
+      <label class="field" id="fPass"><span>Password</span>
+        <input type="password" class="input" id="loginPass" autocomplete="current-password" placeholder="••••••••">
+      </label>
+      <label class="field" id="fCode" hidden><span>Codice bambino</span>
+        <input type="text" class="input" id="loginCode" autocomplete="off" placeholder="es. B001" maxlength="8">
+      </label>
+      <p class="login-err" id="loginError" hidden></p>
+      <button type="submit" class="btn btn-primary btn-block">Accedi</button>
+    </form>
+
+    <div class="login-demo">
+      <p><strong>Demo maestre:</strong> <code>admin</code> · <code>nido2024</code></p>
+      <p><strong>Demo genitori:</strong> codice <code>B001</code></p>
+    </div>
+  </div>
+  <p class="login-foot">I dati restano salvati solo in questo browser.</p>
+</section>
+
+<!-- ============ VISTA MAESTRE ============ -->
+<section class="view app-view" id="viewAdmin" hidden>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo logo-sm" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-8"/><path d="M12 13c0-4 3-7 8-7 0 5-3 8-8 8z"/><path d="M12 10C12 6.5 9.5 4 5 4c0 4.5 2.5 7 7 7z"/></svg>
+      </span>
+      <div class="brand-txt"><strong>Asilapp</strong><small>Sezione Arcobaleno</small></div>
+    </div>
+    <div class="topbar-right">
+      <span class="chip" id="adminToday"></span>
+      <button type="button" class="btn btn-ghost btn-sm" data-action="logout">Esci</button>
+    </div>
   </header>
-  <form class="note-form" id="noteForm">
-    <input type="text" class="input" id="noteText" placeholder="Scrivi una nuova nota…" maxlength="200" autocomplete="off">
-    <button type="submit" class="btn">Aggiungi</button>
-  </form>
-  <p class="form-error" id="formError" hidden>La nota non può essere vuota.</p>
-  <ul class="note-list" id="noteList"></ul>
-  <p class="empty" id="emptyMsg" hidden>Nessuna nota: scrivi la prima qui sopra.</p>
-  <footer class="app-foot">Le note restano salvate in questo browser (localStorage).</footer>
-</div>
+
+  <nav class="tabs" role="tablist" aria-label="Sezioni">
+    <button type="button" class="tab" role="tab" data-tab="kids" aria-selected="true">Bambini</button>
+    <button type="button" class="tab" role="tab" data-tab="diario" aria-selected="false">Diario</button>
+    <button type="button" class="tab" role="tab" data-tab="scorte" aria-selected="false">Scorte</button>
+    <button type="button" class="tab" role="tab" data-tab="avvisi" aria-selected="false">Avvisi</button>
+  </nav>
+
+  <main class="panel">
+    <!-- Bambini -->
+    <section class="tabpane" id="paneKids">
+      <div class="pane-head">
+        <h2>I bambini della sezione</h2>
+        <div class="pane-tools">
+          <input type="search" class="input search" id="kidSearch" placeholder="Cerca un bambino…" aria-label="Cerca bambino">
+          <button type="button" class="btn btn-outline btn-sm" data-action="add-kid">+ Aggiungi</button>
+        </div>
+      </div>
+      <div class="kid-grid" id="kidGrid"></div>
+      <p class="empty" id="kidsEmpty" hidden>Nessun bambino trovato con questo nome.</p>
+    </section>
+
+    <!-- Diario -->
+    <section class="tabpane" id="paneDiario" hidden>
+      <div class="pane-head">
+        <h2>Diario della giornata</h2>
+        <select class="input select" id="diarioFilter" aria-label="Filtra per bambino"></select>
+      </div>
+      <ul class="diario-list" id="diarioList"></ul>
+      <p class="empty" id="diarioEmpty" hidden>Nessuna voce nel diario: aprine una dal pannello Bambini.</p>
+    </section>
+
+    <!-- Scorte -->
+    <section class="tabpane" id="paneScorte" hidden>
+      <div class="pane-head">
+        <h2>Scorte dei genitori</h2>
+        <button type="button" class="btn btn-outline btn-sm" data-action="export-csv">Esporta CSV</button>
+      </div>
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th scope="col">Bambino</th><th scope="col">Pannolini</th><th scope="col">Salviette</th><th scope="col">Crema</th><th scope="col">Latte</th><th scope="col">Bavaglini</th></tr></thead>
+          <tbody id="scorteBody"></tbody>
+        </table>
+      </div>
+      <p class="hint">Un tocco su una mancanza nel pannello del bambino avvisa subito la famiglia.</p>
+    </section>
+
+    <!-- Avvisi -->
+    <section class="tabpane" id="paneAvvisi" hidden>
+      <form class="broadcast" id="avvisoForm">
+        <label class="field"><span>Nuovo avviso a tutte le famiglie</span>
+          <textarea class="input" id="avvisoText" rows="3" maxlength="300" placeholder="Domani gita al parco: portare…" required></textarea>
+        </label>
+        <button type="submit" class="btn btn-primary">Invia avviso</button>
+      </form>
+      <ul class="msg-list" id="msgList"></ul>
+      <p class="empty" id="msgEmpty" hidden>Nessun avviso inviato finora.</p>
+    </section>
+  </main>
+</section>
+
+<!-- ============ VISTA GENITORI ============ -->
+<section class="view app-view" id="viewParent" hidden>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo logo-sm" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-8"/><path d="M12 13c0-4 3-7 8-7 0 5-3 8-8 8z"/><path d="M12 10C12 6.5 9.5 4 5 4c0 4.5 2.5 7 7 7z"/></svg>
+      </span>
+      <div class="brand-txt"><strong>Area famiglia</strong><small id="parentSub"></small></div>
+    </div>
+    <button type="button" class="btn btn-ghost btn-sm" data-action="logout">Esci</button>
+  </header>
+
+  <main class="panel parent-panel">
+    <div class="kid-hero" id="parentHero"></div>
+    <div class="parent-cols">
+      <section class="card">
+        <h3>Diario di oggi</h3>
+        <ul class="diario-list" id="parentDiario"></ul>
+        <p class="empty" id="parentDiarioEmpty" hidden>Le maestre non hanno ancora scritto nulla.</p>
+      </section>
+      <div class="parent-stack">
+        <section class="card">
+          <h3>Le sue scorte in sezione</h3>
+          <div class="bars" id="parentScorte"></div>
+        </section>
+        <section class="card">
+          <h3>Avvisi del nido</h3>
+          <ul class="msg-list" id="parentMsgs"></ul>
+          <p class="empty" id="parentMsgEmpty" hidden>Nessun avviso per ora.</p>
+        </section>
+      </div>
+    </div>
+  </main>
+</section>
+
+<!-- ============ DRAWER BAMBINO ============ -->
+<div class="overlay" id="overlay" data-action="close-drawer" hidden></div>
+<aside class="drawer" id="drawer" aria-hidden="true" aria-label="Dettaglio bambino">
+  <header class="drawer-head">
+    <div class="avatar" id="drawerAvatar"></div>
+    <div class="drawer-title"><strong id="drawerName"></strong><small id="drawerMeta"></small></div>
+    <button type="button" class="btn btn-ghost btn-sm" data-action="close-drawer" aria-label="Chiudi pannello">✕</button>
+  </header>
+  <div class="drawer-body">
+    <p class="drawer-sec">Manca qualcosa? Avvisa i genitori</p>
+    <div class="quick-grid" id="quickSupply"></div>
+    <p class="drawer-sec">Diario rapido</p>
+    <div class="quick-grid" id="quickDiario"></div>
+    <form class="drawer-note" id="drawerNoteForm">
+      <input type="text" class="input" id="drawerNote" maxlength="160" placeholder="Nota libera per i genitori…" autocomplete="off">
+      <button type="submit" class="btn btn-primary btn-sm">Invia</button>
+    </form>
+    <p class="drawer-sec">Ultime attività</p>
+    <ul class="diario-list" id="drawerHistory"></ul>
+  </div>
+</aside>
+
 <script src="script.js"></script>
 </body>
 </html>
