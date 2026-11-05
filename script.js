@@ -1,5 +1,6 @@
 /* Asilapp — diario digitale asilo nido.
-   Stato unico in localStorage, render() ridisegna dallo stato, azioni via data-action. */
+   Stato unico in localStorage, render() ridisegna dallo stato,
+   azioni via data-action gestite con una mappa (un'azione rotta non blocca le altre). */
 'use strict';
 
 /* ---------- costanti ---------- */
@@ -33,11 +34,11 @@ const $ = s => document.querySelector(s);
 function seed() {
   const t = Date.now(), m = 60000;
   const kids = [
-    { id: 1, name: 'Sofia Bianchi', code: 'B001', present: true, supplies: { pannolini: 55, salviette: 70, crema: 80, latte: 60, bavaglini: 65 } },
-    { id: 2, name: 'Leonardo Conti', code: 'B002', present: true, supplies: { pannolini: 30, salviette: 45, crema: 20, latte: 75, bavaglini: 50 } },
+    { id: 1, name: 'Sofia Bianchi', code: 'B001', present: true,  supplies: { pannolini: 55, salviette: 70, crema: 80, latte: 60, bavaglini: 65 } },
+    { id: 2, name: 'Leonardo Conti', code: 'B002', present: true,  supplies: { pannolini: 30, salviette: 45, crema: 20, latte: 75, bavaglini: 50 } },
     { id: 3, name: 'Alice Ferrari', code: 'B003', present: false, supplies: { pannolini: 75, salviette: 60, crema: 90, latte: 40, bavaglini: 80 } },
-    { id: 4, name: 'Tommaso Ricci', code: 'B004', present: true, supplies: { pannolini: 12, salviette: 25, crema: 50, latte: 15, bavaglini: 8 } },
-    { id: 5, name: 'Marta Gallo', code: 'B005', present: true, supplies: { pannolini: 60, salviette: 80, crema: 65, latte: 70, bavaglini: 45 } },
+    { id: 4, name: 'Tommaso Ricci', code: 'B004', present: true,  supplies: { pannolini: 12, salviette: 25, crema: 50, latte: 15, bavaglini: 8 } },
+    { id: 5, name: 'Marta Gallo', code: 'B005', present: true,  supplies: { pannolini: 60, salviette: 80, crema: 65, latte: 70, bavaglini: 45 } },
     { id: 6, name: 'Andrea Fontana', code: 'B006', present: false, supplies: { pannolini: 40, salviette: 10, crema: 35, latte: 55, bavaglini: 30 } }
   ];
   const e = (kidId, type, text, min) => ({ id: t + min * 7 + kidId, kidId, type, text, ts: t - min * m });
@@ -253,7 +254,7 @@ function renderParent() {
   if (pd) {
     const rows = state.diary.filter(e => e.kidId === k.id).slice(0, 20);
     pd.innerHTML = rows.map(e => entryRow(e, false)).join('');
-    const pe = $('#parentDiaryEmpty');
+    const pe = $('#parentDiarioEmpty');
     if (pe) pe.hidden = rows.length > 0;
   }
   const ps = $('#parentScorte');
@@ -281,7 +282,10 @@ function openDrawer(id) {
 function closeDrawer() {
   const dr = $('#drawer'), ov = $('#overlay');
   if (dr) { dr.classList.remove('open'); dr.setAttribute('aria-hidden', 'true'); }
-  if (ov) { ov.classList.remove('show'); setTimeout(() => { if (!ov.classList.contains('show')) ov.hidden = true; }, 250); }
+  if (ov) {
+    ov.classList.remove('show');
+    setTimeout(() => { if (ov && !ov.classList.contains('show')) ov.hidden = true; }, 250);
+  }
   ui.kidId = null;
 }
 function renderDrawer() {
@@ -354,76 +358,81 @@ function doLogin() {
   }
 }
 
-/* ---------- azioni delegite ---------- */
+/* ---------- azioni: mappa, un'azione rotta non blocca le altre ---------- */
+const ACTIONS = {
+  'role-tab'(el) {
+    ui.roleTab = el.dataset.role === 'parent' ? 'parent' : 'admin';
+    renderLogin();
+  },
+  'logout'() {
+    state.session = null; save(); closeDrawer(); render();
+    toast('Sessione chiusa. A presto!');
+  },
+  'open-kid'(el) { openDrawer(el.dataset.id); },
+  'close-drawer'() { closeDrawer(); },
+  'quick-supply'(el) {
+    const k = ui.kidId ? byId(ui.kidId) : null;
+    if (!k) return;
+    const label = (SUPPLIES.find(s => s[0] === el.dataset.key) || ['', el.dataset.key])[1];
+    addEntry(k.id, 'scorte', 'Richiesta alle famiglie: portare ' + label.toLowerCase());
+    save(); renderDrawer(); renderAdmin();
+    toast(label + ': famiglia di ' + firstName(k.name) + ' avvisata.');
+  },
+  'quick-diario'(el) {
+    const k = ui.kidId ? byId(ui.kidId) : null;
+    if (!k) return;
+    const type = el.dataset.type;
+    if (type === 'presenza') {
+      k.present = !k.present;
+      addEntry(k.id, 'presenza', k.present ? 'Entrata registrata al nido' : 'Uscita: andata a casa con la famiglia');
+      toast((k.present ? 'Entrata' : 'Uscita') + ' di ' + firstName(k.name) + ' registrata.');
+    } else {
+      const txt = {
+        merenda: 'Merenda consumata con gusto',
+        riposino: 'Riposino fatto nella nanna room',
+        cambio: 'Cambio effettuato'
+      }[type] || (TYPE_LABEL[type] || type);
+      addEntry(k.id, type, txt);
+      toast(TYPE_LABEL[type] + ' segnata nel diario di ' + firstName(k.name) + '.');
+    }
+    save(); renderDrawer(); renderAdmin();
+  },
+  'del-msg'(el) {
+    const id = Number(el.dataset.id);
+    if (!Number.isFinite(id)) return;
+    if (!window.confirm('Eliminare questo avviso? Le famiglie non lo vedranno più.')) return;
+    state.messages = state.messages.filter(m => m.id !== id);
+    save(); renderAdmin(); toast('Avviso eliminato.');
+  },
+  'export-csv'() { exportCsv(); }
+};
+
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-action]');
   if (el) {
-    const action = el.dataset.action;
-    if (action === 'role-tab') {
-      ui.roleTab = el.dataset.role === 'parent' ? 'parent' : 'admin';
-      renderLogin();
-    } else if (action === 'logout') {
-      state.session = null; save(); closeDrawer(); render();
-      toast('Sessione chiusa. A presto!');
-    } else if (action === 'open-kid') {
-      openDrawer(el.dataset.id);
-    } else if (action === 'close-drawer') {
-      closeDrawer();
-    } else if (action === 'quick-supply') {
-      const k = ui.kidId ? byId(ui.kidId) : null;
-      if (k) {
-        const label = (SUPPLIES.find(s => s[0] === el.dataset.key) || ['', el.dataset.key])[1];
-        addEntry(k.id, 'scorte', 'Richiesta alle famiglie: portare ' + label.toLowerCase());
-        save(); renderDrawer(); renderAdmin();
-        toast(label + ': famiglia di ' + firstName(k.name) + ' avvisata.');
-      }
-    } else if (action === 'quick-diario') {
-      const k = ui.kidId ? byId(ui.kidId) : null;
-      const type = el.dataset.type;
-      if (k) {
-        if (type === 'presenza') {
-          k.present = !k.present;
-          addEntry(k.id, 'presenza', k.present ? 'Entrata registrata al nido' : 'Uscita: andata a casa con la famiglia');
-          toast((k.present ? 'Entrata' : 'Uscita') + ' di ' + firstName(k.name) + ' registrata.');
-        } else {
-          const txt = { merenda: 'Merenda consumata con gusto', riposino: 'Riposino fatto nella nanna room', cambio: 'Cambio effettuato' }[type] || (TYPE_LABEL[type] || type);
-          addEntry(k.id, type, txt);
-          toast(TYPE_LABEL[type] + ' segnata nel diario di ' + firstName(k.name) + '.');
-        }
-        save(); renderDrawer(); renderAdmin();
-      }
-    } else if (action === 'del-msg') {
-      const id = Number(el.dataset.id);
-      state.messages = state.messages.filter(m => m.id !== id);
-      save(); renderAdmin(); toast('Avviso eliminato.');
-    } else if (action === 'export-csv') {
-      exportCsv();
-    }
+    const fn = ACTIONS[el.dataset.action];
+    if (typeof fn === 'function') fn(el);
     return;
   }
-  /* tab della navigazione (senza data-action nel markup) */
   const tab = e.target.closest('.tabs .tab');
   if (tab && tab.dataset.tab) { ui.tab = tab.dataset.tab; renderAdmin(); }
 });
 
-/* invio con Invio sulle righe della tabella scorte */
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeDrawer();
   if (e.key === 'Enter' && e.target.matches('#scorteBody tr[data-action="open-kid"]')) openDrawer(e.target.dataset.id);
 });
 
 /* ---------- form ---------- */
-const loginForm = $('#loginForm');
-if (loginForm) loginForm.addEventListener('submit', ev => { ev.preventDefault(); doLogin(); });
+function bind(id, evt, fn) {
+  const el = $(id);
+  if (el) el.addEventListener(evt, fn);
+}
 
-const search = $('#kidSearch');
-if (search) search.addEventListener('input', () => { ui.query = search.value; renderAdmin(); });
-
-const dfilter = $('#diarioFilter');
-if (dfilter) dfilter.addEventListener('change', () => { ui.filter = dfilter.value; renderAdmin(); });
-
-const avvisoForm = $('#avvisoForm');
-if (avvisoForm) avvisoForm.addEventListener('submit', ev => {
+bind('#loginForm', 'submit', ev => { ev.preventDefault(); doLogin(); });
+bind('#kidSearch', 'input', function () { ui.query = this.value; renderAdmin(); });
+bind('#diarioFilter', 'change', function () { ui.filter = this.value; renderAdmin(); });
+bind('#avvisoForm', 'submit', ev => {
   ev.preventDefault();
   const ta = $('#avvisoText');
   if (!ta) return;
@@ -434,19 +443,24 @@ if (avvisoForm) avvisoForm.addEventListener('submit', ev => {
   save(); renderAdmin();
   toast('Avviso inviato a tutte le famiglie. 📣');
 });
-
-const noteForm = $('#drawerNoteForm');
-if (noteForm) noteForm.addEventListener('submit', ev => {
+bind('#drawerNoteForm', 'submit', ev => {
   ev.preventDefault();
   const inp = $('#drawerNote');
   if (!inp || !ui.kidId) return;
   const txt = inp.value.trim();
   if (!txt) { inp.focus(); toast('Scrivi prima il testo della nota.'); return; }
-  addEntry(ui.kidId, 'nota', txt);
+  const k = byId(ui.kidId);
+  if (!k) return;
+  addEntry(k.id, 'nota', txt);
   inp.value = '';
   save(); renderDrawer(); renderAdmin();
-  toast('Nota inviata alla famiglia di ' + firstName(byId(ui.kidId).name) + '.');
+  toast('Nota inviata alla famiglia di ' + firstName(k.name) + '.');
 });
 
 /* ---------- avvio ---------- */
-render();
+try {
+  render();
+} catch (err) {
+  console.error('Asilapp: errore iniziale', err);
+  try { showView('login'); renderLogin(); } catch (e2) { /* ultima spiaggia */ }
+}
