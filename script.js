@@ -26,6 +26,14 @@ const confirmDel = what => confirm('Eliminare ' + what + '? L\u2019azione non si
 
 /* ---------- stato ---------- */
 const KEY = 'asilapp_v1';
+const DEFAULT_QUICK = () => ([
+  { id: uid(), ico: '🍼', txt: 'Cambio completo' },
+  { id: uid(), ico: '🧦', txt: 'Calzine antiscivolo' },
+  { id: uid(), ico: '👟', txt: 'Scarpe di ricambio' },
+  { id: uid(), ico: '🧸', txt: 'Ciuccio / coperta' },
+  { id: uid(), ico: '🎨', txt: 'Camiciolo' },
+  { id: uid(), ico: '📸', txt: 'Foto per il progetto' }
+]);
 function seed() {
   const t = new Date(), k1 = uid(), k2 = uid(), k3 = uid();
   const d = off => { const x = new Date(t); x.setDate(x.getDate() + off); return iso(x); };
@@ -36,20 +44,30 @@ function seed() {
       { id: k2, name: 'Luca Verdi', code: 'B002' },
       { id: k3, name: 'Sofia Ricci', code: 'B003' }
     ],
+    quickTypes: DEFAULT_QUICK(),
     memos: [
-      { id: uid(), kid: k1, text: 'Portare cambio completo', ts: Date.now() - 864e5, done: false },
-      { id: uid(), kid: k2, text: 'Portare calzine antiscivolo', ts: Date.now() - 1728e5, done: true, doneTs: Date.now() - 864e5 }
+      { id: uid(), kid: k1, text: 'Portare cambio completo', ico: '🍼', ts: Date.now() - 864e5, done: false },
+      { id: uid(), kid: k2, text: 'Portare calzine antiscivolo', ico: '🧦', ts: Date.now() - 1728e5, done: true, doneTs: Date.now() - 864e5 }
     ],
     menu: {
       [d(0)]: { primo: 'Pasta al pomodoro', secondo: 'Polpettine', contorno: 'Zucchine al vapore', merenda: 'Frutta fresca' },
-      [d(1)]: { primo: 'Riso alla zucca', secondo: 'Plativuto di tacchino', contorno: 'Purè di patate', merenda: 'Yogurt' }
+      [d(1)]: { primo: 'Riso alla zucca', secondo: 'Piatto freddo di tacchino', contorno: 'Purè di patate', merenda: 'Yogurt' }
     },
     meals: {}, msgs: [{ id: uid(), text: 'Benvenute su Asilapp! Qui troverete memo, menù e avvisi del nido.', ts: Date.now() - 36e5, reads: {} }],
     role: null, parentKid: null
   };
 }
-function load() { try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && d.v === 1 && Array.isArray(d.kids)) return d; } catch (e) {} return seed(); }
-let state, menuY, menuM, menuSel = '', drawerKid = null, loginRole = 'admin';
+function load() {
+  try {
+    const d = JSON.parse(localStorage.getItem(KEY));
+    if (d && d.v === 1 && Array.isArray(d.kids)) {
+      if (!Array.isArray(d.quickTypes) || !d.quickTypes.length) d.quickTypes = DEFAULT_QUICK();
+      return d;
+    }
+  } catch (e) {}
+  return seed();
+}
+let state, menuY, menuM, menuSel = '', drawerKid = null, loginRole = 'admin', quickEdit = '';
 const save = () => localStorage.setItem(KEY, JSON.stringify(state));
 const parentKid = () => state.kids.find(k => k.id === state.parentKid);
 
@@ -94,9 +112,10 @@ function renderKids() {
 }
 
 /* ---------- drawer bambino ---------- */
-const QUICK = [['🍼', 'Cambio completo'], ['🧦', 'Calzine antiscivolo'], ['👟', 'Scarpe di ricambio'], ['🧸', 'Ciuccio / coperta'], ['🎨', 'Camiciolo'], ['📸', 'Foto per il progetto']];
 function openDrawer(id) {
   drawerKid = state.kids.find(k => k.id === id); if (!drawerKid) return;
+  quickEdit = '';
+  const mg = $('#quickMgr'); if (mg) mg.hidden = true;
   $('#drawerAvatar').className = 'avatar lg ' + avCls(drawerKid.id);
   $('#drawerAvatar').textContent = initials(drawerKid.name);
   $('#drawerName').textContent = drawerKid.name;
@@ -111,10 +130,80 @@ function closeDrawer() {
   o.classList.remove('show'); d.classList.remove('open'); d.setAttribute('aria-hidden', 'true');
   setTimeout(() => { o.hidden = true; }, 200);
 }
+
+/* ---------- memo rapidi personalizzabili ---------- */
 function renderQuick() {
-  $('#quickMemo').innerHTML = QUICK.map(([ic, t]) =>
-    `<button type="button" class="quick-btn" data-action="quick-memo" data-txt="Portare: ${esc(t)}"><span aria-hidden="true">${ic}</span><small>${esc(t)}</small></button>`).join('');
+  const box = $('#quickMemo'); if (!box) return;
+  box.innerHTML = state.quickTypes.map(q =>
+    `<button type="button" class="quick-btn" data-action="quick-memo" data-id="${q.id}"><span aria-hidden="true">${esc(q.ico)}</span><small>${esc(q.txt)}</small></button>`
+  ).join('') +
+  `<button type="button" class="quick-btn" data-action="quick-mgr" style="border-style:dashed;background:var(--bg)"><span aria-hidden="true">⚙️</span><small>Personalizza</small></button>`;
 }
+function ensureQuickMgr() {
+  let m = $('#quickMgr');
+  if (!m) {
+    m = document.createElement('div');
+    m.id = 'quickMgr'; m.hidden = true;
+    m.style.cssText = 'display:grid;gap:.55rem;background:var(--bg);border:1px dashed var(--line);border-radius:14px;padding:.7rem';
+    const after = $('#quickMemo');
+    (after ? after.parentNode : $('#drawer') || document.body).insertBefore(m, after ? after.nextSibling : null);
+  }
+  return m;
+}
+function toggleQuickMgr() {
+  const m = ensureQuickMgr();
+  m.hidden = !m.hidden;
+  if (!m.hidden) renderQuickMgr();
+}
+function renderQuickMgr() {
+  const m = $('#quickMgr'); if (!m) return;
+  const ed = state.quickTypes.find(q => q.id === quickEdit);
+  m.innerHTML = `
+    <p class="drawer-sec" style="margin:0">${ed ? 'Modifica memo rapido' : 'Nuovo memo rapido'}</p>
+    <form data-form="quick-add" class="add-form" style="box-shadow:none;padding:.5rem .5rem .2rem">
+      <label class="field" style="margin:0;flex:0 0 76px"><span>Emoji</span>
+        <input type="text" class="input" data-el="qIco" maxlength="4" placeholder="🍼" value="${ed ? esc(ed.ico) : ''}" style="text-align:center" autocomplete="off">
+      </label>
+      <label class="field" style="margin:0;flex:1 1 140px"><span>Testo del memo</span>
+        <input type="text" class="input" data-el="qTxt" maxlength="40" placeholder="es. Salviette" value="${ed ? esc(ed.txt) : ''}" autocomplete="off">
+      </label>
+      <span style="display:flex;gap:.4rem;padding-top:1.15rem">
+        <button type="submit" class="btn btn-primary btn-sm">${ed ? 'Aggiorna' : 'Aggiungi'}</button>
+        ${ed ? '<button type="button" class="btn btn-ghost btn-sm" data-action="quick-cancel">Annulla</button>' : ''}
+      </span>
+    </form>
+    <div style="display:grid;gap:.35rem">
+      ${state.quickTypes.map(q => `
+        <span style="display:flex;align-items:center;gap:.5rem;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:.4rem .6rem;font-size:.85rem">
+          <strong aria-hidden="true">${esc(q.ico)}</strong>
+          <span style="flex:1;min-width:0">${esc(q.txt)}</span>
+          <button type="button" class="memo-del" data-action="quick-edit" data-id="${q.id}">Modifica</button>
+          <button type="button" class="memo-del" data-action="quick-del" data-id="${q.id}">Elimina</button>
+        </span>`).join('')}
+    </div>
+    <p class="hint" style="margin:0">Qui crei i tuoi memo rapidi con emoji: compariranno come pulsanti qui sopra, pronti per ogni bambino.</p>`;
+  const i = m.querySelector('[data-el="qTxt"]'); if (i) i.focus();
+}
+function onQuickAdd(form) {
+  const ico = (form.querySelector('[data-el="qIco"]') || {}).value || '';
+  const raw = (form.querySelector('[data-el="qTxt"]') || {}).value || '';
+  const txt = raw.trim().replace(/\s+/g, ' ');
+  if (txt.length < 3) return toast('Il testo del memo richiede almeno 3 lettere ✏️');
+  const icoF = ico.trim() || '📌';
+  if (state.quickTypes.some(q => q.txt.toLowerCase() === txt.toLowerCase() && q.id !== quickEdit))
+    return toast('Esiste già un memo rapido con questo testo');
+  if (quickEdit) {
+    const q = state.quickTypes.find(x => x.id === quickEdit);
+    if (q) { q.ico = icoF; q.txt = txt; }
+    toast('Memo rapido aggiornato ✓'); quickEdit = '';
+  } else {
+    state.quickTypes.push({ id: uid(), ico: icoF, txt });
+    toast('Memo rapido aggiunto ✓');
+  }
+  save(); renderQuick(); renderQuickMgr();
+}
+
+/* ---------- memo ---------- */
 function renderDrawerMemos() {
   if (!drawerKid) return;
   const list = state.memos.filter(m => m.kid === drawerKid.id).sort((a, b) => (a.done - b.done) || (b.ts - a.ts));
@@ -125,7 +214,7 @@ function memoRow(m) {
   return `<li class="memo-row ${m.done ? 'done' : ''}">
     <div class="memo-main">
       <p class="memo-meta"><span class="memo-chip">${k ? esc(k.name.split(' ')[0]) : '—'}</span>${fmtDate(m.ts)}${m.done && m.doneTs ? ' · consegnato ' + fmtDate(m.doneTs) : ''}</p>
-      <p class="memo-txt">${esc(m.text)}</p>
+      <p class="memo-txt">${m.ico ? esc(m.ico) + ' ' : ''}${esc(m.text)}</p>
     </div>
     <div style="display:flex;gap:.35rem;align-items:center;flex-wrap:wrap;justify-content:flex-end">
       <button type="button" class="badge ${m.done ? 'ok' : 'off'}" data-action="memo-done" data-id="${m.id}">${m.done ? 'Ricevuto ✓' : 'Segna ricevuto'}</button>
@@ -133,16 +222,16 @@ function memoRow(m) {
     </div>
   </li>`;
 }
-function addMemo(kid, text) {
-  state.memos.unshift({ id: uid(), kid, text, ts: Date.now(), done: false });
+function addMemo(kid, text, ico) {
+  state.memos.unshift({ id: uid(), kid, text, ts: Date.now(), done: false, ico: ico || '' });
   save(); updateMemoBadge();
 }
 function updateMemoBadge() {
   const n = state.memos.filter(m => !m.done).length, el = $('#memoTabCount');
-  el.hidden = n === 0; el.textContent = n;
+  if (el) { el.hidden = n === 0; el.textContent = n; }
 }
 
-/* ---------- memo (tab) ---------- */
+/* ---------- memo (tab maestre) ---------- */
 function fillMemoKid() {
   const sel = $('#memoKid'), cur = sel.value;
   sel.innerHTML = '<option value="tutti">Tutti i bambini</option>' + state.kids.map(k => `<option value="${k.id}">${esc(k.name)}</option>`).join('');
@@ -169,9 +258,10 @@ function menuFormFill() {
 function renderMenu() {
   $('#menuTitle').textContent = 'Menù di ' + MONTHS[menuM] + ' ' + menuY;
   const first = new Date(menuY, menuM, 1), lead = (first.getDay() + 6) % 7, days = new Date(menuY, menuM + 1, 0).getDate();
-  if (!menuSel || menuSel.slice(0, 7) !== `${menuY}-${String(menuM + 1).padStart(2, '0')}`) {
+  const ymS = `${menuY}-${String(menuM + 1).padStart(2, '0')}`;
+  if (!menuSel || menuSel.slice(0, 7) !== ymS) {
     const t = iso(new Date());
-    menuSel = (t.slice(0, 7) === `${menuY}-${String(menuM + 1).padStart(2, '0')}`) ? t : `${menuY}-${String(menuM + 1).padStart(2, '0')}-01`;
+    menuSel = (t.slice(0, 7) === ymS) ? t : ymS + '-01';
   }
   const sel = $('#menuDay'); sel.innerHTML = '';
   for (let d = 1; d <= days; d++) {
@@ -261,7 +351,7 @@ function renderTodos() {
   $('#parentTodoEmpty').hidden = list.length > 0;
   $('#parentTodos').innerHTML = list.map(m =>
     `<li class="todo-item"><span class="todo-dot" style="${m.done ? 'background:var(--sage)' : ''}"></span>
-      <span style="flex:1;${m.done ? 'text-decoration:line-through;opacity:.6' : ''}">${esc(m.text)}<small>${fmtDate(m.ts)}</small></span>
+      <span style="flex:1;${m.done ? 'text-decoration:line-through;opacity:.6' : ''}">${m.ico ? esc(m.ico) + ' ' : ''}${esc(m.text)}<small>${fmtDate(m.ts)}</small></span>
       <button type="button" class="badge ${m.done ? 'ok' : 'off'}" data-action="todo-done" data-id="${m.id}">${m.done ? 'Portato ✓' : 'Segna portato'}</button>
     </li>`).join('');
 }
@@ -334,10 +424,24 @@ document.addEventListener('click', e => {
   if (act === 'close-drawer') { closeDrawer(); return; }
   if (act === 'quick-memo') {
     if (!drawerKid) return;
-    addMemo(drawerKid.id, el.dataset.txt);
+    const q = state.quickTypes.find(x => x.id === el.dataset.id); if (!q) return;
+    addMemo(drawerKid.id, q.txt, q.ico);
     el.classList.add('pressed'); setTimeout(() => el.classList.remove('pressed'), 900);
     renderDrawerMemos(); renderMemos(); renderKids();
     toast('Memo inviato alla famiglia ✓'); return;
+  }
+  if (act === 'quick-mgr') { toggleQuickMgr(); return; }
+  if (act === 'quick-edit') { quickEdit = el.dataset.id; renderQuickMgr(); return; }
+  if (act === 'quick-cancel') { quickEdit = ''; renderQuickMgr(); return; }
+  if (act === 'quick-del') {
+    const q = state.quickTypes.find(x => x.id === el.dataset.id);
+    if (q && confirmDel('il memo rapido "' + q.txt + '"')) {
+      state.quickTypes = state.quickTypes.filter(x => x.id !== q.id);
+      if (quickEdit === q.id) quickEdit = '';
+      save(); renderQuick(); renderQuickMgr();
+      toast('Memo rapido eliminato');
+    }
+    return;
   }
   if (act === 'memo-done') {
     const m = state.memos.find(x => x.id === el.dataset.id);
@@ -389,7 +493,14 @@ document.addEventListener('click', e => {
   }
 });
 
-/* ---------- form ---------- */
+/* ---------- submit delegation (form dinamici) ---------- */
+document.addEventListener('submit', e => {
+  const f = e.target.closest('form[data-form]'); if (!f) return;
+  e.preventDefault();
+  if (f.dataset.form === 'quick-add') onQuickAdd(f);
+});
+
+/* ---------- form statici ---------- */
 on('#loginForm', 'submit', e => {
   e.preventDefault();
   const err = $('#loginError');
@@ -423,7 +534,7 @@ on('#drawerNoteForm', 'submit', e => {
   e.preventDefault();
   if (!drawerKid) return;
   const txt = $('#drawerNote').value.trim(); if (!txt) return;
-  addMemo(drawerKid.id, txt); $('#drawerNote').value = '';
+  addMemo(drawerKid.id, txt, '📝'); $('#drawerNote').value = '';
   renderDrawerMemos(); renderMemos(); renderKids();
   toast('Memo inviato alla famiglia ✓');
 });
@@ -436,32 +547,45 @@ on('#avvisoForm', 'submit', e => {
 });
 on('#menuForm', 'submit', e => {
   e.preventDefault();
-  const row = { primo: $('#menuPrimo').value.trim(), secondo: $('#menuSecondo').value.trim(), contorno: $('#menuContorno').value.trim(), merenda: $('#menuMerenda').value.trim() };
-  const has = Object.values(row).some(v => v);
-  if (has) state.menu[menuSel] = row; else delete state.menu[menuSel];
-  save(); renderMenu();
-  toast(has ? 'Menù del ' + new Date(menuSel + 'T12:00').toLocaleDateString('it-IT', { day: 'numeric', month: 'long' }) + ' salvato ✓' : 'Menù del giorno rimosso');
+  const row = {
+    primo: $('#menuPrimo').value.trim(),
+    secondo: $('#menuSecondo').value.trim(),
+    contorno: $('#menuContorno').value.trim(),
+    merenda: $('#menuMerenda').value.trim()
+  };
+  const day = $('#menuDay').value || menuSel;
+  if (!row.primo && !row.secondo && !row.contorno && !row.merenda) { delete state.menu[day]; toast('Menù del giorno rimosso'); }
+  else state.menu[day] = row;
+  save(); menuSel = day; renderMenu();
+  toast('Menù del ' + new Date(day + 'T12:00').toLocaleDateString('it-IT', { day: 'numeric', month: 'long' }) + ' salvato ✓');
 });
-
-/* ---------- filtri e campi live ---------- */
+on('#menuDay', 'change', () => { menuSel = $('#menuDay').value; renderMenu(); });
 on('#kidSearch', 'input', renderKids);
 on('#memoKid', 'change', renderMemos);
 on('#memoState', 'change', renderMemos);
-on('#menuDay', 'change', e => { menuSel = e.target.value; renderMenu(); });
 on('#mealsMonth', 'change', renderPasti);
+
+/* ---------- pasti: totali live ---------- */
 document.addEventListener('input', e => {
-  const f = e.target.closest('[data-field]'); if (!f) return;
-  const month = state.meals[curYm()], m = month && month[f.dataset.kid]; if (!m) return;
-  let v = parseFloat(f.value); if (isNaN(v) || v < 0) v = 0;
-  m[f.dataset.field] = v; save();
-  const cell = $(`[data-cell="tot-${f.dataset.kid}"]`);
+  const el = e.target.closest('input[data-field]'); if (!el) return;
+  const month = state.meals[curYm()] || {}; const m = month[el.dataset.kid]; if (!m) return;
+  const v = parseFloat(el.value);
+  m[el.dataset.field] = isNaN(v) ? 0 : v;
+  save();
+  const cell = $(`[data-cell="tot-${el.dataset.kid}"]`);
   if (cell) cell.textContent = fmtEur((m.count || 0) * (m.rate || 0));
   renderPastiFoot(curYm());
 });
 
-/* ---------- init ---------- */
-state = load();
-const __n = new Date(); menuY = __n.getFullYear(); menuM = __n.getMonth();
-$('#mealsMonth').value = ymNow();
-show('viewLogin'); setRoleTab('admin');
-if (state.role === 'parent' && parentKid()) showParent();
+/* ---------- boot ---------- */
+(function boot() {
+  state = load();
+  const t = new Date(); menuY = t.getFullYear(); menuM = t.getMonth();
+  $('#mealsMonth').value = ymNow();
+  setRoleTab('admin');
+  show('viewLogin');
+  const sf = $('#quickAddForm'); if (sf) sf.hidden = true; /* eventuale markup legacy: lo gestisce il pannello dinamico */
+  if (state.role === 'admin') showAdmin();
+  else if (state.role === 'parent' && parentKid()) showParent();
+  else { state.role = null; state.parentKid = null; save(); }
+})();

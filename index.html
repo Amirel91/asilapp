@@ -239,8 +239,17 @@
     <button type="button" class="btn btn-ghost btn-sm" data-action="close-drawer" aria-label="Chiudi pannello">✕</button>
   </header>
   <div class="drawer-body">
-    <p class="drawer-sec">Memo rapido alla famiglia</p>
+    <div class="drawer-sec-row">
+      <p class="drawer-sec">Memo rapido alla famiglia</p>
+      <button type="button" class="link-btn" data-action="toggle-quick-add">+ Personalizza</button>
+    </div>
     <div class="quick-grid" id="quickMemo"></div>
+    <form class="quick-add" id="quickAddForm" hidden>
+      <input type="text" class="input ico-in" id="quickIco" maxlength="4" placeholder="📌" aria-label="Emoticon del memo rapido" autocomplete="off">
+      <input type="text" class="input" id="quickTxt" maxlength="40" placeholder="Testo del memo, es. Cappellino" aria-label="Testo del memo rapido" autocomplete="off">
+      <button type="submit" class="btn btn-primary btn-sm">Aggiungi</button>
+    </form>
+    <p class="login-err" id="quickErr" hidden></p>
     <form class="drawer-note" id="drawerNoteForm">
       <input type="text" class="input" id="drawerNote" maxlength="160" placeholder="Memo libero per i genitori…" autocomplete="off">
       <button type="submit" class="btn btn-primary btn-sm">Invia</button>
