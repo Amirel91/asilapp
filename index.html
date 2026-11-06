@@ -118,7 +118,7 @@
           <p class="drawer-sec" id="memoFeedTitle">Memo inviati alle famiglie</p>
           <span class="chip" id="memoFeedCount" hidden></span>
         </div>
-        <p class="hint">Dal più recente: quelli in attesa hanno il filo terracotta, i ricevuti il filo salvia e il testo barrato.</p>
+        <p class="hint">Dal più recente: in attesa col filo terracotta, ricevuti col filo salvia e testo barrato. I ricevuti si eliminano da soli 24 ore dopo la conferma.</p>
         <ul class="memo-list" id="memoList"></ul>
         <p class="empty" id="memoEmpty" hidden>Nessun memo: aprine uno dal pannello di un bambino.</p>
       </section>
@@ -242,6 +242,7 @@
       <h3 id="parentTodoTitle">Da portare in nido</h3>
       <ul class="todo-list" id="parentTodos"></ul>
       <p class="empty" id="parentTodoEmpty" hidden>Tutto in regola: per ora non serve portare nulla.</p>
+      <p class="hint">Quelli barrati sono già stati portati: spariranno da soli dopo 24 ore.</p>
     </section>
 
     <div class="parent-cols">
@@ -276,7 +277,7 @@
   <div class="drawer-body">
     <p class="drawer-sec">Memo rapido alla famiglia</p>
     <div class="quick-grid" id="quickMemo"></div>
-    <p class="hint">Tocca una pastiglia per inviare subito il memo. I modelli si gestiscono dal tab «Memo».</p>
+    <p class="hint">Tocca una pastiglia per inviare subito il memo. I modelli si gestiscono dal tab «Memo»; i memo ricevuti spariscono da soli dopo 24 ore.</p>
     <form class="drawer-note" id="drawerNoteForm">
       <input type="text" class="input" id="drawerNote" maxlength="160" placeholder="Memo libero per i genitori…" autocomplete="off">
       <button type="submit" class="btn btn-primary btn-sm">Invia</button>

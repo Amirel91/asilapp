@@ -26,6 +26,7 @@ const confirmDel = what => confirm('Eliminare ' + what + '? L\u2019azione non si
 
 /* ---------- stato ---------- */
 const KEY = 'asilapp_v1';
+const MEMO_TTL = 24 * 60 * 60 * 1000; // i memo ricevuti spariscono da soli dopo 24h
 const DEFAULT_QUICK = () => ([
   { id: uid(), ico: '🍼', txt: 'Cambio completo' },
   { id: uid(), ico: '🧦', txt: 'Calzine antiscivolo' },
@@ -47,7 +48,7 @@ function seed() {
     quickTypes: DEFAULT_QUICK(),
     memos: [
       { id: uid(), kid: k1, text: 'Portare cambio completo', ico: '🍼', ts: Date.now() - 864e5, done: false },
-      { id: uid(), kid: k2, text: 'Portare calzine antiscivolo', ico: '🧦', ts: Date.now() - 1728e5, done: true, doneTs: Date.now() - 864e5 }
+      { id: uid(), kid: k2, text: 'Portare calzine antiscivolo', ico: '🧦', ts: Date.now() - 1728e5, done: true, doneTs: Date.now() - 36e5 }
     ],
     menu: {
       [d(0)]: { primo: 'Pasta al pomodoro', secondo: 'Polpettine', contorno: 'Zucchine al vapore', merenda: 'Frutta fresca' },
@@ -76,6 +77,21 @@ let state, menuY, menuM, menuSel = '', drawerKid = null, loginRole = 'admin', qu
 const save = () => localStorage.setItem(KEY, JSON.stringify(state));
 const parentKid = () => state.kids.find(k => k.id === state.parentKid);
 
+/* ---------- autopulizia: memo ricevuti eliminati dopo 24h ---------- */
+function purgeDoneMemos() {
+  const cutoff = Date.now() - MEMO_TTL;
+  const before = state.memos.length;
+  state.memos = state.memos.filter(m => !(m.done && (m.doneTs || m.ts) < cutoff));
+  if (state.memos.length !== before) { save(); return true; }
+  return false;
+}
+function autoPurge() {
+  if (!purgeDoneMemos()) return;
+  renderMemos(); renderKids(); updateMemoBadge();
+  if (drawerKid) renderDrawerMemos();
+  if (state.role === 'parent') renderTodos();
+}
+
 /* ---------- viste ---------- */
 function show(id) { $$('.view').forEach(v => { v.hidden = v.id !== id; }); }
 function switchTab(name) {
@@ -94,6 +110,7 @@ function showAdmin() {
 }
 function showParent() {
   const k = parentKid(); if (!k) { logout(); return; }
+  markMsgsRead();
   show('viewParent');
   const sub = $('#parentSub'); if (sub) sub.textContent = k.name;
   const hero = $('#parentHero');
@@ -117,7 +134,6 @@ function setRoleTab(role) {
   if (fU) fU.hidden = !admin;
   if (fP) fP.hidden = !admin;
   if (fC) fC.hidden = admin;
-  // campi non pertinenti svuotati: nessun residuo "admin" nel login genitori
   if (admin) { const c = $('#loginCode'); if (c) c.value = ''; }
   else { const u = $('#loginUser'), p = $('#loginPass'); if (u) u.value = ''; if (p) p.value = ''; }
   const err = $('#loginError'); if (err) err.hidden = true;
@@ -215,6 +231,16 @@ function sendQuickMemo(qid) {
   if (btn) { btn.classList.add('pressed'); setTimeout(() => btn.classList.remove('pressed'), 500); }
   toast('Memo inviato a ' + drawerKid.name.split(' ')[0] + ' ✓');
 }
+function onDrawerNote() {
+  const inp = $('#drawerNote');
+  const txt = ((inp && inp.value) || '').trim();
+  if (!drawerKid) return;
+  if (txt.length < 3) { toast('Scrivi almeno 3 lettere per il memo'); return; }
+  addMemo(drawerKid.id, txt, '📝');
+  if (inp) inp.value = '';
+  renderDrawerMemos(); renderMemos(); renderKids();
+  toast('Memo inviato a ' + drawerKid.name.split(' ')[0] + ' ✓');
+}
 
 /* ---------- modelli memo rapidi: gestione unica nel tab Memo ---------- */
 function renderMemoTemplates() {
@@ -227,7 +253,6 @@ function renderMemoTemplates() {
       <button type="button" class="memo-del" data-action="quick-edit" data-id="${q.id}">Modifica</button>
       <button type="button" class="memo-del" data-action="quick-del" data-id="${q.id}">Elimina</button>
     </li>`).join('');
-  if (!state.quickTypes.length && !quickEdit && $('#quickForm') && $('#quickForm').hidden) return;
   if (quickEdit && !state.quickTypes.some(q => q.id === quickEdit)) cancelQuickEdit();
 }
 function openQuickNew() {
@@ -320,6 +345,7 @@ function toggleMemo(id) {
   renderMemos();
   if (drawerKid) renderDrawerMemos();
   renderKids(); renderTodos(); updateMemoBadge();
+  toast(m.done ? 'Memo ricevuto — verrà rimosso in automatico tra 24 ore' : 'Memo rimesso in attesa');
 }
 function delMemo(id) {
   const m = state.memos.find(x => x.id === id); if (!m) return;
@@ -425,6 +451,12 @@ function onMenuCopy() {
   }
   toast('Nessun menù precedente da copiare');
 }
+function menuShift(n) {
+  menuM += n;
+  if (menuM < 0) { menuM = 11; menuY--; }
+  if (menuM > 11) { menuM = 0; menuY++; }
+  menuSel = ''; renderMenu();
+}
 
 /* ---------- pasti ---------- */
 function renderPasti() {
@@ -459,7 +491,7 @@ function onMealInput(el) {
   m[el.dataset.field] = v;
   const cell = $(`[data-cell="tot-${el.dataset.kid}"]`);
   if (cell) cell.textContent = fmtEur((m.count || 0) * (m.rate || 0));
-  renderPastiFoot(ymK); save();
+  renderPastiFoot(ymK); save(); renderParentMeals();
 }
 function onMealPaid(kid) {
   const ymK = curYm(); const month = state.meals[ymK] = state.meals[ymK] || {};
@@ -489,180 +521,161 @@ function exportMeals() {
   toast('Bollettino esportato in CSV ✓');
 }
 
-/* ---------- avvisi (maestre) ---------- */
+/* ---------- avvisi ---------- */
 function renderMsgs() {
   const box = $('#msgList'); if (!box) return;
-  const empty = $('#msgEmpty'); if (empty) empty.hidden = state.msgs.length > 0;
-  box.innerHTML = state.msgs.map(g => {
-    const n = state.kids.filter(k => g.reads && g.reads[k.id]).length, tot = Math.max(state.kids.length, 1);
+  const list = state.msgs.slice().sort((a, b) => b.ts - a.ts);
+  const empty = $('#msgEmpty'); if (empty) empty.hidden = list.length > 0;
+  const n = state.kids.length;
+  box.innerHTML = list.map(m => {
+    const reads = Object.keys(m.reads || {}).length;
+    const pct = n ? Math.round(reads / n * 100) : 0;
     return `<li class="msg-row">
       <div class="msg-body">
-        <p class="msg-text">${esc(g.text)}</p>
-        <p class="msg-time">${fmtTime(g.ts)} · letto da ${n} di ${state.kids.length} famiglie</p>
-        <progress class="read-bar" max="${tot}" value="${n}"></progress>
+        <p class="msg-text">${esc(m.text)}</p>
+        <p class="msg-time">${fmtTime(m.ts)} · letta da ${reads}/${n} famiglie</p>
+        <progress class="read-bar" max="100" value="${pct}"></progress>
       </div>
-      <button type="button" class="msg-del" data-action="msg-del" data-id="${g.id}">Elimina</button>
+      <button type="button" class="msg-del" data-action="msg-del" data-id="${m.id}">Elimina</button>
     </li>`;
   }).join('');
 }
-function onAvviso() {
-  const ta = $('#avvisoText');
-  const txt = ((ta && ta.value) || '').trim();
-  if (txt.length < 5) return toast("L'avviso richiede almeno 5 lettere ✏️");
+function onAvviso(e) {
+  e.preventDefault();
+  const t = $('#avvisoText');
+  const txt = ((t && t.value) || '').trim();
+  if (txt.length < 5) { toast("L'avviso richiede almeno 5 lettere"); return; }
   state.msgs.unshift({ id: uid(), text: txt, ts: Date.now(), reads: {} });
-  if (ta) ta.value = '';
-  save(); renderMsgs();
+  save();
+  if (t) t.value = '';
+  renderMsgs(); renderParentMsgs();
   toast('Avviso inviato a tutte le famiglie ✓');
 }
 function delMsg(id) {
-  const g = state.msgs.find(x => x.id === id); if (!g) return;
   if (!confirmDel("l'avviso")) return;
   state.msgs = state.msgs.filter(x => x.id !== id);
-  save(); renderMsgs();
+  save(); renderMsgs(); renderParentMsgs();
   toast('Avviso eliminato');
 }
 
 /* ---------- vista genitori ---------- */
-function renderTodos() {
-  const box = $('#parentTodos'); if (!box) return;
+function markMsgsRead() {
   const k = parentKid(); if (!k) return;
-  const list = state.memos.filter(m => m.kid === k.id).sort((a, b) => (a.done - b.done) || (b.ts - a.ts));
+  let ch = false;
+  state.msgs.forEach(m => {
+    if (!m.reads) m.reads = {};
+    if (!m.reads[k.id]) { m.reads[k.id] = true; ch = true; }
+  });
+  if (ch) save();
+}
+function renderTodos() {
+  const k = parentKid(); if (!k) return;
+  const box = $('#parentTodos'); if (!box) return;
+  const list = state.memos.filter(m => m.kid === k.id && !m.done).sort((a, b) => b.ts - a.ts);
   const empty = $('#parentTodoEmpty'); if (empty) empty.hidden = list.length > 0;
-  const card = $('#parentTodoCard');
-  if (card) card.style.display = '';
-  box.innerHTML = list.map(m =>
-    `<li class="todo-item"><span class="todo-dot" style="${m.done ? 'background:var(--sage)' : ''}"></span>
-      <span style="flex:1;${m.done ? 'text-decoration:line-through;opacity:.6' : ''}">${m.ico ? esc(m.ico) + ' ' : ''}${esc(m.text)}<small>${fmtDate(m.ts)}</small></span>
-      <button type="button" class="badge ${m.done ? 'ok' : 'off'}" data-action="todo-done" data-id="${m.id}">${m.done ? 'Portato ✓' : 'Segna portato'}</button>
-    </li>`).join('');
+  box.innerHTML = list.map(m => `<li class="todo-item">
+    <span class="todo-dot" aria-hidden="true"></span>
+    <div><strong>${m.ico ? esc(m.ico) + ' ' : ''}${esc(m.text)}</strong>
+    <small>richiesto dalle maestre · ${fmtDate(m.ts)}</small></div>
+  </li>`).join('');
 }
 function renderParentMenu() {
-  const today = $('#parentMenuToday'), next = $('#parentMenuNext');
-  if (!today) return;
-  const t = new Date(), key = iso(t), m = state.menu[key], wd = (t.getDay() + 6) % 7;
-  today.innerHTML = m
-    ? `<div class="menu-today"><h3>Menù di oggi · ${DOW[wd]} ${t.getDate()}</h3>
-        <span class="mt"><strong>Primo</strong>${esc(m.primo || '—')}</span>
-        <span class="mt"><strong>Secondo</strong>${esc(m.secondo || '—')}</span>
-        <span class="mt"><strong>Contorno</strong>${esc(m.contorno || '—')}</span>
-        <span class="mt"><strong>Merenda</strong>${esc(m.merenda || '—')}</span></div>`
-    : `<div class="menu-today"><h3>Menù di oggi</h3><p class="hint">Il menù di oggi non è ancora stato pubblicato.</p></div>`;
-  if (!next) return;
-  const upcoming = []; const d = new Date(t);
-  for (let i = 0; i < 30 && upcoming.length < 4; i++) {
+  const today = iso(new Date());
+  const t = state.menu[today];
+  const box = $('#parentMenuToday'); if (!box) return;
+  box.innerHTML = t
+    ? `<div class="menu-today"><h3>Menù di oggi</h3>
+        <span class="mt"><strong>Primo</strong>${esc(t.primo || '—')}</span>
+        <span class="mt"><strong>Secondo</strong>${esc(t.secondo || '—')}</span>
+        <span class="mt"><strong>Contorno</strong>${esc(t.contorno || '—')}</span>
+        <span class="mt"><strong>Merenda</strong>${esc(t.merenda || '—')}</span></div>`
+    : `<div class="menu-today"><h3>Menù di oggi</h3><span class="mt">Il menù di oggi non è ancora stato pubblicato.</span></div>`;
+  const nx = $('#parentMenuNext'); if (!nx) return;
+  const out = [];
+  const d = new Date();
+  for (let i = 1; out.length < 4 && i <= 14; i++) {
     d.setDate(d.getDate() + 1);
-    const mm = state.menu[iso(d)];
-    if (mm) upcoming.push({ d: new Date(d), m: mm });
+    const m = state.menu[iso(d)];
+    if (m) out.push(`<li class="menu-row"><strong>${DOW[(d.getDay() + 6) % 7]} ${d.getDate()}</strong><span>${esc([m.primo, m.secondo].filter(Boolean).join(' · '))}</span></li>`);
   }
-  next.innerHTML = upcoming.map(x => {
-    const prev = [x.m.primo, x.m.secondo, x.m.contorno, x.m.merenda].filter(Boolean).slice(0, 3).join(' · ');
-    return `<li class="menu-row"><strong>${DOW[(x.d.getDay() + 6) % 7]} ${x.d.getDate()}</strong><span>${esc(prev)}</span></li>`;
-  }).join('') || '<li class="hint">Nessun menù nei prossimi giorni.</li>';
+  nx.innerHTML = out.join('') || '<p class="hint">Nessun menù pubblicato nei prossimi giorni.</p>';
 }
 function renderParentMeals() {
-  const box = $('#parentMeals'); if (!box) return;
   const k = parentKid(); if (!k) return;
-  const ymK = ymNow(), m = (state.meals[ymK] || {})[k.id];
-  const label = new Date(ymK + '-01T12:00').toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
-  box.innerHTML = m
-    ? `<div class="bill-card">
-        <div class="bill-total"><strong>${fmtEur((m.count || 0) * (m.rate || 0))}</strong><span class="badge ${m.paid ? 'ok' : 'off'}">${m.paid ? 'Pagato ✓' : 'Da pagare'}</span></div>
-        <p class="bill-sub">${m.count || 0} pasti a ${fmtEur(m.rate || 0)} · bollettino di ${label}</p>
-      </div>`
-    : `<p class="hint">Il bollettino di ${label} non è ancora stato predisposto dalle maestre.</p>`;
+  const box = $('#parentMeals'); if (!box) return;
+  const m = (state.meals[ymNow()] || {})[k.id];
+  if (!m) { box.innerHTML = '<p class="hint">Il bollettino del mese non è ancora stato preparato dalle maestre.</p>'; return; }
+  const tot = (m.count || 0) * (m.rate || 0);
+  box.innerHTML = `<div class="bill-card">
+    <div class="bill-total"><strong>${fmtEur(tot)}</strong>
+    <span class="badge ${m.paid ? 'ok' : 'off'}">${m.paid ? 'Pagato ✓' : 'Da pagare'}</span></div>
+    <p class="bill-sub">${m.count || 0} pasti × ${fmtEur(m.rate || 0)} — ${new Date().toLocaleDateString('it-IT', { month: 'long', year: 'numeric' })}</p>
+  </div>`;
 }
 function renderParentMsgs() {
   const box = $('#parentMsgs'); if (!box) return;
-  const k = parentKid(); if (!k) return;
-  const list = state.msgs.slice(0, 6);
+  const list = state.msgs.slice().sort((a, b) => b.ts - a.ts);
   const empty = $('#parentMsgEmpty'); if (empty) empty.hidden = list.length > 0;
-  box.innerHTML = list.map(g => {
-    const read = !!(g.reads && g.reads[k.id]);
-    return `<li class="msg-row">
-      <div class="msg-body">
-        <p class="msg-text">${esc(g.text)}</p>
-        <p class="msg-time">${fmtTime(g.ts)}</p>
-        ${read ? '' : `<button type="button" class="badge off" data-action="msg-read" data-id="${g.id}" style="margin-top:.4rem">Segna come letto</button>`}
-      </div>
-      ${read ? '<span class="badge ok">Letto ✓</span>' : ''}
-    </li>`;
-  }).join('');
-}
-function markMsgRead(id) {
-  const g = state.msgs.find(x => x.id === id), k = parentKid();
-  if (!g || !k) return;
-  g.reads = g.reads || {};
-  if (g.reads[k.id]) return;
-  g.reads[k.id] = true;
-  save(); renderParentMsgs(); renderMsgs();
+  box.innerHTML = list.map(m => `<li class="msg-row">
+    <div class="msg-body"><p class="msg-text">${esc(m.text)}</p><p class="msg-time">${fmtTime(m.ts)}</p></div>
+  </li>`).join('');
 }
 
 /* ---------- eventi ---------- */
 document.addEventListener('click', e => {
-  const el = e.target.closest('[data-action]');
-  if (!el) return;
+  const el = e.target.closest('[data-action]'); if (!el) return;
   const act = el.dataset.action;
   if (act === 'role-tab') setRoleTab(el.dataset.role);
   else if (act === 'logout') logout();
   else if (act === 'tab') switchTab(el.dataset.tab);
   else if (act === 'toggle-add-kid') {
-    const f = $('#addKidForm');
-    if (f) { f.hidden = !f.hidden; if (!f.hidden) { const i = $('#addKidName'); if (i) i.focus(); } }
+    const f = $('#addKidForm'); if (!f) return;
+    f.hidden = !f.hidden;
+    if (!f.hidden) { const n = $('#addKidName'); if (n) n.focus(); }
+    const err = $('#addKidErr'); if (err) err.hidden = true;
   }
   else if (act === 'open-kid') openDrawer(el.dataset.id);
   else if (act === 'close-drawer') closeDrawer();
   else if (act === 'quick-memo') sendQuickMemo(el.dataset.id);
   else if (act === 'quick-new') openQuickNew();
   else if (act === 'quick-edit') startQuickEdit(el.dataset.id);
-  else if (act === 'quick-cancel') cancelQuickEdit();
   else if (act === 'quick-del') onQuickDel(el.dataset.id);
+  else if (act === 'quick-cancel') cancelQuickEdit();
   else if (act === 'memo-done') toggleMemo(el.dataset.id);
   else if (act === 'memo-del') delMemo(el.dataset.id);
+  else if (act === 'menu-prev') menuShift(-1);
+  else if (act === 'menu-next') menuShift(1);
   else if (act === 'menu-day') { menuSel = el.dataset.day; renderMenu(); }
-  else if (act === 'menu-prev') { menuM--; if (menuM < 0) { menuM = 11; menuY--; } renderMenu(); }
-  else if (act === 'menu-next') { menuM++; if (menuM > 11) { menuM = 0; menuY++; } renderMenu(); }
   else if (act === 'menu-copy') onMenuCopy();
   else if (act === 'gen-meals') genMeals();
   else if (act === 'export-meals') exportMeals();
   else if (act === 'meal-paid') onMealPaid(el.dataset.kid);
   else if (act === 'msg-del') delMsg(el.dataset.id);
-  else if (act === 'msg-read') markMsgRead(el.dataset.id);
-  else if (act === 'todo-done') toggleMemo(el.dataset.id);
 });
+$('#loginForm').addEventListener('submit', onLogin);
+$('#addKidForm').addEventListener('submit', e => { e.preventDefault(); onAddKid(); });
+$('#quickForm').addEventListener('submit', e => { e.preventDefault(); onQuickAdd(); });
+$('#menuForm').addEventListener('submit', e => { e.preventDefault(); onMenuSave(); });
+$('#avvisoForm').addEventListener('submit', onAvviso);
+$('#drawerNoteForm').addEventListener('submit', e => { e.preventDefault(); onDrawerNote(); });
+$('#kidSearch').addEventListener('input', renderKids);
+$('#memoKid').addEventListener('change', renderMemos);
+$('#memoState').addEventListener('change', renderMemos);
+$('#menuDay').addEventListener('change', e => { menuSel = e.target.value; renderMenu(); });
+$('#mealsMonth').addEventListener('change', renderPasti);
 document.addEventListener('input', e => {
-  const el = e.target.closest('input[data-field][data-kid]');
-  if (el) onMealInput(el);
+  const el = e.target;
+  if (el.matches('[data-field][data-kid]')) onMealInput(el);
 });
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && drawerKid) closeDrawer();
-});
-const on = (sel, ev, fn) => { const el = $(sel); if (el) el.addEventListener(ev, fn); };
-on('#loginForm', 'submit', onLogin);
-on('#addKidForm', 'submit', e => { e.preventDefault(); onAddKid(); });
-on('#quickForm', 'submit', e => { e.preventDefault(); onQuickAdd(); });
-on('#avvisoForm', 'submit', e => { e.preventDefault(); onAvviso(); });
-on('#menuForm', 'submit', e => { e.preventDefault(); onMenuSave(); });
-on('#drawerNoteForm', 'submit', e => {
-  e.preventDefault();
-  const inp = $('#drawerNote'), txt = ((inp && inp.value) || '').trim();
-  if (!drawerKid) return;
-  if (txt.length < 3) return toast('Scrivi almeno 3 lettere ✏️');
-  addMemo(drawerKid.id, txt, '');
-  if (inp) inp.value = '';
-  renderDrawerMemos(); renderMemos(); renderKids();
-  toast('Memo inviato alla famiglia ✓');
-});
-on('#menuDay', 'change', e => { menuSel = e.target.value; renderMenu(); });
-on('#kidSearch', 'input', renderKids);
-on('#memoKid', 'change', renderMemos);
-on('#memoState', 'change', renderMemos);
-on('#mealsMonth', 'change', renderPasti);
 
-/* ---------- avvio ---------- */
-state = load();
-const now = new Date();
-menuY = now.getFullYear(); menuM = now.getMonth();
-setRoleTab('admin');
-if (state.role === 'admin') showAdmin();
-else if (state.parentKid && parentKid()) showParent();
-else show('viewLogin');
+/* ---------- init ---------- */
+(function init() {
+  state = load();
+  purgeDoneMemos();
+  const t = new Date(); menuY = t.getFullYear(); menuM = t.getMonth();
+  if (state.role === 'admin') showAdmin();
+  else if (state.role === 'parent' && parentKid()) showParent();
+  else { setRoleTab('admin'); show('viewLogin'); }
+  // spazzino: ricontrolla ogni minuto se qualche memo ricevuto ha superato le 24h
+  setInterval(autoPurge, 60000);
+})();
