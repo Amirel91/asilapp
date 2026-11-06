@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Asilapp — memo, menù e pasti del nido</title>
-<meta name="description" content="Asilapp: memo alle famiglie, menù mensile del nido e bollettino pasti — il ponte digitale tra maestre e genitori.">
+<meta name="description" content="Asilapp: memo alle famiglie, menù mensile del nido e bollettino pasti — il ponte digitale tra maestre e genitori, con classi, sezioni e sedi separate.">
 <meta name="theme-color" content="#faf9f7">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -61,12 +61,12 @@
     </div>
     <div class="topbar-right">
       <span class="chip" id="adminToday"></span>
-      <button type="button" class="btn btn-ghost btn-sm" data-action="toggle-settings" aria-label="Modifica il nome dell'asilo" title="Modifica il nome dell'asilo">⚙</button>
+      <button type="button" class="btn btn-ghost btn-sm" data-action="toggle-settings" aria-label="Impostazioni asilo e sezioni" title="Impostazioni asilo e sezioni">⚙</button>
       <button type="button" class="btn btn-ghost btn-sm" data-action="logout">Esci</button>
     </div>
   </header>
 
-  <nav class="tabs" role="tablist" aria-label="Sezioni">
+  <nav class="tabs" role="tablist" aria-label="Sezioni della app">
     <button type="button" class="tab" role="tab" data-action="tab" data-tab="kids" aria-selected="true">Bambini</button>
     <button type="button" class="tab" role="tab" data-action="tab" data-tab="memo" aria-selected="false">Memo <span class="tab-count" id="memoTabCount" hidden></span></button>
     <button type="button" class="tab" role="tab" data-action="tab" data-tab="menu" aria-selected="false">Menù</button>
@@ -75,38 +75,67 @@
   </nav>
 
   <main class="panel">
-    <!-- Impostazioni: nome asilo -->
-    <form class="card" id="settingsForm" hidden aria-labelledby="schoolLbl" style="display:grid;gap:.6rem">
+    <!-- Impostazioni: nome asilo + classi/sezioni/sedi -->
+    <div class="card" id="settingsCard" hidden style="display:grid;gap:.9rem" aria-label="Impostazioni asilo">
       <div class="drawer-sec-row">
-        <p class="drawer-sec" id="schoolLbl">Impostazioni — nome dell'asilo</p>
+        <p class="drawer-sec" id="schoolLbl">Impostazioni asilo</p>
         <button type="button" class="link-btn" data-action="toggle-settings">Chiudi</button>
       </div>
-      <label class="field"><span>Nome dell'asilo (visibile a maestre e famiglie)</span>
-        <input type="text" class="input" id="schoolName" maxlength="40" placeholder="es. Asilo Nido Arcobaleno" autocomplete="off">
-      </label>
-      <span class="form-actions">
-        <button type="submit" class="btn btn-primary btn-sm">Salva nome</button>
-      </span>
-      <p class="login-err" id="schoolErr" hidden></p>
-      <p class="hint">Il nome compare nella schermata di login, nel pannello maestre e nell'area famiglia.</p>
-    </form>
+
+      <form id="schoolForm" style="display:grid;gap:.6rem" novalidate>
+        <label class="field"><span>Nome dell'asilo (visibile a maestre e famiglie)</span>
+          <input type="text" class="input" id="schoolName" maxlength="40" placeholder="es. Asilo Nido Arcobaleno" autocomplete="off">
+        </label>
+        <span class="form-actions">
+          <button type="submit" class="btn btn-primary btn-sm">Salva nome</button>
+        </span>
+        <p class="login-err" id="schoolErr" hidden></p>
+        <p class="hint">Il nome compare nella schermata di login, nel pannello maestre e nell'area famiglia.</p>
+      </form>
+
+      <div style="border-top:1px solid var(--line);padding-top:.8rem;display:grid;gap:.6rem">
+        <div class="drawer-sec-row">
+          <p class="drawer-sec">Classi, sezioni e sedi</p>
+          <button type="button" class="link-btn" data-action="sec-new">+ Nuova</button>
+        </div>
+        <p class="hint">Crea qui le classi, le sezioni o le sedi dell'asilo: ogni bambino viene iscritto a una di queste e si può spostare dal suo pannelino.</p>
+
+        <form class="add-form" id="secForm" hidden novalidate>
+          <label class="field"><span>Nome classe, sezione o sede</span>
+            <input type="text" class="input" id="secName" maxlength="30" placeholder="es. Sezione Farfalle — Sede Nord" autocomplete="off">
+          </label>
+          <span class="form-actions">
+            <button type="submit" class="btn btn-primary btn-sm" id="secSubmitBtn">Aggiungi</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-action="sec-cancel" id="secCancelBtn" hidden>Annulla</button>
+          </span>
+        </form>
+        <p class="login-err" id="secErr" hidden></p>
+
+        <ul class="quick-manage" id="secList"></ul>
+        <p class="empty" id="secEmpty" hidden>Nessuna classe: creane almeno una con «+ Nuova».</p>
+      </div>
+    </div>
 
     <!-- Bambini -->
     <section class="tabpane" id="paneKids">
       <div class="pane-head">
-        <h2>I bambini della sezione</h2>
+        <h2>I bambini del nido</h2>
         <div class="pane-tools">
+          <select class="input select" id="kidSection" aria-label="Filtra per classe o sede"></select>
           <input type="search" class="input search" id="kidSearch" placeholder="Cerca un bambino…" aria-label="Cerca bambino">
           <button type="button" class="btn btn-outline btn-sm" data-action="toggle-add-kid">+ Aggiungi</button>
         </div>
       </div>
 
-      <form class="add-form" id="addKidForm" hidden>
+      <form class="add-form" id="addKidForm" hidden novalidate>
         <label class="field"><span>Nome e cognome</span>
           <input type="text" class="input" id="addKidName" maxlength="40" placeholder="es. Giulia Rossi" autocomplete="off">
         </label>
         <label class="field"><span>Codice famiglia</span>
           <input type="text" class="input" id="addKidCode" maxlength="8" placeholder="es. B007" autocomplete="off">
+        </label>
+        <label class="field"><span>Classe / sede</span>
+          <select class="input" id="addKidSection" aria-label="Classe o sede del bambino"></select>
         </label>
         <button type="submit" class="btn btn-primary btn-sm">Crea</button>
         <p class="login-err" id="addKidErr" hidden></p>
@@ -149,7 +178,7 @@
         </div>
         <p class="hint">Le pastiglie che trovi nel pannello di ogni bambino: creale, correggile o eliminale qui, una volta per tutte.</p>
 
-        <form class="add-form" id="quickForm" hidden>
+        <form class="add-form" id="quickForm" hidden novalidate>
           <label class="field"><span>Emoji</span>
             <input type="text" class="input ico-in" id="quickIco" maxlength="4" placeholder="🍼" autocomplete="off">
           </label>
@@ -184,7 +213,7 @@
           <p class="hint">I giorni con la pastiglia verde hanno già il menù: toccane uno per compilarlo o correggerlo, la famiglia lo vede subito.</p>
         </div>
 
-        <form class="menu-form" id="menuForm">
+        <form class="menu-form" id="menuForm" novalidate>
           <div class="menu-form-head">
             <p class="drawer-sec">Menù del giorno</p>
             <select class="input select" id="menuDay" aria-label="Giorno del menù"></select>
@@ -219,7 +248,7 @@
       </div>
       <div class="table-wrap">
         <table class="table">
-          <thead><tr><th scope="col">Bambino</th><th scope="col" class="num">Pasti</th><th scope="col" class="num">Tariffa</th><th scope="col" class="num">Totale</th><th scope="col">Stato</th></tr></thead>
+          <thead><tr><th scope="col">Bambino</th><th scope="col">Classe</th><th scope="col" class="num">Pasti</th><th scope="col" class="num">Tariffa</th><th scope="col" class="num">Totale</th><th scope="col">Stato</th></tr></thead>
           <tbody id="mealsBody"></tbody>
           <tfoot id="mealsFoot"></tfoot>
         </table>
@@ -229,7 +258,7 @@
 
     <!-- Avvisi -->
     <section class="tabpane" id="paneAvvisi" hidden>
-      <form class="broadcast" id="avvisoForm">
+      <form class="broadcast" id="avvisoForm" novalidate>
         <label class="field"><span>Nuovo avviso a tutte le famiglie</span>
           <textarea class="input" id="avvisoText" rows="3" maxlength="300" placeholder="Domani gita al parco: portare…" required></textarea>
         </label>
@@ -293,10 +322,13 @@
     <button type="button" class="btn btn-ghost btn-sm" data-action="close-drawer" aria-label="Chiudi pannello">✕</button>
   </header>
   <div class="drawer-body">
+    <label class="field" style="margin-bottom:.2rem"><span>Classe / sede del bambino</span>
+      <select class="input select" id="drawerSection" style="max-width:none" aria-label="Cambia classe o sede del bambino"></select>
+    </label>
     <p class="drawer-sec">Memo rapido alla famiglia</p>
     <div class="quick-grid" id="quickMemo"></div>
     <p class="hint">Tocca una pastiglia per inviare subito il memo. I modelli si gestiscono dal tab «Memo»; i memo ricevuti spariscono da soli dopo 24 ore.</p>
-    <form class="drawer-note" id="drawerNoteForm">
+    <form class="drawer-note" id="drawerNoteForm" novalidate>
       <input type="text" class="input" id="drawerNote" maxlength="160" placeholder="Memo libero per i genitori…" autocomplete="off">
       <button type="submit" class="btn btn-primary btn-sm">Invia</button>
     </form>
