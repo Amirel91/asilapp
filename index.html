@@ -113,6 +113,32 @@
       </div>
       <ul class="memo-list" id="memoList"></ul>
       <p class="empty" id="memoEmpty" hidden>Nessun memo: aprine uno dal pannello di un bambino.</p>
+
+      <!-- gestione tipi di memo rapido -->
+      <section class="card quick-card" aria-labelledby="quickCardTitle">
+        <div class="drawer-sec-row">
+          <p class="drawer-sec" id="quickCardTitle">Memo rapidi</p>
+          <button type="button" class="link-btn" data-action="quick-new">+ Nuovo</button>
+        </div>
+        <p class="hint">Le pastiglie che trovi nel pannello di ogni bambino: creale, correggile o eliminale qui.</p>
+
+        <form class="add-form" id="quickForm" hidden>
+          <label class="field"><span>Emoji</span>
+            <input type="text" class="input ico-in" id="quickIco" maxlength="4" placeholder="🍼" autocomplete="off">
+          </label>
+          <label class="field"><span>Testo del memo</span>
+            <input type="text" class="input" id="quickTxt" maxlength="40" placeholder="es. Salviette" autocomplete="off">
+          </label>
+          <span class="form-actions">
+            <button type="submit" class="btn btn-primary btn-sm" id="quickSubmitBtn">Aggiungi</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-action="quick-cancel" id="quickCancelBtn" hidden>Annulla</button>
+          </span>
+        </form>
+        <p class="login-err" id="quickErr" hidden></p>
+
+        <ul class="quick-manage" id="quickList"></ul>
+        <p class="empty" id="quickEmpty" hidden>Nessun memo rapido: creane il primo con «+ Nuovo».</p>
+      </section>
     </section>
 
     <!-- Menù mensile -->
@@ -239,17 +265,9 @@
     <button type="button" class="btn btn-ghost btn-sm" data-action="close-drawer" aria-label="Chiudi pannello">✕</button>
   </header>
   <div class="drawer-body">
-    <div class="drawer-sec-row">
-      <p class="drawer-sec">Memo rapido alla famiglia</p>
-      <button type="button" class="link-btn" data-action="toggle-quick-add">+ Personalizza</button>
-    </div>
+    <p class="drawer-sec">Memo rapido alla famiglia</p>
     <div class="quick-grid" id="quickMemo"></div>
-    <form class="quick-add" id="quickAddForm" hidden>
-      <input type="text" class="input ico-in" id="quickIco" maxlength="4" placeholder="📌" aria-label="Emoticon del memo rapido" autocomplete="off">
-      <input type="text" class="input" id="quickTxt" maxlength="40" placeholder="Testo del memo, es. Cappellino" aria-label="Testo del memo rapido" autocomplete="off">
-      <button type="submit" class="btn btn-primary btn-sm">Aggiungi</button>
-    </form>
-    <p class="login-err" id="quickErr" hidden></p>
+    <p class="hint">Tocca una pastiglia per inviare subito il memo. I memo rapidi si gestiscono dal tab «Memo».</p>
     <form class="drawer-note" id="drawerNoteForm">
       <input type="text" class="input" id="drawerNote" maxlength="160" placeholder="Memo libero per i genitori…" autocomplete="off">
       <button type="submit" class="btn btn-primary btn-sm">Invia</button>
