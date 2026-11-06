@@ -80,6 +80,9 @@ ul { list-style: none; }
 .login-demo code { font-family: ui-monospace, Menlo, monospace; background: var(--bg); padding: .1rem .35rem; border-radius: 6px; color: var(--ink-soft); }
 .login-foot { font-size: .72rem; color: var(--muted); text-align: center; }
 
+/* nome asilo mostrato nella card di login */
+.login-school { font-size: .85rem; font-weight: 600; color: var(--ink-soft); margin-top: -.45rem; }
+
 /* ---------- bottoni ---------- */
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: .45rem; padding: .65rem 1.1rem; border-radius: var(--r-sm); font-weight: 600; font-size: .92rem; transition: transform var(--t), box-shadow var(--t), background var(--t), color var(--t), border-color var(--t); }
 .btn:active { transform: scale(.97); }
@@ -118,9 +121,10 @@ ul { list-style: none; }
 .search { max-width: 220px; }
 .select { max-width: 230px; width: auto; }
 
-/* ---------- form inline (aggiungi bambino) ---------- */
+/* ---------- form inline (aggiungi bambino / impostazioni) ---------- */
 .add-form { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; background: var(--card); border: 1px dashed var(--line); border-radius: var(--r); padding: .75rem .8rem; box-shadow: var(--sh-sm); }
 .add-form .input { flex: 1 1 150px; width: auto; min-width: 0; }
+#schoolInput { max-width: 360px; }
 
 /* ---------- griglia bambini ---------- */
 .kid-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: .6rem; }
@@ -294,6 +298,11 @@ button.cal-day.off:hover { transform: none; box-shadow: none; }
 .todo-item:last-child { border-bottom: 0; }
 .todo-item .todo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--terra); margin-top: .5rem; flex-shrink: 0; }
 .todo-item small { display: block; font-size: .7rem; color: var(--muted); }
+/* testo del memo: regola prima assente — ora definita + stato "portato" */
+.todo-txt { font-weight: 600; letter-spacing: -.01em; overflow-wrap: anywhere; }
+.todo-item.done .todo-txt { text-decoration: line-through; font-weight: 500; color: var(--muted); }
+.todo-item.done .todo-dot { background: var(--sage); }
+.todo-item.done small { color: var(--sage-ink); }
 
 /* ---------- drawer ---------- */
 .overlay { position: fixed; inset: 0; z-index: 40; background: rgba(41,37,36,.32); opacity: 0; transition: opacity var(--t); }
@@ -320,29 +329,26 @@ button.cal-day.off:hover { transform: none; box-shadow: none; }
 .drawer-note { display: flex; gap: .5rem; }
 .drawer-note .input { flex: 1; }
 
-/* form di creazione/modifica modello memo rapido (emoji + testo) */
-.quick-add { display: flex; gap: .5rem; flex-wrap: wrap; align-items: stretch; background: var(--bg); border: 1px dashed var(--line); border-radius: var(--r); padding: .6rem .65rem; }
-.quick-add .input { flex: 1 1 140px; width: auto; min-width: 0; padding: .55rem .75rem; font-size: .92rem; }
-/* input compatto per l'emoticon del memo rapido */
-.ico-in { width: 54px; flex: 0 0 54px; padding: .55rem .3rem; font-size: 1.1rem; line-height: 1.3; text-align: center; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", system-ui, sans-serif; }
-.ico-in::placeholder { font-size: .9rem; }
+/* input emoji compatto nei form dei modelli */
+.ico-in { width: 64px; text-align: center; font-size: 1.05rem; padding-inline: .3rem; }
 
 /* ---------- toast ---------- */
-.toast-wrap { position: fixed; top: 1rem; left: 50%; transform: translateX(-50%); z-index: 100; display: grid; gap: .5rem; width: min(420px, calc(100vw - 2rem)); pointer-events: none; }
-.toast { background: var(--ink); color: #faf9f7; border-radius: 999px; padding: .6rem 1.1rem; font-size: .88rem; font-weight: 500; text-align: center; box-shadow: var(--sh-md); opacity: 0; transform: translateY(-12px); transition: opacity var(--t), transform var(--t); }
+.toast-wrap { position: fixed; bottom: 1.1rem; left: 50%; transform: translateX(-50%); z-index: 90; display: grid; gap: .45rem; width: max-content; max-width: 92vw; pointer-events: none; }
+.toast { background: var(--ink); color: #fff; font-size: .84rem; font-weight: 500; padding: .6rem 1.05rem; border-radius: 999px; box-shadow: var(--sh-md); opacity: 0; transform: translateY(8px); transition: opacity 250ms ease-out, transform 250ms ease-out; max-width: 92vw; text-align: center; }
 .toast.show { opacity: 1; transform: none; }
 
 /* ---------- responsive ---------- */
-@media (min-width: 768px) {
-  .app-view { padding: 0 1.5rem 3rem; }
+@media (min-width: 640px) {
   .kid-grid { grid-template-columns: repeat(3, minmax(0,1fr)); }
-  .parent-cols { grid-template-columns: 1fr 1fr; align-items: start; }
-  .quick-grid { grid-template-columns: repeat(3, minmax(0,1fr)); }
-  .menu-layout { grid-template-columns: 1.25fr .75fr; }
-  .quick-manage li { flex-wrap: nowrap; }
+  .quick-grid { grid-template-columns: repeat(3, 1fr); }
+  .parent-cols { grid-template-columns: 1.15fr 1fr; align-items: start; }
+  .cal-cell, .cal-day { min-height: 76px; }
 }
-
-@media (min-width: 1024px) {
+@media (min-width: 900px) {
   .kid-grid { grid-template-columns: repeat(4, minmax(0,1fr)); }
-  .calendar .cal-cell, .calendar .cal-day { min-height: 78px; }
+  .menu-layout { grid-template-columns: minmax(0,1.45fr) minmax(0,1fr); }
+  .cal-cell, .cal-day { min-height: 88px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
