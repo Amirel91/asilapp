@@ -111,33 +111,42 @@
           </select>
         </div>
       </div>
-      <ul class="memo-list" id="memoList"></ul>
-      <p class="empty" id="memoEmpty" hidden>Nessun memo: aprine uno dal pannello di un bambino.</p>
 
-      <!-- gestione tipi di memo rapido -->
+      <!-- feed notifiche: cronologia memo inviati (sola lettura) -->
+      <section class="card" aria-labelledby="memoFeedTitle">
+        <div class="drawer-sec-row">
+          <p class="drawer-sec" id="memoFeedTitle">Memo inviati alle famiglie</p>
+          <span class="chip" id="memoFeedCount" hidden></span>
+        </div>
+        <p class="hint">Dal più recente: quelli in attesa hanno il filo terracotta, i ricevuti il filo salvia e il testo barrato.</p>
+        <ul class="memo-list" id="memoList"></ul>
+        <p class="empty" id="memoEmpty" hidden>Nessun memo: aprine uno dal pannello di un bambino.</p>
+      </section>
+
+      <!-- unica card di gestione dei modelli (niente doppioni) -->
       <section class="card quick-card" aria-labelledby="quickCardTitle">
         <div class="drawer-sec-row">
-          <p class="drawer-sec" id="quickCardTitle">Memo rapidi</p>
+          <p class="drawer-sec" id="quickCardTitle">Modelli memo rapidi</p>
           <button type="button" class="link-btn" data-action="quick-new">+ Nuovo</button>
         </div>
-        <p class="hint">Le pastiglie che trovi nel pannello di ogni bambino: creale, correggile o eliminale qui.</p>
+        <p class="hint">Le pastiglie che trovi nel pannello di ogni bambino: creale, correggile o eliminale qui, una volta per tutte.</p>
 
         <form class="add-form" id="quickForm" hidden>
           <label class="field"><span>Emoji</span>
             <input type="text" class="input ico-in" id="quickIco" maxlength="4" placeholder="🍼" autocomplete="off">
           </label>
-          <label class="field"><span>Testo del memo</span>
-            <input type="text" class="input" id="quickTxt" maxlength="40" placeholder="es. Salviette" autocomplete="off">
+          <label class="field"><span>Testo del modello</span>
+            <input type="text" class="input" id="quickTxt" maxlength="40" placeholder="es. Salviette umidificate" autocomplete="off">
           </label>
           <span class="form-actions">
-            <button type="submit" class="btn btn-primary btn-sm" id="quickSubmitBtn">Aggiungi</button>
+            <button type="submit" class="btn btn-primary btn-sm" id="quickSubmitBtn">Aggiungi modello</button>
             <button type="button" class="btn btn-ghost btn-sm" data-action="quick-cancel" id="quickCancelBtn" hidden>Annulla</button>
           </span>
         </form>
         <p class="login-err" id="quickErr" hidden></p>
 
         <ul class="quick-manage" id="quickList"></ul>
-        <p class="empty" id="quickEmpty" hidden>Nessun memo rapido: creane il primo con «+ Nuovo».</p>
+        <p class="empty" id="quickEmpty" hidden>Nessun modello: creane il primo con «+ Nuovo».</p>
       </section>
     </section>
 
@@ -267,7 +276,7 @@
   <div class="drawer-body">
     <p class="drawer-sec">Memo rapido alla famiglia</p>
     <div class="quick-grid" id="quickMemo"></div>
-    <p class="hint">Tocca una pastiglia per inviare subito il memo. I memo rapidi si gestiscono dal tab «Memo».</p>
+    <p class="hint">Tocca una pastiglia per inviare subito il memo. I modelli si gestiscono dal tab «Memo».</p>
     <form class="drawer-note" id="drawerNoteForm">
       <input type="text" class="input" id="drawerNote" maxlength="160" placeholder="Memo libero per i genitori…" autocomplete="off">
       <button type="submit" class="btn btn-primary btn-sm">Invia</button>

@@ -30,7 +30,7 @@ const DEFAULT_QUICK = () => ([
   { id: uid(), ico: '🍼', txt: 'Cambio completo' },
   { id: uid(), ico: '🧦', txt: 'Calzine antiscivolo' },
   { id: uid(), ico: '👟', txt: 'Scarpe di ricambio' },
-  { id: uid(), ico: '🧸', txt: 'Ciuccio / coperta' },
+  { id: uid(), ico: '🧸', txt: 'Ciuccio / copreta' },
   { id: uid(), ico: '🎨', txt: 'Camiciolo' },
   { id: uid(), ico: '📸', txt: 'Foto per il progetto' }
 ]);
@@ -83,7 +83,8 @@ function switchTab(name) {
   $$('.tabpane').forEach(p => { p.hidden = p.id !== 'pane' + name[0].toUpperCase() + name.slice(1); });
 }
 function showAdmin() {
-  state.role = 'admin'; save();
+  state.role = 'admin'; state.parentKid = null; save();
+  drawerKid = null; closeDrawer();
   const chip = $('#adminToday');
   if (chip) chip.textContent = new Date().toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'short' });
   const md = $('#mealsMonth'); if (md && !md.value) md.value = ymNow();
@@ -105,6 +106,40 @@ function showParent() {
 function logout() {
   state.role = null; state.parentKid = null; save();
   drawerKid = null; closeDrawer(); setRoleTab('admin'); show('viewLogin');
+}
+
+/* ---------- login ---------- */
+function setRoleTab(role) {
+  loginRole = role;
+  $$('.seg-btn').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.role === role)));
+  const admin = role === 'admin';
+  const fU = $('#fUser'), fP = $('#fPass'), fC = $('#fCode');
+  if (fU) fU.hidden = !admin;
+  if (fP) fP.hidden = !admin;
+  if (fC) fC.hidden = admin;
+  // campi non pertinenti svuotati: nessun residuo "admin" nel login genitori
+  if (admin) { const c = $('#loginCode'); if (c) c.value = ''; }
+  else { const u = $('#loginUser'), p = $('#loginPass'); if (u) u.value = ''; if (p) p.value = ''; }
+  const err = $('#loginError'); if (err) err.hidden = true;
+}
+function onLogin(e) {
+  e.preventDefault();
+  const err = $('#loginError');
+  const fail = m => { if (err) { err.textContent = m; err.hidden = false; } };
+  if (err) err.hidden = true;
+  if (loginRole === 'admin') {
+    const u = (($('#loginUser') || {}).value || '').trim();
+    const p = ($('#loginPass') || {}).value || '';
+    if (u !== 'admin' || p !== 'nido2024') return fail('Credenziali sbagliate: prova admin · nido2024.');
+    showAdmin();
+  } else {
+    const code = (($('#loginCode') || {}).value || '').trim().toUpperCase();
+    const k = state.kids.find(x => x.code.toUpperCase() === code);
+    if (!k) return fail('Codice non riconosciuto: controlla con le maestre (demo: B001).');
+    state.parentKid = k.id; save();
+    const c = $('#loginCode'); if (c) c.value = '';
+    showParent();
+  }
 }
 
 /* ---------- bambini ---------- */
@@ -132,7 +167,7 @@ function onAddKid() {
   const fail = msg => { if (err) { err.textContent = msg; err.hidden = false; } };
   if (err) err.hidden = true;
   if (name.length < 3) return fail('Il nome richiede almeno 3 lettere.');
-  if (!/^[A-Z0-9]{2,8}$/.test(code)) return fail('Il codice famiglia serve di 2–8 lettere o numeri, es. B007.');
+  if (!/^[A-Z0-9]{2,8}$/.test(code)) return fail('Il codice famiglia serve di 2\u20138 lettere o numeri, es. B007.');
   if (state.kids.some(k => k.code.toUpperCase() === code)) return fail('Esiste già un bambino con il codice ' + code + '.');
   state.kids.push({ id: uid(), name, code });
   save();
@@ -142,7 +177,7 @@ function onAddKid() {
   toast('Bambino aggiunto ✓');
 }
 
-/* ---------- drawer bambino (solo invio memo, niente gestione modelli) ---------- */
+/* ---------- drawer bambino: solo invio memo ---------- */
 function openDrawer(id) {
   drawerKid = state.kids.find(k => k.id === id); if (!drawerKid) return;
   const av = $('#drawerAvatar');
@@ -171,70 +206,90 @@ function renderQuick() {
     `<button type="button" class="quick-btn" data-action="quick-memo" data-id="${q.id}"><span aria-hidden="true">${esc(q.ico)}</span><small>${esc(q.txt)}</small></button>`
   ).join('');
 }
+function sendQuickMemo(qid) {
+  const q = state.quickTypes.find(x => x.id === qid);
+  if (!q || !drawerKid) return;
+  addMemo(drawerKid.id, q.txt, q.ico);
+  renderDrawerMemos(); renderMemos(); renderKids();
+  const btn = $(`.quick-btn[data-id="${qid}"]`);
+  if (btn) { btn.classList.add('pressed'); setTimeout(() => btn.classList.remove('pressed'), 500); }
+  toast('Memo inviato a ' + drawerKid.name.split(' ')[0] + ' ✓');
+}
 
-/* ---------- modelli memo rapidi: gestione nella sezione Memo ---------- */
-function ensureTplBox() {
-  let box = $('#quickMgr') || $('#tplBox');
-  if (!box) {
-    const pane = $('#paneMemo'); if (!pane) return null;
-    box = document.createElement('section');
-    box.className = 'card'; box.id = 'tplBox';
-    const list = $('#memoList');
-    pane.insertBefore(box, list || pane.firstChild);
-  }
-  return box;
-}
+/* ---------- modelli memo rapidi: gestione unica nel tab Memo ---------- */
 function renderMemoTemplates() {
-  const box = ensureTplBox(); if (!box) return;
-  const ed = state.quickTypes.find(q => q.id === quickEdit);
-  box.innerHTML = `
-    <h3>Modelli dei memo rapidi</h3>
-    <p class="hint" style="margin-bottom:.7rem">Questi pulsanti compaiono nel pannello di ogni bambino: creali, correggili o eliminali qui, una volta per tutte.</p>
-    <form data-form="quick-add" class="add-form" style="box-shadow:none;padding:.6rem .65rem">
-      <label class="field" style="margin:0;flex:0 0 76px"><span>Emoji</span>
-        <input type="text" class="input" data-el="qIco" maxlength="4" placeholder="🍼" value="${ed ? esc(ed.ico) : ''}" style="text-align:center;font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',system-ui,sans-serif" autocomplete="off">
-      </label>
-      <label class="field" style="margin:0;flex:1 1 170px"><span>Testo del modello</span>
-        <input type="text" class="input" data-el="qTxt" maxlength="40" placeholder="es. Salviette umidificate" value="${ed ? esc(ed.txt) : ''}" autocomplete="off">
-      </label>
-      <span style="display:flex;gap:.4rem;padding-top:1.15rem">
-        <button type="submit" class="btn btn-primary btn-sm">${ed ? 'Aggiorna' : 'Aggiungi modello'}</button>
-        ${ed ? '<button type="button" class="btn btn-ghost btn-sm" data-action="quick-cancel">Annulla</button>' : ''}
-      </span>
-    </form>
-    <ul style="display:grid;gap:.4rem;margin-top:.7rem">
-      ${state.quickTypes.length ? state.quickTypes.map(q => `
-        <li style="display:flex;align-items:center;gap:.55rem;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:.45rem .65rem;font-size:.88rem">
-          <strong aria-hidden="true" style="font-size:1.05rem">${esc(q.ico)}</strong>
-          <span style="flex:1;min-width:0">${esc(q.txt)}</span>
-          <button type="button" class="memo-del" data-action="quick-edit" data-id="${q.id}">Modifica</button>
-          <button type="button" class="memo-del" data-action="quick-del" data-id="${q.id}">Elimina</button>
-        </li>`).join('') : '<li class="hint" style="margin:0">Nessun modello: aggiungi il primo qui sopra.</li>'}
-    </ul>`;
-  const i = box.querySelector('[data-el="qTxt"]'); if (i && quickEdit) i.focus();
+  const list = $('#quickList'); if (!list) return;
+  const empty = $('#quickEmpty'); if (empty) empty.hidden = state.quickTypes.length > 0;
+  list.innerHTML = state.quickTypes.map(q => `
+    <li>
+      <strong aria-hidden="true" style="font-size:1.05rem">${esc(q.ico)}</strong>
+      <span class="tpl-txt">${esc(q.txt)}</span>
+      <button type="button" class="memo-del" data-action="quick-edit" data-id="${q.id}">Modifica</button>
+      <button type="button" class="memo-del" data-action="quick-del" data-id="${q.id}">Elimina</button>
+    </li>`).join('');
+  if (!state.quickTypes.length && !quickEdit && $('#quickForm') && $('#quickForm').hidden) return;
+  if (quickEdit && !state.quickTypes.some(q => q.id === quickEdit)) cancelQuickEdit();
 }
-function onQuickAdd(form) {
-  const icoEl = form.querySelector('[data-el="qIco"]') || form.querySelector('#quickIco');
-  const txtEl = form.querySelector('[data-el="qTxt"]') || form.querySelector('#quickTxt');
-  const ico = ((icoEl && icoEl.value) || '').trim() || '📌';
-  const txt = ((txtEl && txtEl.value) || '').trim().replace(/\s+/g, ' ');
-  if (txt.length < 3) return toast('Il testo del modello richiede almeno 3 lettere ✏️');
+function openQuickNew() {
+  quickEdit = '';
+  const f = $('#quickForm'); if (!f) return;
+  const i = $('#quickIco'), t = $('#quickTxt');
+  if (i) i.value = ''; if (t) t.value = '';
+  const sb = $('#quickSubmitBtn'), cb = $('#quickCancelBtn'), err = $('#quickErr');
+  if (sb) sb.textContent = 'Aggiungi modello';
+  if (cb) cb.hidden = true;
+  if (err) err.hidden = true;
+  f.hidden = false;
+  if (t) t.focus();
+}
+function startQuickEdit(id) {
+  const q = state.quickTypes.find(x => x.id === id); if (!q) return;
+  quickEdit = id;
+  const f = $('#quickForm'); if (!f) return;
+  const i = $('#quickIco'), t = $('#quickTxt');
+  if (i) i.value = q.ico; if (t) t.value = q.txt;
+  const sb = $('#quickSubmitBtn'), cb = $('#quickCancelBtn'), err = $('#quickErr');
+  if (sb) sb.textContent = 'Aggiorna';
+  if (cb) cb.hidden = false;
+  if (err) err.hidden = true;
+  f.hidden = false;
+  if (t) { t.focus(); t.select(); }
+}
+function cancelQuickEdit() {
+  quickEdit = '';
+  const f = $('#quickForm'); if (f) f.hidden = true;
+}
+function onQuickAdd() {
+  const err = $('#quickErr');
+  const ico = (($('#quickIco') || {}).value || '').trim() || '📌';
+  const txt = (($('#quickTxt') || {}).value || '').trim().replace(/\s+/g, ' ');
+  const fail = msg => { if (err) { err.textContent = msg; err.hidden = false; } };
+  if (err) err.hidden = true;
+  if (txt.length < 3) return fail('Il testo del modello richiede almeno 3 lettere.');
   if (state.quickTypes.some(q => q.txt.toLowerCase() === txt.toLowerCase() && q.id !== quickEdit))
-    return toast('Esiste già un modello con questo testo');
+    return fail('Esiste già un modello con questo testo.');
   if (quickEdit) {
     const q = state.quickTypes.find(x => x.id === quickEdit);
     if (q) { q.ico = ico; q.txt = txt; }
     quickEdit = '';
-    save(); renderMemoTemplates(); renderQuick();
+    save(); renderMemoTemplates(); renderQuick(); cancelQuickEdit();
     toast('Modello aggiornato ✓');
   } else {
     state.quickTypes.push({ id: uid(), ico, txt });
-    save(); renderMemoTemplates(); renderQuick();
+    save(); renderMemoTemplates(); renderQuick(); cancelQuickEdit();
     toast('Modello aggiunto ✓');
   }
 }
+function onQuickDel(id) {
+  const q = state.quickTypes.find(x => x.id === id); if (!q) return;
+  if (!confirmDel('il modello \u00AB' + q.txt + '\u00BB')) return;
+  state.quickTypes = state.quickTypes.filter(x => x.id !== id);
+  if (quickEdit === id) cancelQuickEdit();
+  save(); renderMemoTemplates(); renderQuick();
+  toast('Modello eliminato');
+}
 
-/* ---------- memo ---------- */
+/* ---------- memo: feed notifiche ---------- */
 function memoRow(m) {
   const k = state.kids.find(x => x.id === m.kid);
   return `<li class="memo-row ${m.done ? 'done' : ''}">
@@ -257,6 +312,24 @@ function addMemo(kid, text, ico) {
   state.memos.unshift({ id: uid(), kid, text, ts: Date.now(), done: false, ico: ico || '' });
   save(); updateMemoBadge();
 }
+function toggleMemo(id) {
+  const m = state.memos.find(x => x.id === id); if (!m) return;
+  m.done = !m.done;
+  m.doneTs = m.done ? Date.now() : null;
+  save();
+  renderMemos();
+  if (drawerKid) renderDrawerMemos();
+  renderKids(); renderTodos(); updateMemoBadge();
+}
+function delMemo(id) {
+  const m = state.memos.find(x => x.id === id); if (!m) return;
+  if (!confirmDel('il memo \u00AB' + m.text + '\u00BB')) return;
+  state.memos = state.memos.filter(x => x.id !== id);
+  save();
+  renderMemos();
+  if (drawerKid) renderDrawerMemos();
+  renderKids(); renderTodos(); updateMemoBadge();
+}
 function updateMemoBadge() {
   const n = state.memos.filter(m => !m.done).length, el = $('#memoTabCount');
   if (el) { el.hidden = n === 0; el.textContent = n; }
@@ -277,6 +350,8 @@ function renderMemos() {
   list.sort((a, b) => (a.done - b.done) || (b.ts - a.ts));
   const empty = $('#memoEmpty'); if (empty) empty.hidden = list.length > 0;
   box.innerHTML = list.map(memoRow).join('');
+  const cnt = $('#memoFeedCount');
+  if (cnt) { cnt.hidden = list.length === 0; cnt.textContent = list.length + (list.length === 1 ? ' memo' : ' memo'); }
   updateMemoBadge();
 }
 
@@ -322,7 +397,7 @@ function renderMenu() {
   menuFormFill();
 }
 function onMenuSave() {
-  const val = id => (( $(id) || {}).value || '').trim();
+  const val = id => (($('#' + id.replace('#', '')) || {}).value || '').trim();
   const day = { primo: val('#menuPrimo'), secondo: val('#menuSecondo'), contorno: val('#menuContorno'), merenda: val('#menuMerenda') };
   const filled = Object.values(day).filter(Boolean).length;
   if (!filled) {
@@ -334,6 +409,21 @@ function onMenuSave() {
   }
   state.menu[menuSel] = day; save(); renderMenu();
   toast('Menù del ' + new Date(menuSel + 'T12:00').toLocaleDateString('it-IT', { day: 'numeric', month: 'long' }) + ' salvato ✓');
+}
+function onMenuCopy() {
+  const d = new Date(menuSel + 'T12:00');
+  for (let i = 0; i < 60; i++) {
+    d.setDate(d.getDate() - 1);
+    const m = state.menu[iso(d)];
+    if (m) {
+      const set = (id, v) => { const el = $(id); if (el) el.value = v || ''; };
+      set('#menuPrimo', m.primo); set('#menuSecondo', m.secondo);
+      set('#menuContorno', m.contorno); set('#menuMerenda', m.merenda);
+      toast('Copiato dal ' + d.toLocaleDateString('it-IT', { day: 'numeric', month: 'long' }) + ' — ricordati di salvare');
+      return;
+    }
+  }
+  toast('Nessun menù precedente da copiare');
 }
 
 /* ---------- pasti ---------- */
@@ -360,6 +450,23 @@ function renderPastiFoot(ymK) {
   const np = rows.reduce((a, r) => a + (r.count || 0), 0);
   foot.innerHTML =
     `<tr><th scope="row">Totale sezione</th><td class="num">${np}</td><td></td><td class="num"><strong>${fmtEur(tot)}</strong></td><td></td></tr>`;
+}
+function onMealInput(el) {
+  const ymK = curYm(); const month = state.meals[ymK]; if (!month) return;
+  const m = month[el.dataset.kid]; if (!m) return;
+  let v = parseFloat(el.value);
+  if (isNaN(v) || v < 0) v = 0;
+  m[el.dataset.field] = v;
+  const cell = $(`[data-cell="tot-${el.dataset.kid}"]`);
+  if (cell) cell.textContent = fmtEur((m.count || 0) * (m.rate || 0));
+  renderPastiFoot(ymK); save();
+}
+function onMealPaid(kid) {
+  const ymK = curYm(); const month = state.meals[ymK] = state.meals[ymK] || {};
+  const m = month[kid] = month[kid] || { count: 0, rate: 4, paid: false };
+  m.paid = !m.paid;
+  save(); renderPasti(); renderParentMeals();
+  toast(m.paid ? 'Bollettino segnato come pagato ✓' : 'Bollettino rimesso in «Da pagare»');
 }
 function genMeals() {
   const ymK = curYm(); state.meals[ymK] = state.meals[ymK] || {};
@@ -407,6 +514,13 @@ function onAvviso() {
   save(); renderMsgs();
   toast('Avviso inviato a tutte le famiglie ✓');
 }
+function delMsg(id) {
+  const g = state.msgs.find(x => x.id === id); if (!g) return;
+  if (!confirmDel("l'avviso")) return;
+  state.msgs = state.msgs.filter(x => x.id !== id);
+  save(); renderMsgs();
+  toast('Avviso eliminato');
+}
 
 /* ---------- vista genitori ---------- */
 function renderTodos() {
@@ -414,6 +528,8 @@ function renderTodos() {
   const k = parentKid(); if (!k) return;
   const list = state.memos.filter(m => m.kid === k.id).sort((a, b) => (a.done - b.done) || (b.ts - a.ts));
   const empty = $('#parentTodoEmpty'); if (empty) empty.hidden = list.length > 0;
+  const card = $('#parentTodoCard');
+  if (card) card.style.display = '';
   box.innerHTML = list.map(m =>
     `<li class="todo-item"><span class="todo-dot" style="${m.done ? 'background:var(--sage)' : ''}"></span>
       <span style="flex:1;${m.done ? 'text-decoration:line-through;opacity:.6' : ''}">${m.ico ? esc(m.ico) + ' ' : ''}${esc(m.text)}<small>${fmtDate(m.ts)}</small></span>
@@ -446,220 +562,107 @@ function renderParentMenu() {
 function renderParentMeals() {
   const box = $('#parentMeals'); if (!box) return;
   const k = parentKid(); if (!k) return;
-  const ymK = ymNow(), m = state.meals[ymK] && state.meals[ymK][k.id];
+  const ymK = ymNow(), m = (state.meals[ymK] || {})[k.id];
+  const label = new Date(ymK + '-01T12:00').toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
   box.innerHTML = m
     ? `<div class="bill-card">
         <div class="bill-total"><strong>${fmtEur((m.count || 0) * (m.rate || 0))}</strong><span class="badge ${m.paid ? 'ok' : 'off'}">${m.paid ? 'Pagato ✓' : 'Da pagare'}</span></div>
-        <p class="bill-sub">${m.count || 0} pasti × ${fmtEur(m.rate || 0)} · ${new Date(ymK + '-01T12:00').toLocaleDateString('it-IT', { month: 'long', year: 'numeric' })}</p>
+        <p class="bill-sub">${m.count || 0} pasti a ${fmtEur(m.rate || 0)} · bollettino di ${label}</p>
       </div>`
-    : '<p class="hint">Il bollettino di questo mese non è ancora pronto.</p>';
+    : `<p class="hint">Il bollettino di ${label} non è ancora stato predisposto dalle maestre.</p>`;
 }
 function renderParentMsgs() {
   const box = $('#parentMsgs'); if (!box) return;
   const k = parentKid(); if (!k) return;
-  const empty = $('#parentMsgEmpty'); if (empty) empty.hidden = state.msgs.length > 0;
-  box.innerHTML = state.msgs.map(g => {
-    const read = g.reads && g.reads[k.id];
+  const list = state.msgs.slice(0, 6);
+  const empty = $('#parentMsgEmpty'); if (empty) empty.hidden = list.length > 0;
+  box.innerHTML = list.map(g => {
+    const read = !!(g.reads && g.reads[k.id]);
     return `<li class="msg-row">
       <div class="msg-body">
         <p class="msg-text">${esc(g.text)}</p>
-        <p class="msg-time">${fmtTime(g.ts)}${read ? ' · letto ✓' : ''}</p>
+        <p class="msg-time">${fmtTime(g.ts)}</p>
+        ${read ? '' : `<button type="button" class="badge off" data-action="msg-read" data-id="${g.id}" style="margin-top:.4rem">Segna come letto</button>`}
       </div>
-      <button type="button" class="badge ${read ? 'ok' : 'off'}" data-action="msg-read" data-id="${g.id}">${read ? 'Letto ✓' : 'Segna come letto'}</button>
+      ${read ? '<span class="badge ok">Letto ✓</span>' : ''}
     </li>`;
   }).join('');
 }
-
-/* ---------- login ---------- */
-function setRoleTab(role) {
-  loginRole = role;
-  const parent = role === 'parent';
-  $$('[data-action="role-tab"]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.role === role)));
-  const fu = $('#fUser'), fp = $('#fPass'), fc = $('#fCode');
-  if (fu) fu.hidden = parent;
-  if (fp) fp.hidden = parent;
-  if (fc) fc.hidden = !parent;
-  if (parent) {
-    const u = $('#loginUser'), p = $('#loginPass');
-    if (u) u.value = ''; if (p) p.value = '';
-  } else {
-    const c = $('#loginCode'); if (c) c.value = '';
-  }
-  const err = $('#loginError'); if (err) err.hidden = true;
-  const vl = $('#viewLogin');
-  if (vl && !vl.hidden) { const el = parent ? $('#loginCode') : $('#loginUser'); if (el) el.focus(); }
-}
-function loginError(msg) { const e = $('#loginError'); if (e) { e.textContent = msg; e.hidden = false; } }
-function doLogin() {
-  const err = $('#loginError'); if (err) err.hidden = true;
-  if (loginRole === 'parent') {
-    const code = ((($('#loginCode') || {}).value) || '').trim().toUpperCase();
-    if (!code) return loginError('Inserisci il codice famiglia che ti ha dato il nido.');
-    const k = state.kids.find(x => x.code.toUpperCase() === code);
-    if (!k) return loginError('Codice famiglia non trovato: controlla e riprova.');
-    state.role = 'parent'; state.parentKid = k.id; save();
-    const c = $('#loginCode'); if (c) c.value = '';
-    showParent();
-    toast('Bentornata, famiglia ' + k.name.split(' ')[0] + '!');
-    return;
-  }
-  const u = ((($('#loginUser') || {}).value) || '').trim();
-  const p = ($('#loginPass') || {}).value || '';
-  if (u.toLowerCase() !== 'admin' || p !== 'nido2024')
-    return loginError('Credenziali sbagliate: riprova (demo: admin · nido2024).');
-  const un = $('#loginUser'), pw = $('#loginPass');
-  if (un) un.value = ''; if (pw) pw.value = '';
-  showAdmin();
-  toast('Bentornata, maestra! 🌱');
+function markMsgRead(id) {
+  const g = state.msgs.find(x => x.id === id), k = parentKid();
+  if (!g || !k) return;
+  g.reads = g.reads || {};
+  if (g.reads[k.id]) return;
+  g.reads[k.id] = true;
+  save(); renderParentMsgs(); renderMsgs();
 }
 
-/* ---------- click delegation ---------- */
+/* ---------- eventi ---------- */
 document.addEventListener('click', e => {
-  const el = e.target.closest('[data-action]'); if (!el) return;
+  const el = e.target.closest('[data-action]');
+  if (!el) return;
   const act = el.dataset.action;
-  if (act === 'role-tab') { setRoleTab(el.dataset.role); return; }
-  if (act === 'logout') { logout(); toast('A presto! 👋'); return; }
-  if (act === 'tab') { switchTab(el.dataset.tab); return; }
-  if (act === 'toggle-add-kid') {
-    const f = $('#addKidForm'); if (!f) return;
-    f.hidden = !f.hidden;
-    const err = $('#addKidErr'); if (err) err.hidden = true;
-    if (!f.hidden) { const n = $('#addKidName'); if (n) n.focus(); }
-    return;
+  if (act === 'role-tab') setRoleTab(el.dataset.role);
+  else if (act === 'logout') logout();
+  else if (act === 'tab') switchTab(el.dataset.tab);
+  else if (act === 'toggle-add-kid') {
+    const f = $('#addKidForm');
+    if (f) { f.hidden = !f.hidden; if (!f.hidden) { const i = $('#addKidName'); if (i) i.focus(); } }
   }
-  if (act === 'open-kid') { openDrawer(el.dataset.id); return; }
-  if (act === 'close-drawer') { closeDrawer(); return; }
-  if (act === 'quick-memo') {
-    if (!drawerKid) return;
-    const q = state.quickTypes.find(x => x.id === el.dataset.id); if (!q) return;
-    addMemo(drawerKid.id, q.txt, q.ico);
-    el.classList.add('pressed'); setTimeout(() => el.classList.remove('pressed'), 900);
-    renderDrawerMemos(); renderMemos(); renderKids();
-    toast('Memo inviato alla famiglia ✓');
-    return;
-  }
-  if (act === 'quick-mgr') { closeDrawer(); switchTab('memo'); return; }
-  if (act === 'quick-edit') { quickEdit = el.dataset.id; renderMemoTemplates(); return; }
-  if (act === 'quick-cancel') { quickEdit = ''; renderMemoTemplates(); return; }
-  if (act === 'quick-del') {
-    const q = state.quickTypes.find(x => x.id === el.dataset.id);
-    if (q && confirmDel('il modello "' + q.txt + '"')) {
-      state.quickTypes = state.quickTypes.filter(x => x.id !== q.id);
-      if (quickEdit === q.id) quickEdit = '';
-      save(); renderMemoTemplates(); renderQuick();
-      toast('Modello eliminato');
-    }
-    return;
-  }
-  if (act === 'memo-done' || act === 'todo-done') {
-    const m = state.memos.find(x => x.id === el.dataset.id); if (!m) return;
-    m.done = !m.done;
-    m.doneTs = m.done ? Date.now() : null;
-    save(); renderTodos(); updateMemoBadge();
-    if (drawerKid) renderDrawerMemos();
-    renderMemos(); renderKids();
-    return;
-  }
-  if (act === 'memo-del') {
-    const m = state.memos.find(x => x.id === el.dataset.id);
-    if (m && confirmDel('il memo')) {
-      state.memos = state.memos.filter(x => x.id !== m.id);
-      save();
-      if (drawerKid) renderDrawerMemos();
-      renderMemos(); renderKids(); renderTodos(); updateMemoBadge();
-    }
-    return;
-  }
-  if (act === 'menu-prev') { menuM--; if (menuM < 0) { menuM = 11; menuY--; } renderMenu(); return; }
-  if (act === 'menu-next') { menuM++; if (menuM > 11) { menuM = 0; menuY++; } renderMenu(); return; }
-  if (act === 'menu-day') { menuSel = el.dataset.day; renderMenu(); return; }
-  if (act === 'menu-copy') {
-    const prev = new Date(menuSel + 'T12:00'); prev.setDate(prev.getDate() - 1);
-    const src = state.menu[iso(prev)];
-    if (src) {
-      state.menu[menuSel] = { ...src }; save(); renderMenu();
-      toast('Menù copiato da ' + prev.toLocaleDateString('it-IT', { day: 'numeric', month: 'short' }) + ' ✓');
-    } else toast('Il giorno prima non ha un menù da copiare');
-    return;
-  }
-  if (act === 'meal-paid') {
-    const ymK = curYm(), kid = el.dataset.kid;
-    const m = state.meals[ymK] && state.meals[ymK][kid]; if (!m) return;
-    m.paid = !m.paid; save(); renderPasti(); renderParentMeals();
-    return;
-  }
-  if (act === 'gen-meals') { genMeals(); return; }
-  if (act === 'export-meals') { exportMeals(); return; }
-  if (act === 'msg-del') {
-    const g = state.msgs.find(x => x.id === el.dataset.id);
-    if (g && confirmDel("l'avviso")) {
-      state.msgs = state.msgs.filter(x => x.id !== g.id);
-      save(); renderMsgs(); renderParentMsgs();
-      toast('Avviso eliminato');
-    }
-    return;
-  }
-  if (act === 'msg-read') {
-    const g = state.msgs.find(x => x.id === el.dataset.id);
-    if (g) { g.reads = g.reads || {}; g.reads[state.parentKid] = true; save(); renderParentMsgs(); }
-    return;
-  }
+  else if (act === 'open-kid') openDrawer(el.dataset.id);
+  else if (act === 'close-drawer') closeDrawer();
+  else if (act === 'quick-memo') sendQuickMemo(el.dataset.id);
+  else if (act === 'quick-new') openQuickNew();
+  else if (act === 'quick-edit') startQuickEdit(el.dataset.id);
+  else if (act === 'quick-cancel') cancelQuickEdit();
+  else if (act === 'quick-del') onQuickDel(el.dataset.id);
+  else if (act === 'memo-done') toggleMemo(el.dataset.id);
+  else if (act === 'memo-del') delMemo(el.dataset.id);
+  else if (act === 'menu-day') { menuSel = el.dataset.day; renderMenu(); }
+  else if (act === 'menu-prev') { menuM--; if (menuM < 0) { menuM = 11; menuY--; } renderMenu(); }
+  else if (act === 'menu-next') { menuM++; if (menuM > 11) { menuM = 0; menuY++; } renderMenu(); }
+  else if (act === 'menu-copy') onMenuCopy();
+  else if (act === 'gen-meals') genMeals();
+  else if (act === 'export-meals') exportMeals();
+  else if (act === 'meal-paid') onMealPaid(el.dataset.kid);
+  else if (act === 'msg-del') delMsg(el.dataset.id);
+  else if (act === 'msg-read') markMsgRead(el.dataset.id);
+  else if (act === 'todo-done') toggleMemo(el.dataset.id);
 });
-
-/* ---------- input & change delegation ---------- */
 document.addEventListener('input', e => {
-  const t = e.target;
-  if (t.id === 'kidSearch') { renderKids(); return; }
-  if (t.matches && t.matches('[data-field][data-kid]')) {
-    const ymK = curYm(), m = state.meals[ymK] && state.meals[ymK][t.dataset.kid];
-    if (!m) return;
-    const n = parseFloat(t.value);
-    m[t.dataset.field] = isNaN(n) || n < 0 ? 0 : n;
-    save();
-    const cell = $(`[data-cell="tot-${t.dataset.kid}"]`);
-    if (cell) cell.textContent = fmtEur((m.count || 0) * (m.rate || 0));
-    renderPastiFoot(ymK);
-  }
+  const el = e.target.closest('input[data-field][data-kid]');
+  if (el) onMealInput(el);
 });
-document.addEventListener('change', e => {
-  const t = e.target;
-  if (t.id === 'memoKid' || t.id === 'memoState') { renderMemos(); return; }
-  if (t.id === 'menuDay') { menuSel = t.value; renderMenu(); return; }
-  if (t.id === 'mealsMonth') { renderPasti(); return; }
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && drawerKid) closeDrawer();
 });
-
-/* ---------- submit delegation ---------- */
-document.addEventListener('submit', e => {
-  const f = e.target;
-  if (f.id === 'loginForm') { e.preventDefault(); doLogin(); return; }
-  if (f.id === 'addKidForm') { e.preventDefault(); onAddKid(); return; }
-  if (f.id === 'menuForm') { e.preventDefault(); onMenuSave(); return; }
-  if (f.id === 'avvisoForm') { e.preventDefault(); onAvviso(); return; }
-  if (f.id === 'drawerNoteForm') {
-    e.preventDefault();
-    if (!drawerKid) return;
-    const inp = $('#drawerNote');
-    const txt = ((inp && inp.value) || '').trim().replace(/\s+/g, ' ');
-    if (txt.length < 2) return toast('Scrivi il memo prima di inviarlo ✏️');
-    addMemo(drawerKid.id, txt, '');
-    if (inp) inp.value = '';
-    renderDrawerMemos(); renderMemos(); renderKids();
-    toast('Memo inviato alla famiglia ✓');
-    return;
-  }
-  if (f.id === 'quickAddForm' || (f.matches && f.matches('[data-form="quick-add"]'))) {
-    e.preventDefault(); onQuickAdd(f); return;
-  }
+const on = (sel, ev, fn) => { const el = $(sel); if (el) el.addEventListener(ev, fn); };
+on('#loginForm', 'submit', onLogin);
+on('#addKidForm', 'submit', e => { e.preventDefault(); onAddKid(); });
+on('#quickForm', 'submit', e => { e.preventDefault(); onQuickAdd(); });
+on('#avvisoForm', 'submit', e => { e.preventDefault(); onAvviso(); });
+on('#menuForm', 'submit', e => { e.preventDefault(); onMenuSave(); });
+on('#drawerNoteForm', 'submit', e => {
+  e.preventDefault();
+  const inp = $('#drawerNote'), txt = ((inp && inp.value) || '').trim();
+  if (!drawerKid) return;
+  if (txt.length < 3) return toast('Scrivi almeno 3 lettere ✏️');
+  addMemo(drawerKid.id, txt, '');
+  if (inp) inp.value = '';
+  renderDrawerMemos(); renderMemos(); renderKids();
+  toast('Memo inviato alla famiglia ✓');
 });
+on('#menuDay', 'change', e => { menuSel = e.target.value; renderMenu(); });
+on('#kidSearch', 'input', renderKids);
+on('#memoKid', 'change', renderMemos);
+on('#memoState', 'change', renderMemos);
+on('#mealsMonth', 'change', renderPasti);
 
 /* ---------- avvio ---------- */
-(function init() {
-  state = load();
-  const now = new Date();
-  menuY = now.getFullYear(); menuM = now.getMonth();
-  const md = $('#mealsMonth'); if (md && !md.value) md.value = ymNow();
-  setRoleTab('admin');
-  if (state.role === 'admin') showAdmin();
-  else if (state.role === 'parent' && parentKid()) showParent();
-  else show('viewLogin');
-})();
+state = load();
+const now = new Date();
+menuY = now.getFullYear(); menuM = now.getMonth();
+setRoleTab('admin');
+if (state.role === 'admin') showAdmin();
+else if (state.parentKid && parentKid()) showParent();
+else show('viewLogin');
