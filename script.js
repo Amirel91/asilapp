@@ -9,7 +9,6 @@ const ymNow = () => { const d = new Date(); return `${d.getFullYear()}-${String(
 const curYm = () => { const el = $('#mealsMonth'); return (el && el.value) || ymNow(); };
 const fmtEur = n => (n || 0).toLocaleString('it-IT', { style: 'currency', currency: 'EUR' });
 const fmtDate = ts => new Date(ts).toLocaleDateString('it-IT', { day: 'numeric', month: 'short' });
-const fmtTime = ts => new Date(ts).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 const DOW = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
 const MONTHS = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
 const AVCLS = ['av-sage', 'av-sky', 'av-terra', 'av-lav', 'av-sand', 'av-mint'];
@@ -38,14 +37,19 @@ const DEFAULT_QUICK = () => ([
 ]);
 function seed() {
   const t = new Date(), k1 = uid(), k2 = uid(), k3 = uid();
+  const s1 = uid(), s2 = uid();
   const d = off => { const x = new Date(t); x.setDate(x.getDate() + off); return iso(x); };
   return {
     v: 1,
     school: DEFAULT_SCHOOL(),
+    sections: [
+      { id: s1, name: 'Sezione Farfalle' },
+      { id: s2, name: 'Sezione Coccinelle' }
+    ],
     kids: [
-      { id: k1, name: 'Emma Bianchi', code: 'B001' },
-      { id: k2, name: 'Luca Verdi', code: 'B002' },
-      { id: k3, name: 'Sofia Ricci', code: 'B003' }
+      { id: k1, name: 'Emma Bianchi', code: 'B001', sec: s1 },
+      { id: k2, name: 'Luca Verdi', code: 'B002', sec: s1 },
+      { id: k3, name: 'Sofia Ricci', code: 'B003', sec: s2 }
     ],
     quickTypes: DEFAULT_QUICK(),
     memos: [
@@ -66,6 +70,15 @@ function load() {
     const d = JSON.parse(localStorage.getItem(KEY));
     if (d && d.v === 1 && Array.isArray(d.kids)) {
       if (typeof d.school !== 'string' || !d.school.trim()) d.school = DEFAULT_SCHOOL();
+      if (!Array.isArray(d.sections) || !d.sections.length) {
+        const s = uid();
+        d.sections = [{ id: s, name: 'Sezione unica' }];
+        d.kids.forEach(k => { if (!k.sec) k.sec = s; });
+      }
+      // sezioni eliminate: i bambini orfani tornano nella prima disponibile
+      const valid = new Set(d.sections.map(x => x.id));
+      const first = d.sections[0].id;
+      d.kids.forEach(k => { if (!k.sec || !valid.has(k.sec)) k.sec = first; });
       if (!Array.isArray(d.quickTypes) || !d.quickTypes.length) d.quickTypes = DEFAULT_QUICK();
       if (!Array.isArray(d.memos)) d.memos = [];
       if (!Array.isArray(d.msgs)) d.msgs = [];
@@ -76,9 +89,10 @@ function load() {
   } catch (e) {}
   return seed();
 }
-let state, menuY, menuM, menuSel = '', drawerKid = null, loginRole = 'admin', quickEdit = '';
+let state, menuY, menuM, menuSel = '', drawerKid = null, loginRole = 'admin', quickEdit = '', secEdit = '';
 const save = () => localStorage.setItem(KEY, JSON.stringify(state));
 const parentKid = () => state.kids.find(k => k.id === state.parentKid);
+const secName = id => { const s = state.sections.find(x => x.id === id); return s ? s.name : '—'; };
 
 /* ---------- autopulizia: memo ricevuti eliminati dopo 24h ---------- */
 function purgeDoneMemos() {
@@ -99,20 +113,114 @@ function autoPurge() {
 const school = () => (typeof state.school === 'string' && state.school.trim()) ? state.school.trim() : DEFAULT_SCHOOL();
 function applySchool() {
   const n = school();
-  const ls = $('#loginSchoolName'); if (ls) ls.textContent = n;
-  const as = $('#adminSchoolName'); if (as) as.textContent = n;
-  const ps = $('#parentSchoolName'); if (ps) ps.textContent = n;
-  const inp = $('#schoolInput'); if (inp && document.activeElement !== inp) inp.value = n;
+  const ls = $('#loginSchool'); if (ls) ls.textContent = n;
+  const as = $('#adminSchool'); if (as) as.textContent = n;
+  const ps = $('#parentSchool'); if (ps) ps.textContent = n;
+  const inp = $('#schoolName'); if (inp && document.activeElement !== inp) inp.value = n;
   document.title = n + ' · Asilapp';
 }
 function onSchoolSave(e) {
   e.preventDefault();
-  const inp = $('#schoolInput'), err = $('#schoolErr');
+  const inp = $('#schoolName'), err = $('#schoolErr');
   const v = ((inp && inp.value) || '').trim().replace(/\s+/g, ' ');
   if (err) err.hidden = true;
   if (v.length < 3) { if (err) { err.textContent = 'Il nome dell\u2019asilo richiede almeno 3 lettere.'; err.hidden = false; } return; }
   state.school = v; save(); applySchool();
   toast('Nome dell\u2019asilo aggiornato ✓');
+}
+
+/* ---------- classi / sezioni / sedi ---------- */
+function renderSections() {
+  const list = $('#secList'); if (!list) return;
+  const empty = $('#secEmpty'); if (empty) empty.hidden = state.sections.length > 0;
+  list.innerHTML = state.sections.map(s => {
+    const n = state.kids.filter(k => k.sec === s.id).length;
+    return `<li>
+      <span class="tpl-txt">${esc(s.name)} <small style="color:var(--muted);font-weight:500">· ${n} ${n === 1 ? 'bambino' : 'bambini'}</small></span>
+      <button type="button" class="memo-del" data-action="sec-edit" data-id="${s.id}">Modifica</button>
+      <button type="button" class="memo-del" data-action="sec-del" data-id="${s.id}">Elimina</button>
+    </li>`;
+  }).join('');
+  if (secEdit && !state.sections.some(s => s.id === secEdit)) cancelSecEdit();
+}
+function openSecNew() {
+  secEdit = '';
+  const f = $('#secForm'); if (!f) return;
+  const n = $('#secName'); if (n) n.value = '';
+  const sb = $('#secSubmitBtn'), cb = $('#secCancelBtn'), err = $('#secErr');
+  if (sb) sb.textContent = 'Aggiungi';
+  if (cb) cb.hidden = true;
+  if (err) err.hidden = true;
+  f.hidden = false;
+  if (n) n.focus();
+}
+function startSecEdit(id) {
+  const s = state.sections.find(x => x.id === id); if (!s) return;
+  secEdit = id;
+  const f = $('#secForm'); if (!f) return;
+  const n = $('#secName'); if (n) n.value = s.name;
+  const sb = $('#secSubmitBtn'), cb = $('#secCancelBtn'), err = $('#secErr');
+  if (sb) sb.textContent = 'Aggiorna';
+  if (cb) cb.hidden = false;
+  if (err) err.hidden = true;
+  f.hidden = false;
+  if (n) { n.focus(); n.select(); }
+}
+function cancelSecEdit() {
+  secEdit = '';
+  const f = $('#secForm'); if (f) f.hidden = true;
+}
+function onSecAdd() {
+  const err = $('#secErr');
+  const name = (($('#secName') || {}).value || '').trim().replace(/\s+/g, ' ');
+  const fail = msg => { if (err) { err.textContent = msg; err.hidden = false; } };
+  if (err) err.hidden = true;
+  if (name.length < 3) return fail('Il nome richiede almeno 3 lettere.');
+  if (state.sections.some(s => s.name.toLowerCase() === name.toLowerCase() && s.id !== secEdit))
+    return fail('Esiste già una classe con questo nome.');
+  if (secEdit) {
+    const s = state.sections.find(x => x.id === secEdit);
+    if (s) s.name = name;
+    secEdit = '';
+    save(); renderSections(); fillSectionSelects(); renderKids(); renderPasti();
+    cancelSecEdit();
+    toast('Classe aggiornata ✓');
+  } else {
+    state.sections.push({ id: uid(), name });
+    save(); renderSections(); fillSectionSelects();
+    cancelSecEdit();
+    toast('Classe aggiunta ✓');
+  }
+}
+function onSecDel(id) {
+  const s = state.sections.find(x => x.id === id); if (!s) return;
+  const n = state.kids.filter(k => k.sec === id).length;
+  if (state.sections.length === 1) { toast('Serve almeno una classe: non puoi eliminarla'); return; }
+  if (!confirmDel('la classe \u00AB' + s.name + '\u00BB' + (n ? ' (i suoi ' + n + ' bambini passeranno alla prima classe disponibile)' : ''))) return;
+  state.sections = state.sections.filter(x => x.id !== id);
+  const first = state.sections[0].id;
+  state.kids.forEach(k => { if (k.sec === id) k.sec = first; });
+  save(); renderSections(); fillSectionSelects(); renderKids(); renderPasti();
+  if (secEdit === id) cancelSecEdit();
+  toast('Classe eliminata');
+}
+/* ripopola tutte le select che elencano le classi */
+function fillSectionSelects() {
+  const opts = state.sections.map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join('');
+  const filt = $('#kidSection');
+  if (filt) {
+    const cur = filt.value;
+    filt.innerHTML = '<option value="tutte">Tutte le classi</option>' + opts;
+    filt.value = state.sections.some(s => s.id === cur) ? cur : 'tutte';
+  }
+  const add = $('#addKidSection');
+  if (add) { const cur = add.value; add.innerHTML = opts; add.value = state.sections.some(s => s.id === cur) ? cur : (state.sections[0] || {}).id; }
+  const dr = $('#drawerSection');
+  if (dr && drawerKid) {
+    const cur = drawerKid.sec;
+    dr.innerHTML = opts;
+    dr.value = state.sections.some(s => s.id === cur) ? cur : (state.sections[0] || {}).id;
+  }
 }
 
 /* ---------- viste ---------- */
@@ -129,6 +237,8 @@ function showAdmin() {
   const md = $('#mealsMonth'); if (md && !md.value) md.value = ymNow();
   applySchool();
   show('viewAdmin'); switchTab('kids');
+  const sc = $('#settingsCard'); if (sc) sc.hidden = true;
+  renderSections(); fillSectionSelects(); cancelSecEdit();
   renderKids(); fillMemoKid(); renderMemos(); renderMemoTemplates();
   renderMenu(); renderPasti(); renderMsgs(); updateMemoBadge();
 }
@@ -136,11 +246,12 @@ function showParent() {
   const k = parentKid(); if (!k) { logout(); return; }
   markMsgsRead(); applySchool();
   show('viewParent');
-  const sub = $('#parentSub'); if (sub) sub.textContent = k.name;
   const hero = $('#parentHero');
   if (hero) hero.innerHTML =
     `<span class="avatar lg ${avCls(k.id)}">${initials(k.name)}</span>
-     <div class="hero-txt"><h2>Ciao, ${esc(k.name.split(' ')[0])}!</h2><span class="badge ok">${esc(school())}</span></div>
+     <div class="hero-txt"><h2>Ciao, ${esc(k.name.split(' ')[0])}!</h2>
+       <span class="badge ok">${esc(school())}</span>
+       <small style="color:var(--muted);font-size:.74rem">${esc(secName(k.sec))}</small></div>
      <span class="hero-code">Codice famiglia: <strong>${esc(k.code)}</strong></span>`;
   renderTodos(); renderParentMenu(); renderParentMeals(); renderParentMsgs();
 }
@@ -187,44 +298,49 @@ function renderKids() {
   const grid = $('#kidGrid'); if (!grid) return;
   const s = $('#kidSearch');
   const q = ((s && s.value) || '').toLowerCase();
-  const list = state.kids.filter(k => k.name.toLowerCase().includes(q) || k.code.toLowerCase().includes(q));
+  const sf = ($('#kidSection') || {}).value || 'tutte';
+  const list = state.kids
+    .filter(k => sf === 'tutte' || k.sec === sf)
+    .filter(k => k.name.toLowerCase().includes(q) || k.code.toLowerCase().includes(q));
   const empty = $('#kidsEmpty'); if (empty) empty.hidden = list.length > 0;
   grid.innerHTML = list.map(k => {
     const open = state.memos.filter(m => m.kid === k.id && !m.done).length;
     return `<button type="button" class="kid-card" data-action="open-kid" data-id="${k.id}">
       <span class="avatar ${avCls(k.id)}">${initials(k.name)}</span>
       <span class="kid-name">${esc(k.name)}</span>
-      <span class="kid-meta">Codice ${esc(k.code)}</span>
+      <span class="kid-meta">${esc(secName(k.sec))} · Codice ${esc(k.code)}</span>
       ${open ? `<span class="badge-low">${open} memo in attesa</span>` : ''}
     </button>`;
   }).join('');
 }
 function onAddKid() {
   const err = $('#addKidErr');
-  const nameEl = $('#addKidName'), codeEl = $('#addKidCode');
+  const nameEl = $('#addKidName'), codeEl = $('#addKidCode'), secEl = $('#addKidSection');
   const name = ((nameEl && nameEl.value) || '').trim().replace(/\s+/g, ' ');
   const code = ((codeEl && codeEl.value) || '').trim().toUpperCase();
+  const sec = (secEl && secEl.value) || (state.sections[0] || {}).id;
   const fail = msg => { if (err) { err.textContent = msg; err.hidden = false; } };
   if (err) err.hidden = true;
   if (name.length < 3) return fail('Il nome richiede almeno 3 lettere.');
   if (!/^[A-Z0-9]{2,8}$/.test(code)) return fail('Il codice famiglia serve di 2\u20138 lettere o numeri, es. B007.');
   if (state.kids.some(k => k.code.toUpperCase() === code)) return fail('Esiste già un bambino con il codice ' + code + '.');
-  state.kids.push({ id: uid(), name, code });
+  state.kids.push({ id: uid(), name, code, sec });
   save();
   if (nameEl) nameEl.value = ''; if (codeEl) codeEl.value = '';
   const f = $('#addKidForm'); if (f) f.hidden = true;
-  renderKids(); fillMemoKid(); renderMemos(); renderPasti(); renderMsgs();
+  renderKids(); fillMemoKid(); renderMemos(); renderPasti(); renderSections();
   toast('Bambino aggiunto ✓');
 }
 
-/* ---------- drawer bambino: solo invio memo ---------- */
+/* ---------- drawer bambino ---------- */
 function openDrawer(id) {
   drawerKid = state.kids.find(k => k.id === id); if (!drawerKid) return;
   const av = $('#drawerAvatar');
   if (av) { av.className = 'avatar lg ' + avCls(drawerKid.id); av.textContent = initials(drawerKid.name); }
   const nm = $('#drawerName'), mt = $('#drawerMeta');
   if (nm) nm.textContent = drawerKid.name;
-  if (mt) mt.textContent = 'Codice famiglia ' + drawerKid.code;
+  if (mt) mt.textContent = secName(drawerKid.sec) + ' · Codice famiglia ' + drawerKid.code;
+  fillSectionSelects();
   renderQuick(); renderDrawerMemos();
   const o = $('#overlay'), d = $('#drawer');
   if (o && d) {
@@ -239,6 +355,14 @@ function closeDrawer() {
   if (!o || !d) return;
   o.classList.remove('show'); d.classList.remove('open'); d.setAttribute('aria-hidden', 'true');
   setTimeout(() => { o.hidden = true; }, 200);
+}
+function onDrawerSection(id) {
+  if (!drawerKid) return;
+  drawerKid.sec = id; save();
+  const mt = $('#drawerMeta');
+  if (mt) mt.textContent = secName(id) + ' · Codice famiglia ' + drawerKid.code;
+  renderKids(); renderPasti(); renderSections();
+  toast(drawerKid.name.split(' ')[0] + ' spostato in «' + secName(id) + '» ✓');
 }
 function renderQuick() {
   const box = $('#quickMemo'); if (!box) return;
@@ -266,7 +390,7 @@ function onDrawerNote() {
   toast('Memo inviato a ' + drawerKid.name.split(' ')[0] + ' ✓');
 }
 
-/* ---------- modelli memo rapidi: gestione unica nel tab Memo ---------- */
+/* ---------- modelli memo rapidi ---------- */
 function renderMemoTemplates() {
   const list = $('#quickList'); if (!list) return;
   const empty = $('#quickEmpty'); if (empty) empty.hidden = state.quickTypes.length > 0;
@@ -401,7 +525,7 @@ function renderMemos() {
   const empty = $('#memoEmpty'); if (empty) empty.hidden = list.length > 0;
   box.innerHTML = list.map(memoRow).join('');
   const cnt = $('#memoFeedCount');
-  if (cnt) { cnt.hidden = list.length === 0; cnt.textContent = list.length + (list.length === 1 ? ' memo' : ' memo'); }
+  if (cnt) { cnt.hidden = list.length === 0; cnt.textContent = list.length + ' memo'; }
   updateMemoBadge();
 }
 
@@ -491,6 +615,7 @@ function renderPasti() {
     const m = month[k.id];
     return `<tr>
       <td><strong>${esc(k.name)}</strong></td>
+      <td>${esc(secName(k.sec))}</td>
       <td class="num"><input type="number" min="0" max="60" class="input" value="${m.count || 0}" data-field="count" data-kid="${k.id}" aria-label="Pasti di ${esc(k.name)}" style="width:84px;padding:.45rem .55rem;text-align:right"></td>
       <td class="num"><input type="number" min="0" step="0.5" class="input" value="${m.rate || 0}" data-field="rate" data-kid="${k.id}" aria-label="Tariffa di ${esc(k.name)}" style="width:92px;padding:.45rem .55rem;text-align:right"></td>
       <td class="num" data-cell="tot-${k.id}">${fmtEur((m.count || 0) * (m.rate || 0))}</td>
@@ -501,204 +626,228 @@ function renderPasti() {
 }
 function renderPastiFoot(ymK) {
   const foot = $('#mealsFoot'); if (!foot) return;
-  const rows = Object.values(state.meals[ymK] || {}).filter(Boolean);
-  const tot = rows.reduce((a, r) => a + (r.count || 0) * (r.rate || 0), 0);
-  const np = rows.reduce((a, r) => a + (r.count || 0), 0);
-  foot.innerHTML =
-    `<tr><th scope="row">Totale sezione</th><td class="num">${np}</td><td></td><td class="num"><strong>${fmtEur(tot)}</strong></td><td></td></tr>`;
+  const month = state.meals[ymK] || {};
+  const tot = state.kids.reduce((a, k) => a + ((month[k.id] || {}).count || 0) * ((month[k.id] || {}).rate || 0), 0);
+  const n = state.kids.reduce((a, k) => a + ((month[k.id] || {}).count || 0), 0);
+  foot.innerHTML = `<tr><td><strong>Totale mese</strong></td><td></td><td class="num"><strong>${n}</strong></td><td></td><td class="num"><strong>${fmtEur(tot)}</strong></td><td></td></tr>`;
 }
-function onMealInput(el) {
-  const ymK = curYm(); const month = state.meals[ymK]; if (!month) return;
-  const m = month[el.dataset.kid]; if (!m) return;
-  let v = parseFloat(el.value);
-  if (isNaN(v) || v < 0) v = 0;
-  m[el.dataset.field] = v;
-  const cell = $(`[data-cell="tot-${el.dataset.kid}"]`);
+function onMealField(inp) {
+  const ymK = curYm(), month = state.meals[ymK] = state.meals[ymK] || {};
+  const m = month[inp.dataset.kid] = month[inp.dataset.kid] || { count: 0, rate: 4, paid: false };
+  m[inp.dataset.field] = parseFloat(inp.value) || 0;
+  save();
+  const cell = $(`[data-cell="tot-${inp.dataset.kid}"]`);
   if (cell) cell.textContent = fmtEur((m.count || 0) * (m.rate || 0));
-  renderPastiFoot(ymK); save(); renderParentMeals();
+  renderPastiFoot(ymK);
 }
-function onMealPaid(kid) {
-  const ymK = curYm(); const month = state.meals[ymK] = state.meals[ymK] || {};
+function toggleMealPaid(kid) {
+  const ymK = curYm(), month = state.meals[ymK] = state.meals[ymK] || {};
   const m = month[kid] = month[kid] || { count: 0, rate: 4, paid: false };
-  m.paid = !m.paid;
-  save(); renderPasti(); renderParentMeals();
-  toast(m.paid ? 'Bollettino segnato come pagato ✓' : 'Bollettino rimesso da pagare');
+  m.paid = !m.paid; save(); renderPasti();
+  toast(m.paid ? 'Bollettino segnato pagato ✓' : 'Bollettino rimesso da pagare');
 }
 function onGenMeals() {
-  const ymK = curYm(); const month = state.meals[ymK] = state.meals[ymK] || {};
-  let nuovi = 0;
-  state.kids.forEach(k => { if (!month[k.id]) { month[k.id] = { count: 0, rate: 4, paid: false }; nuovi++; } });
-  save(); renderPasti(); renderParentMeals();
-  const dt = new Date(ymK + '-01T12:00');
-  toast(nuovi ? 'Bollettino di ' + MONTHS[dt.getMonth()] + ' pronto: compila i pasti' : 'Il bollettino di ' + MONTHS[dt.getMonth()] + ' era già pronto');
+  renderPasti();
+  toast('Bollettino di ' + new Date(curYm() + '-01T12:00').toLocaleDateString('it-IT', { month: 'long', year: 'numeric' }) + ' pronto ✓');
 }
-function exportMealsCSV() {
+function onExportMeals() {
   const ymK = curYm(), month = state.meals[ymK] || {};
-  const rows = [['Bambino', 'Pasti', 'Tariffa (EUR)', 'Totale (EUR)', 'Stato']];
+  const rows = [['Bambino', 'Classe', 'Pasti', 'Tariffa', 'Totale', 'Stato']];
   state.kids.forEach(k => {
-    const m = month[k.id] || { count: 0, rate: 0, paid: false };
-    rows.push([k.name, String(m.count || 0), String(m.rate || 0), ((m.count || 0) * (m.rate || 0)).toFixed(2), m.paid ? 'Pagato' : 'Da pagare']);
+    const m = month[k.id] || {};
+    rows.push([k.name, secName(k.sec), m.count || 0, m.rate || 0, ((m.count || 0) * (m.rate || 0)).toFixed(2), m.paid ? 'Pagato' : 'Da pagare']);
   });
-  const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(';')).join('\n');
+  const csv = rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(';')).join('\n');
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' }));
+  a.href = URL.createObjectURL(new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' }));
   a.download = 'bollettino-pasti-' + ymK + '.csv';
   a.click(); URL.revokeObjectURL(a.href);
-  toast('Bollettino esportato in CSV ✓');
+  toast('CSV del bollettino scaricato ✓');
 }
 
 /* ---------- avvisi ---------- */
+function renderMsgs() {
+  const box = $('#msgList'); if (!box) return;
+  const list = state.msgs.slice().sort((a, b) => b.ts - a.ts);
+  const empty = $('#msgEmpty'); if (empty) empty.hidden = list.length > 0;
+  box.innerHTML = list.map(m => {
+    const reads = Object.keys(m.reads || {}).length, tot = state.kids.length;
+    return `<li class="msg-row">
+      <div class="msg-body">
+        <p class="msg-text">${esc(m.text)}</p>
+        <p class="msg-time">${new Date(m.ts).toLocaleString('it-IT', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })} · letto da ${reads}/${tot} famiglie</p>
+        <progress class="read-bar" max="${Math.max(tot, 1)}" value="${reads}"></progress>
+      </div>
+      <button type="button" class="msg-del" data-action="msg-del" data-id="${m.id}">Elimina</button>
+    </li>`;
+  }).join('');
+}
 function onAvviso(e) {
   e.preventDefault();
-  const ta = $('#avvisoText');
-  const txt = ((ta && ta.value) || '').trim();
-  if (txt.length < 3) { toast('L\u2019avviso richiede almeno 3 lettere'); return; }
+  const t = $('#avvisoText');
+  const txt = ((t && t.value) || '').trim();
+  if (txt.length < 5) { toast('Scrivi almeno 5 lettere per l\u2019avviso'); return; }
   state.msgs.unshift({ id: uid(), text: txt, ts: Date.now(), reads: {} });
   save();
-  if (ta) ta.value = '';
-  renderMsgs(); renderParentMsgs();
+  if (t) t.value = '';
+  renderMsgs();
   toast('Avviso inviato a tutte le famiglie ✓');
 }
 function delMsg(id) {
-  const m = state.msgs.find(x => x.id === id); if (!m) return;
-  if (!confirmDel('l\u2019avviso')) return;
+  if (!confirmDel('questo avviso')) return;
   state.msgs = state.msgs.filter(x => x.id !== id);
   save(); renderMsgs(); renderParentMsgs();
-  toast('Avviso eliminato');
 }
 function markMsgsRead() {
-  if (!state.parentKid) return;
-  let changed = false;
-  state.msgs.forEach(m => {
-    if (!m.reads) m.reads = {};
-    if (!m.reads[state.parentKid]) { m.reads[state.parentKid] = true; changed = true; }
-  });
-  if (changed) { save(); renderMsgs(); }
-}
-function renderMsgs() {
-  const box = $('#msgList'); if (!box) return;
-  const tot = state.kids.length;
-  box.innerHTML = state.msgs.map(m => {
-    const reads = m.reads ? Object.keys(m.reads).length : 0;
-    const pct = tot ? Math.round(reads / tot * 100) : 0;
-    return `<li class="msg-row"><div class="msg-body">
-      <p class="msg-text">${esc(m.text)}</p>
-      <p class="msg-time">${fmtTime(m.ts)} · letto da ${reads}/${tot} famiglie</p>
-      <progress class="read-bar" max="100" value="${pct}"></progress>
-    </div><button type="button" class="msg-del" data-action="msg-del" data-id="${m.id}">Elimina</button></li>`;
-  }).join('');
-  const empty = $('#msgEmpty'); if (empty) empty.hidden = state.msgs.length > 0;
+  const k = parentKid(); if (!k) return;
+  let ch = false;
+  state.msgs.forEach(m => { if (!m.reads) m.reads = {}; if (!m.reads[k.id]) { m.reads[k.id] = Date.now(); ch = true; } });
+  if (ch) save();
 }
 
 /* ---------- vista genitori ---------- */
 function renderTodos() {
-  const k = parentKid(); const box = $('#parentTodos'); if (!box || !k) return;
+  const k = parentKid(); if (!k) return;
   const list = state.memos.filter(m => m.kid === k.id).sort((a, b) => (a.done - b.done) || (b.ts - a.ts));
-  const empty = $('#parentTodoEmpty'); if (empty) empty.hidden = list.length > 0;
-  box.innerHTML = list.map(m => `<li class="todo-item ${m.done ? 'done' : ''}">
-    <span class="todo-dot"></span>
-    <div><span class="todo-txt">${m.ico ? esc(m.ico) + ' ' : ''}${esc(m.text)}</span>
-    <small>${m.done ? 'Portato ✓ ' + fmtDate(m.doneTs || m.ts) : 'Richiesto il ' + fmtDate(m.ts)}</small></div>
-  </li>`).join('');
+  const box = $('#parentTodos'), empty = $('#parentTodoEmpty');
+  if (!box) return;
+  if (empty) empty.hidden = list.length > 0;
+  box.innerHTML = list.map(m => `
+    <li class="todo-item ${m.done ? 'done' : ''}">
+      <span class="todo-dot"></span>
+      <span style="flex:1;min-width:0">
+        <span class="todo-txt">${m.ico ? esc(m.ico) + ' ' : ''}${esc(m.text)}</span>
+        <small>${m.done ? 'Portato ✓ — sparirà tra 24 ore' : 'In attesa · ' + fmtDate(m.ts)}</small>
+      </span>
+      ${m.done ? '' : `<button type="button" class="link-btn" data-action="parent-done" data-id="${m.id}">Portato ✓</button>`}
+    </li>`).join('');
+}
+function onParentDone(id) {
+  const m = state.memos.find(x => x.id === id); if (!m) return;
+  m.done = true; m.doneTs = Date.now();
+  save(); renderTodos(); renderMemos(); updateMemoBadge();
+  toast('Grazie! Segnato come portato ✓');
 }
 function renderParentMenu() {
+  const k = parentKid(); if (!k) return;
+  const today = iso(new Date());
+  const m = state.menu[today];
   const box = $('#parentMenuToday'); if (!box) return;
-  const t = state.menu[iso(new Date())];
-  box.innerHTML = `<div class="menu-today"><h3>Menù di oggi</h3>${t
-    ? `<span class="mt"><strong>Primo</strong>${esc(t.primo || '—')}</span>
-       <span class="mt"><strong>Secondo</strong>${esc(t.secondo || '—')}</span>
-       <span class="mt"><strong>Contorno</strong>${esc(t.contorno || '—')}</span>
-       <span class="mt"><strong>Merenda</strong>${esc(t.merenda || '—')}</span>`
-    : '<p class="hint">Il menù di oggi non è ancora stato pubblicato.</p>'}</div>`;
-  const nx = $('#parentMenuNext'); if (!nx) return;
-  const rows = [];
-  const d = new Date();
-  for (let i = 1; i <= 7 && rows.length < 4; i++) {
-    d.setDate(d.getDate() + 1);
-    const key = iso(d), m = state.menu[key];
-    if (m) rows.push(`<li class="menu-row"><strong>${DOW[(d.getDay() + 6) % 7]} ${d.getDate()}</strong><span>${esc([m.primo, m.secondo].filter(Boolean).join(' · ') || '—')}</span></li>`);
+  box.innerHTML = `<div class="menu-today">
+    <h3>Menù di oggi</h3>
+    ${m ? `
+      <span class="mt"><strong>🍝 Primo</strong>${esc(m.primo || '—')}</span>
+      <span class="mt"><strong>🍗 Secondo</strong>${esc(m.secondo || '—')}</span>
+      <span class="mt"><strong>🥗 Contorno</strong>${esc(m.contorno || '—')}</span>
+      <span class="mt"><strong>🍎 Merenda</strong>${esc(m.merenda || '—')}</span>`
+    : '<p class="hint">Il menù di oggi non è ancora stato pubblicato.</p>'}
+  </div>`;
+  const next = $('#parentMenuNext');
+  if (next) {
+    const d = new Date(); const out = [];
+    for (let i = 1; i <= 7 && out.length < 4; i++) {
+      d.setDate(d.getDate() + 1);
+      const key = iso(d), mm = state.menu[key];
+      if (mm) out.push(`<li class="menu-row"><strong>${d.toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'short' })}</strong><span>${esc([mm.primo, mm.secondo].filter(Boolean).join(' · ') || '—')}</span></li>`);
+    }
+    next.innerHTML = out.join('') || '<li class="hint">Nessun menù nei prossimi giorni.</li>';
   }
-  nx.innerHTML = rows.join('') || '<li class="hint">Nessun menù nei prossimi giorni.</li>';
 }
 function renderParentMeals() {
+  const k = parentKid(); if (!k) return;
   const box = $('#parentMeals'); if (!box) return;
-  const k = parentKid(); if (!k) { box.innerHTML = ''; return; }
-  const ymK = ymNow(), m = (state.meals[ymK] || {})[k.id];
-  if (!m) { box.innerHTML = '<p class="hint">Il bollettino di questo mese non è ancora pronto.</p>'; return; }
+  const ymK = ymNow(), m = (state.meals[ymK] || {})[k.id] || { count: 0, rate: 4, paid: false };
   const tot = (m.count || 0) * (m.rate || 0);
-  const dt = new Date(ymK + '-01T12:00');
   box.innerHTML = `<div class="bill-card">
-    <div class="bill-total"><strong>${fmtEur(tot)}</strong><span class="badge ${m.paid ? 'ok' : 'off'}">${m.paid ? 'Pagato ✓' : 'Da pagare'}</span></div>
-    <p class="bill-sub">${MONTHS[dt.getMonth()]} ${dt.getFullYear()} · ${m.count || 0} pasti × ${fmtEur(m.rate || 0)}</p>
+    <div class="bill-total"><span>Bollettino di ${new Date(ymK + '-01T12:00').toLocaleDateString('it-IT', { month: 'long' })}</span><strong>${fmtEur(tot)}</strong></div>
+    <p class="bill-sub">${m.count || 0} pasti × ${fmtEur(m.rate || 0)} · ${m.paid ? 'pagato ✓' : 'in attesa di pagamento'}</p>
   </div>`;
 }
 function renderParentMsgs() {
   const box = $('#parentMsgs'); if (!box) return;
-  box.innerHTML = state.msgs.map(m => `<li class="msg-row"><div class="msg-body">
-    <p class="msg-text">${esc(m.text)}</p><p class="msg-time">${fmtTime(m.ts)}</p>
-  </div></li>`).join('');
-  const empty = $('#parentMsgEmpty'); if (empty) empty.hidden = state.msgs.length > 0;
+  const list = state.msgs.slice().sort((a, b) => b.ts - a.ts);
+  const empty = $('#parentMsgEmpty'); if (empty) empty.hidden = list.length > 0;
+  box.innerHTML = list.map(m => `
+    <li class="msg-row">
+      <div class="msg-body">
+        <p class="msg-text">${esc(m.text)}</p>
+        <p class="msg-time">${new Date(m.ts).toLocaleString('it-IT', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
+      </div>
+    </li>`).join('');
 }
 
-/* ---------- azioni globali ---------- */
-function handleAction(e) {
-  const b = e.target.closest('[data-action]'); if (!b) return;
-  const act = b.dataset.action, id = b.dataset.id;
-  if (act === 'role-tab') setRoleTab(b.dataset.role);
-  else if (act === 'logout') logout();
-  else if (act === 'tab') { switchTab(b.dataset.tab); autoPurge(); }
-  else if (act === 'toggle-add-kid') {
-    const f = $('#addKidForm');
-    if (f) { f.hidden = !f.hidden; if (!f.hidden) { const i = $('#addKidName'); if (i) i.focus(); } }
-  }
-  else if (act === 'open-kid') openDrawer(id);
-  else if (act === 'close-drawer') closeDrawer();
-  else if (act === 'quick-memo') sendQuickMemo(id);
-  else if (act === 'quick-new') openQuickNew();
-  else if (act === 'quick-edit') startQuickEdit(id);
-  else if (act === 'quick-cancel') cancelQuickEdit();
-  else if (act === 'quick-del') onQuickDel(id);
-  else if (act === 'memo-done') toggleMemo(id);
-  else if (act === 'memo-del') delMemo(id);
-  else if (act === 'menu-day') { menuSel = b.dataset.day; renderMenu(); }
-  else if (act === 'menu-prev') menuShift(-1);
-  else if (act === 'menu-next') menuShift(1);
-  else if (act === 'menu-copy') onMenuCopy();
-  else if (act === 'meal-paid') onMealPaid(b.dataset.kid);
-  else if (act === 'gen-meals') onGenMeals();
-  else if (act === 'export-meals') exportMealsCSV();
-  else if (act === 'msg-del') delMsg(id);
-}
+/* ---------- delegazione eventi ---------- */
+const ACTIONS = {
+  'role-tab': btn => setRoleTab(btn.dataset.role),
+  'logout': () => logout(),
+  'tab': btn => switchTab(btn.dataset.tab),
+  'toggle-settings': () => {
+    const c = $('#settingsCard'); if (!c) return;
+    c.hidden = !c.hidden;
+    if (!c.hidden) { renderSections(); fillSectionSelects(); }
+  },
+  'sec-new': () => openSecNew(),
+  'sec-cancel': () => cancelSecEdit(),
+  'sec-edit': btn => startSecEdit(btn.dataset.id),
+  'sec-del': btn => onSecDel(btn.dataset.id),
+  'toggle-add-kid': () => {
+    const f = $('#addKidForm'); if (f) { f.hidden = !f.hidden; if (!f.hidden) { fillSectionSelects(); const i = $('#addKidName'); if (i) i.focus(); } }
+  },
+  'open-kid': btn => openDrawer(btn.dataset.id),
+  'close-drawer': () => closeDrawer(),
+  'quick-memo': btn => sendQuickMemo(btn.dataset.id),
+  'quick-new': () => openQuickNew(),
+  'quick-cancel': () => cancelQuickEdit(),
+  'quick-edit': btn => startQuickEdit(btn.dataset.id),
+  'quick-del': btn => onQuickDel(btn.dataset.id),
+  'memo-done': btn => toggleMemo(btn.dataset.id),
+  'memo-del': btn => delMemo(btn.dataset.id),
+  'menu-day': btn => { menuSel = btn.dataset.day; renderMenu(); },
+  'menu-prev': () => menuShift(-1),
+  'menu-next': () => menuShift(1),
+  'menu-copy': () => onMenuCopy(),
+  'gen-meals': () => onGenMeals(),
+  'export-meals': () => onExportMeals(),
+  'meal-paid': btn => toggleMealPaid(btn.dataset.kid),
+  'msg-del': btn => delMsg(btn.dataset.id),
+  'parent-done': btn => onParentDone(btn.dataset.id)
+};
+document.addEventListener('click', e => {
+  const btn = e.target.closest('[data-action]');
+  if (!btn) return;
+  const fn = ACTIONS[btn.dataset.action];
+  if (fn) { e.preventDefault(); fn(btn); }
+});
+document.addEventListener('input', e => {
+  if (e.target.matches('[data-field]')) onMealField(e.target);
+  if (e.target.id === 'kidSearch' || e.target.id === 'kidSection') renderKids();
+  if (e.target.id === 'memoKid' || e.target.id === 'memoState') renderMemos();
+});
+document.addEventListener('change', e => {
+  if (e.target.id === 'drawerSection') onDrawerSection(e.target.value);
+  if (e.target.id === 'mealsMonth') renderPasti();
+  if (e.target.id === 'menuDay') { menuSel = e.target.value; menuFormFill(); const g = $('#menuGrid'); if (g) $$('.cal-day', ).forEach(c => {}); renderMenu(); }
+});
 
-/* ---------- init ---------- */
-function init() {
+/* ---------- avvio ---------- */
+(function init() {
   state = load();
-  const t = new Date(); menuY = t.getFullYear(); menuM = t.getMonth();
-  applySchool();
-  if (state.role === 'admin') showAdmin();
-  else if (state.role === 'parent' && parentKid()) showParent();
-  else { setRoleTab('admin'); show('viewLogin'); }
-  autoPurge();
+  const t = new Date();
+  menuY = t.getFullYear(); menuM = t.getMonth();
+  purgeDoneMemos();
   setInterval(autoPurge, 60 * 1000);
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) autoPurge(); });
 
   const lf = $('#loginForm'); if (lf) lf.addEventListener('submit', onLogin);
   const sf = $('#schoolForm'); if (sf) sf.addEventListener('submit', onSchoolSave);
-  const ak = $('#addKidForm'); if (ak) ak.addEventListener('submit', e => { e.preventDefault(); onAddKid(); });
-  const ks = $('#kidSearch'); if (ks) ks.addEventListener('input', renderKids);
-  const dn = $('#drawerNoteForm'); if (dn) dn.addEventListener('submit', e => { e.preventDefault(); onDrawerNote(); });
+  const scf = $('#secForm'); if (scf) scf.addEventListener('submit', e => { e.preventDefault(); onSecAdd(); });
+  const akf = $('#addKidForm'); if (akf) akf.addEventListener('submit', e => { e.preventDefault(); onAddKid(); });
   const qf = $('#quickForm'); if (qf) qf.addEventListener('submit', e => { e.preventDefault(); onQuickAdd(); });
+  const dnf = $('#drawerNoteForm'); if (dnf) dnf.addEventListener('submit', e => { e.preventDefault(); onDrawerNote(); });
   const mf = $('#menuForm'); if (mf) mf.addEventListener('submit', e => { e.preventDefault(); onMenuSave(); });
   const av = $('#avvisoForm'); if (av) av.addEventListener('submit', onAvviso);
 
-  document.addEventListener('click', handleAction);
-  document.addEventListener('input', e => { if (e.target.matches('[data-field]')) onMealInput(e.target); });
-  document.addEventListener('change', e => {
-    const el = e.target;
-    if (el.id === 'mealsMonth') renderPasti();
-    else if (el.id === 'memoKid' || el.id === 'memoState') renderMemos();
-    else if (el.id === 'menuDay') { menuSel = el.value; menuFormFill(); }
-  });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
-}
-document.addEventListener('DOMContentLoaded', init);
+  applySchool(); setRoleTab('admin');
+  if (state.role === 'admin') showAdmin();
+  else if (state.role === 'parent' && parentKid()) showParent();
+  else show('viewLogin');
+})();
