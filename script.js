@@ -24,7 +24,7 @@ function toast(msg) {
 const confirmDel = what => confirm('Eliminare ' + what + '? L\u2019azione non si può annullare.');
 
 /* ---------- stato ---------- */
-const KEY = 'asilapp_v1';
+let KEY = (typeof ASILO !== 'undefined') ? ASILO.keyFor(ASILO.cur() || 'demo') : 'asilapp_v1';
 const MEMO_TTL = 24 * 60 * 60 * 1000; // i memo ricevuti spariscono da soli dopo 24h
 const DEFAULT_SCHOOL = () => 'Asilo Nido Arcobaleno';
 const DEFAULT_QUICK = () => ([
@@ -42,6 +42,7 @@ function seed() {
   return {
     v: 1,
     school: DEFAULT_SCHOOL(),
+    pw: 'nido2024',
     sections: [
       { id: s1, name: 'Sezione Farfalle' },
       { id: s2, name: 'Sezione Coccinelle' }
@@ -70,6 +71,7 @@ function load() {
     const d = JSON.parse(localStorage.getItem(KEY));
     if (d && d.v === 1 && Array.isArray(d.kids)) {
       if (typeof d.school !== 'string' || !d.school.trim()) d.school = DEFAULT_SCHOOL();
+      if (typeof d.pw !== 'string' || !d.pw) d.pw = 'nido2024';
       if (!Array.isArray(d.sections) || !d.sections.length) {
         const s = uid();
         d.sections = [{ id: s, name: 'Sezione unica' }];
@@ -278,15 +280,24 @@ function onLogin(e) {
   const err = $('#loginError');
   const fail = m => { if (err) { err.textContent = m; err.hidden = false; } };
   if (err) err.hidden = true;
+  const asiloName = (($('#loginAsilo') || {}).value || '').trim();
+  const tenant = (typeof ASILO !== 'undefined' && asiloName) ? ASILO.resolve(asiloName) : null;
+  if (!tenant) {
+    if (!asiloName) return fail('Scrivi il nome del tuo asilo (demo: Asilo Nido Arcobaleno).');
+    return fail('Asilo non trovato su questo dispositivo: controlla il nome o registrati dalla home.');
+  }
+  ASILO.enter(tenant.id);
+  KEY = ASILO.keyFor(tenant.id);
+  state = load();
   if (loginRole === 'admin') {
     const u = (($('#loginUser') || {}).value || '').trim();
     const p = ($('#loginPass') || {}).value || '';
-    if (u !== 'admin' || p !== 'nido2024') return fail('Credenziali sbagliate: prova admin · nido2024.');
+    if (u !== 'admin' || p !== state.pw) return fail('Credenziali sbagliate per «' + tenant.name + '».');
     showAdmin();
   } else {
     const code = (($('#loginCode') || {}).value || '').trim().toUpperCase();
     const k = state.kids.find(x => x.code.toUpperCase() === code);
-    if (!k) return fail('Codice non riconosciuto: controlla con le maestre (demo: B001).');
+    if (!k) return fail('Codice non riconosciuto presso «' + tenant.name + '»: controlla con le maestre.');
     state.parentKid = k.id; save();
     const c = $('#loginCode'); if (c) c.value = '';
     showParent();

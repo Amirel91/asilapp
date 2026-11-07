@@ -1,0 +1,39 @@
+/* ============================================================
+   landing.css — home Asilapp: scelta e registrazione dell'asilo
+   Riusa il design system di style.css (variabili, .card, .btn…)
+   ============================================================ */
+.landing-view { max-width: 1080px; margin: 0 auto; padding: 0 .85rem 3rem; display: grid; gap: 1.2rem; align-content: start; }
+
+.landing-top { display: flex; align-items: center; justify-content: space-between; gap: .6rem; padding-top: calc(.9rem + env(safe-area-inset-top)); }
+
+.landing-hero {
+  background: linear-gradient(135deg, var(--sage-soft), var(--sky-soft));
+  border: 1px solid var(--line); border-radius: var(--r-lg);
+  padding: 1.6rem 1.3rem; display: grid; gap: .8rem;
+}
+.landing-hero h1 { font-size: clamp(1.4rem, 4vw, 2rem); letter-spacing: -.02em; line-height: 1.2; }
+.landing-hero > p { color: var(--ink-soft); font-size: .95rem; max-width: 56ch; }
+
+.landing-feats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: .6rem; margin-top: .4rem; }
+.landing-feats li {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--r);
+  padding: .8rem .85rem; display: grid; grid-template-columns: auto 1fr; gap: .2rem .55rem; align-items: center;
+  box-shadow: var(--sh-sm); font-size: .84rem;
+}
+.landing-feats li > span { grid-row: span 2; font-size: 1.4rem; }
+.landing-feats strong { font-size: .88rem; letter-spacing: -.01em; }
+.landing-feats small { color: var(--muted); line-height: 1.35; }
+
+.landing-cols { display: grid; gap: 1rem; align-items: start; }
+@media (min-width: 800px) { .landing-cols { grid-template-columns: 1fr 1fr; } }
+
+.asilo-list { display: grid; gap: .4rem; margin-top: .6rem; }
+.asilo-list li {
+  display: flex; align-items: center; justify-content: space-between; gap: .6rem; flex-wrap: wrap;
+  background: var(--bg); border: 1px solid var(--line); border-radius: var(--r-sm);
+  padding: .55rem .75rem; box-shadow: var(--sh-sm); transition: border-color var(--t), background var(--t);
+}
+.asilo-list li:hover { border-color: #ddd7d0; background: var(--card); }
+.asilo-list .tpl-txt { flex: 1; min-width: 0; overflow-wrap: anywhere; font-size: .92rem; }
+
+.demo-strip { display: flex; align-items: center; justify-content: space-between; gap: .6rem; flex-wrap: wrap; border-top: 1px dashed var(--line); margin-top: .8rem; padding-top: .7rem; }

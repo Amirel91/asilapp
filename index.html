@@ -4,14 +4,72 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Asilapp — memo, menù e pasti del nido</title>
-<meta name="description" content="Asilapp: memo alle famiglie, menù mensile del nido e bollettino pasti — il ponte digitale tra maestre e genitori, con classi, sezioni e sedi separate.">
+<meta name="description" content="Asilapp: lo spazio digitale del tuo nido. Memo alle famiglie, menù mensile, bollettino pasti e diario della giornata — ogni asilo con i suoi bambini e i suoi codici famiglia.">
 <meta name="theme-color" content="#faf9f7">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="landing.css">
 </head>
 <body>
 
 <!-- TOAST -->
 <div class="toast-wrap" id="toastWrap" aria-live="polite"></div>
+
+<!-- ============ LANDING (scelta / registrazione asilo) ============ -->
+<section class="view landing-view" id="viewLanding" hidden>
+  <header class="landing-top">
+    <div class="brand">
+      <span class="logo logo-sm" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-8"/><path d="M12 13c0-4 3-7 8-7 0 5-3 8-8 8z"/><path d="M12 10C12 6.5 9.5 4 5 4c0 4.5 2.5 7 7 7z"/></svg>
+      </span>
+      <div class="brand-txt"><strong>Asilapp</strong><small>il nido, in tasca alle famiglie</small></div>
+    </div>
+    <button type="button" class="btn btn-outline btn-sm" data-action="goto-demo">Prova la demo</button>
+  </header>
+
+  <div class="landing-hero">
+    <h1>Il ponte digitale tra il tuo nido e le famiglie</h1>
+    <p>Ogni asilo ha il suo spazio: memo, menù mensile, bollettino pasti, diario della giornata e avvisi — con bambini e codici famiglia separati per struttura.</p>
+    <ul class="landing-feats">
+      <li><span aria-hidden="true">🍼</span><strong>Memo rapidi</strong><small>Cosa portare in nido, con conferma dei genitori</small></li>
+      <li><span aria-hidden="true">🍝</span><strong>Menù del mese</strong><small>Calendario pasti visibile alle famiglie</small></li>
+      <li><span aria-hidden="true">🧾</span><strong>Bollettino pasti</strong><small>Pasti, tariffe e totali pronti per l'esport</small></li>
+      <li><span aria-hidden="true">😴</span><strong>Diario della giornata</strong><small>Pranzo, riposo e note per i genitori</small></li>
+    </ul>
+  </div>
+
+  <div class="landing-cols">
+    <section class="card" aria-labelledby="asiliTitle">
+      <p class="drawer-sec" id="asiliTitle">Entra nel tuo asilo</p>
+      <p class="hint">Ogni struttura ha i propri bambini e codici famiglia, salvati in modo separato.</p>
+      <ul class="asilo-list" id="asiloList"></ul>
+      <p class="empty" id="asiloEmpty" hidden>Nessun asilo registrato su questo dispositivo: crea il primo qui a fianco.</p>
+      <div class="demo-strip">
+        <p class="hint">Vuoi solo guardare? La demo contiene un asilo già pronto.</p>
+        <button type="button" class="btn btn-ghost btn-sm" data-action="goto-demo">Apri la demo</button>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="signupTitle">
+      <p class="drawer-sec" id="signupTitle">Registra il tuo asilo</p>
+      <form id="signupForm" novalidate>
+        <label class="field"><span>Nome dell'asilo</span>
+          <input type="text" class="input" id="signupName" maxlength="40" placeholder="es. Asilo Nido Arcobaleno" autocomplete="organization" required>
+        </label>
+        <label class="field"><span>Password maestre</span>
+          <input type="password" class="input" id="signupPass" minlength="6" maxlength="40" placeholder="almeno 6 caratteri" autocomplete="new-password" required>
+        </label>
+        <label class="field"><span>Ripeti la password</span>
+          <input type="password" class="input" id="signupPass2" maxlength="40" placeholder="ancora la stessa password" autocomplete="new-password" required>
+        </label>
+        <p class="login-err" id="signupErr" hidden></p>
+        <button type="submit" class="btn btn-primary btn-block">Crea lo spazio del mio asilo</button>
+      </form>
+      <p class="hint">Dopo la registrazione entri subito: username <code>admin</code> e la password scelta. I genitori accedono col codice bambino.</p>
+    </section>
+  </div>
+
+  <p class="login-foot">I dati di ogni asilo restano salvati solo in questo browser.</p>
+</section>
 
 <!-- ============ LOGIN ============ -->
 <section class="view login-view" id="viewLogin" hidden>
@@ -29,6 +87,9 @@
     </div>
 
     <form id="loginForm" novalidate>
+      <label class="field" id="fAsilo"><span>Nome dell'asilo</span>
+        <input type="text" class="input" id="loginAsilo" autocomplete="organization" placeholder="es. Asilo Nido Arcobaleno" maxlength="40">
+      </label>
       <label class="field" id="fUser"><span>Username</span>
         <input type="text" class="input" id="loginUser" autocomplete="username" placeholder="admin">
       </label>
@@ -43,9 +104,10 @@
     </form>
 
     <div class="login-demo">
-      <p><strong>Demo maestre:</strong> <code>admin</code> · <code>nido2024</code></p>
-      <p><strong>Demo genitori:</strong> codice <code>B001</code></p>
+      <p><strong>Demo maestre:</strong> Asilo Nido Arcobaleno · <code>admin</code> · <code>nido2024</code></p>
+      <p><strong>Demo genitori:</strong> stesso asilo · codice <code>B001</code></p>
     </div>
+    <button type="button" class="link-btn" data-action="switch-asilo" style="margin:.4rem auto 0">↩ Non è questo il tuo asilo? Scegline un altro</button>
   </div>
   <p class="login-foot">I dati restano salvati solo in questo browser.</p>
 </section>
@@ -372,6 +434,7 @@
   </div>
 </aside>
 
+<script src="saas.js"></script>
 <script src="script.js"></script>
 <script src="diario.js"></script>
 <script src="extra.js"></script>
