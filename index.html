@@ -114,6 +114,18 @@
         <ul class="quick-manage" id="secList"></ul>
         <p class="empty" id="secEmpty" hidden>Nessuna classe: creane almeno una con «+ Nuova».</p>
       </div>
+
+      <div style="border-top:1px solid var(--line);padding-top:.8rem;display:grid;gap:.6rem">
+        <p class="drawer-sec">Backup dei dati</p>
+        <p class="hint">Tutti i dati vivono solo in questo browser: scarica una copia ogni tanto, o portala su un altro dispositivo con «Ripristina backup».</p>
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline btn-sm" data-action="backup-export">⬇ Scarica backup</button>
+          <label class="btn btn-ghost btn-sm" style="cursor:pointer">⬆ Ripristina backup
+            <input type="file" id="backupFile" accept="application/json,.json" hidden>
+          </label>
+        </div>
+        <p class="login-err" id="backupErr" hidden></p>
+      </div>
     </div>
 
     <!-- Bambini -->
@@ -292,6 +304,11 @@
       <p class="hint">Quelli barrati sono già stati portati: spariranno da soli dopo 24 ore.</p>
     </section>
 
+    <section class="card diary-card" id="parentDiaryCard" hidden>
+      <h3>Come è andata oggi</h3>
+      <div id="parentDiary"></div>
+    </section>
+
     <div class="parent-cols">
       <section class="card">
         <div id="parentMenuToday"></div>
@@ -332,11 +349,14 @@
       <input type="text" class="input" id="drawerNote" maxlength="160" placeholder="Memo libero per i genitori…" autocomplete="off">
       <button type="submit" class="btn btn-primary btn-sm">Invia</button>
     </form>
+    <p class="drawer-sec">Diario della giornata</p>
+    <div class="diary" id="diaryBox"></div>
     <p class="drawer-sec">Memo di questo bambino</p>
     <ul class="memo-list" id="drawerMemoList"></ul>
   </div>
 </aside>
 
 <script src="script.js"></script>
+<script src="diario.js"></script>
 </body>
 </html>

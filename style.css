@@ -322,6 +322,19 @@ button.cal-day.off:hover { transform: none; box-shadow: none; }
 .quick-btn span { font-size: 1.2rem; }
 .quick-btn small { font-size: .72rem; text-align: center; line-height: 1.25; }
 
+/* ---------- diario della giornata ---------- */
+.diary { display: grid; gap: .55rem; }
+.diary-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: .45rem; }
+.diary-pill { display: grid; gap: .2rem; justify-items: center; padding: .6rem .3rem; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--card); box-shadow: var(--sh-sm); font-size: .74rem; font-weight: 600; color: var(--ink-soft); transition: background var(--t), border-color var(--t), color var(--t), transform var(--t); }
+.diary-pill span { font-size: 1.15rem; }
+.diary-pill small { font-size: .7rem; text-align: center; line-height: 1.2; }
+.diary-pill:active { transform: scale(.95); }
+.diary-pill.on { background: var(--sage-soft); border-color: var(--sage); color: var(--sage-ink); }
+.diary-card { border-left: 4px solid var(--sky); animation: fade-up 250ms ease-out both; }
+.diary-out { display: flex; flex-wrap: wrap; gap: .4rem; }
+.diary-tag { font-size: .78rem; font-weight: 600; background: var(--sage-soft); color: var(--sage-ink); border: 1px solid #d6e1d8; border-radius: 999px; padding: .25rem .65rem; }
+.diary-note { font-size: .9rem; margin-top: .5rem; overflow-wrap: anywhere; }
+
 /* ---------- tablet ≥ 768px ---------- */
 @media (min-width: 768px) {
   .app-view { padding: 0 1.25rem 3rem; }
