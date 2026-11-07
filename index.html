@@ -75,14 +75,19 @@
   </nav>
 
   <main class="panel">
-    <!-- Impostazioni: nome asilo + classi/sezioni/sedi -->
-    <div class="card" id="settingsCard" hidden style="display:grid;gap:.9rem" aria-label="Impostazioni asilo">
-      <div class="drawer-sec-row">
-        <p class="drawer-sec" id="schoolLbl">Impostazioni asilo</p>
-        <button type="button" class="link-btn" data-action="toggle-settings">Chiudi</button>
+    <!-- Impostazioni: pagina dedicata, si apre col bottone ⚙ della barra -->
+    <section class="tabpane" id="paneSettings" hidden aria-label="Impostazioni asilo">
+      <div class="pane-head">
+        <h2>Impostazioni asilo</h2>
+        <div class="pane-tools">
+          <button type="button" class="btn btn-ghost btn-sm" data-action="toggle-settings" aria-label="Chiudi impostazioni">✕ Chiudi</button>
+        </div>
       </div>
+      <p class="hint">Nome dell'asilo, classi o sedi e backup dei dati: tutto quello che serve per tenere in ordine Asilapp.</p>
 
-      <form id="schoolForm" style="display:grid;gap:.6rem" novalidate>
+      <section class="card" style="display:grid;gap:.9rem" aria-label="Nome dell'asilo">
+        <p class="drawer-sec">Nome dell'asilo</p>
+        <form id="schoolForm" style="display:grid;gap:.6rem" novalidate>
         <label class="field"><span>Nome dell'asilo (visibile a maestre e famiglie)</span>
           <input type="text" class="input" id="schoolName" maxlength="40" placeholder="es. Asilo Nido Arcobaleno" autocomplete="off">
         </label>
@@ -93,7 +98,9 @@
         <p class="hint">Il nome compare nella schermata di login, nel pannello maestre e nell'area famiglia.</p>
       </form>
 
-      <div style="border-top:1px solid var(--line);padding-top:.8rem;display:grid;gap:.6rem">
+      </section>
+
+      <section class="card" style="display:grid;gap:.6rem" aria-label="Classi, sezioni e sedi">
         <div class="drawer-sec-row">
           <p class="drawer-sec">Classi, sezioni e sedi</p>
           <button type="button" class="link-btn" data-action="sec-new">+ Nuova</button>
@@ -113,9 +120,9 @@
 
         <ul class="quick-manage" id="secList"></ul>
         <p class="empty" id="secEmpty" hidden>Nessuna classe: creane almeno una con «+ Nuova».</p>
-      </div>
+      </section>
 
-      <div style="border-top:1px solid var(--line);padding-top:.8rem;display:grid;gap:.6rem">
+      <section class="card" style="display:grid;gap:.6rem" aria-label="Backup dei dati">
         <p class="drawer-sec">Backup dei dati</p>
         <p class="hint">Tutti i dati vivono solo in questo browser: scarica una copia ogni tanto, o portala su un altro dispositivo con «Ripristina backup».</p>
         <div class="form-actions">
@@ -125,8 +132,8 @@
           </label>
         </div>
         <p class="login-err" id="backupErr" hidden></p>
-      </div>
-    </div>
+      </section>
+    </section>
 
     <!-- Bambini -->
     <section class="tabpane" id="paneKids">
@@ -377,5 +384,6 @@
 <script src="script.js"></script>
 <script src="diario.js"></script>
 <script src="extra.js"></script>
+<script src="settings.js"></script>
 </body>
 </html>
