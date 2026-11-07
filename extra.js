@@ -1,69 +1,21 @@
 'use strict';
 /* ============================================================
    extra.js — secondo modulo di estensione di Asilapp
-   1) Presenze del giorno (Presente/Assente per bambino, conteggio
-      live e risvolto nell'area famiglia)
-   2) Allergie e dieta per bambino: nota salute modificabile dal
-      drawer, segnale ⚠️ nelle presenze, avviso ai genitori
-   3) Riepilogo del bollettino pasti: bambini, pasti del mese,
+   1) Allergie e dieta per bambino: nota salute modificabile dal
+      drawer, segnale ⚠️ sulle schede della griglia Bambini,
+      avviso nell'area famiglia
+   2) Riepilogo del bollettino pasti: bambini, pasti del mese,
       incasso previsto, diete speciali
-   Riutilizza i globali di script.js: state, save, toast, esc, iso,
-   fmtEur, curYm, avCls, initials, secName, drawerKid, parentKid.
+   Riutilizza i globali di script.js: state, save, toast, esc,
+   fmtEur, curYm, drawerKid, parentKid.
    ============================================================ */
 (function () {
   if (typeof state === 'undefined') return; // script.js assente: niente da estendere
 
-  /* ---------- modello: state.attendance[AAAA-MM-GG][kidId] = true|false ---------- */
-  const today = () => iso(new Date());
-  function attDay() {
-    if (!state.attendance || typeof state.attendance !== 'object') state.attendance = {};
-    return state.attendance;
-  }
-  function purgeAttendance() { // lo storico oltre 60 giorni non serve a nessuno
-    const a = attDay();
-    const cut = new Date(); cut.setDate(cut.getDate() - 60);
-    const c = iso(cut);
-    let ch = false;
-    Object.keys(a).forEach(d => { if (d < c) { delete a[d]; ch = true; } });
-    if (ch) save();
-  }
-  const kidAllergy = k => String((k && k.allergy) || '').trim();
+  /* ritiro i dati delle vecchie presenze, se presenti */
+  if (state.attendance !== undefined) { delete state.attendance; save(); }
 
-  /* ---------- presenze: card in cima al tab Bambini ---------- */
-  function renderAttendance() {
-    const list = document.getElementById('attList');
-    if (!list) return;
-    const empty = document.getElementById('attEmpty');
-    if (empty) empty.hidden = state.kids.length > 0;
-    const rec = attDay()[today()] || {};
-    list.innerHTML = state.kids.map(k => {
-      const v = rec[k.id];
-      const all = kidAllergy(k);
-      return `<li>
-        <span class="avatar sm ${avCls(k.id)}">${initials(k.name)}</span>
-        <span class="att-name">${esc(k.name)}${all ? ` <span class="att-warn" title="${esc(all)}">⚠️</span>` : ''}<small>${esc(secName(k.sec))}</small></span>
-        <span class="att-btns">
-          <button type="button" class="att-btn ok${v === true ? ' on' : ''}" data-att="1" data-id="${k.id}" aria-pressed="${v === true}">Presente</button>
-          <button type="button" class="att-btn no${v === false ? ' on' : ''}" data-att="0" data-id="${k.id}" aria-pressed="${v === false}">Assente</button>
-        </span>
-      </li>`;
-    }).join('');
-    const chip = document.getElementById('attCount');
-    if (chip) {
-      const pres = state.kids.filter(k => rec[k.id] === true).length;
-      const abs = state.kids.filter(k => rec[k.id] === false).length;
-      chip.textContent = state.kids.length
-        ? pres + ' presenti · ' + abs + (abs === 1 ? ' assente' : ' assenti')
-        : '—';
-    }
-  }
-  function markAttendance(kidId, present) {
-    const d = attDay();
-    if (!d[today()]) d[today()] = {};
-    d[today()][kidId] = present;
-    save(); renderAttendance();
-    toast(present ? 'Presenza segnata ✓' : 'Assenza segnata');
-  }
+  const kidAllergy = k => String((k && k.allergy) || '').trim();
 
   /* ---------- allergie e dieta: editor nel drawer bambino ---------- */
   function renderAllergyDrawer() {
@@ -76,7 +28,7 @@
         <input type="text" class="input" maxlength="80" placeholder="es. Allergia alle uova, dieta senza lattosio…" value="${esc(kidAllergy(k))}" autocomplete="off">
         <button type="submit" class="btn btn-primary btn-sm">Salva</button>
       </form>
-      <p class="hint">La nota compare con un avviso ⚠️ nelle presenze e nell'area famiglia.</p>`;
+      <p class="hint">La nota compare con un avviso ⚠️ sulla scheda del bambino e nell'area famiglia.</p>`;
   }
   function saveAllergy(form) {
     const k = (typeof drawerKid !== 'undefined' && drawerKid) ? drawerKid : null;
@@ -84,27 +36,43 @@
     if (!k || !inp) return;
     const v = String(inp.value || '').trim().replace(/\s+/g, ' ');
     k.allergy = v;
-    save(); renderAllergyDrawer(); renderAttendance();
+    save(); renderAllergyDrawer(); flagKidCards(); renderParentHealth();
     toast(v ? 'Nota salute salvata ✓' : 'Nota salute rimossa');
   }
 
-  /* ---------- area famiglia: «Oggi al nido» ---------- */
-  function renderParentToday() {
+  /* ---------- segnale ⚠️ sulle schede della griglia Bambini ---------- */
+  /* idempotente: aggiorna in place quando può, così l'observer non impazzisce */
+  function flagKidCards() {
+    const grid = document.getElementById('kidGrid');
+    if (!grid) return;
+    grid.querySelectorAll('.kid-card').forEach(card => {
+      const k = state.kids.find(x => x.id === card.getAttribute('data-id'));
+      const all = k ? kidAllergy(k) : '';
+      let f = card.querySelector('.kid-flag');
+      if (!all) { if (f) f.remove(); return; }
+      if (f) { f.title = all; return; } // solo attributo: niente mutazioni childList
+      f = document.createElement('span');
+      f.className = 'kid-flag';
+      f.title = all;
+      f.textContent = '⚠️ ' + all;
+      card.appendChild(f);
+    });
+  }
+  const grid = document.getElementById('kidGrid');
+  if (grid) new MutationObserver(flagKidCards).observe(grid, { childList: true });
+
+  /* ---------- area famiglia: card «Nota salute» ---------- */
+  function renderParentHealth() {
     const view = document.getElementById('viewParent');
-    const card = document.getElementById('parentTodayCard');
-    const box = document.getElementById('parentToday');
+    const card = document.getElementById('parentHealthCard');
+    const box = document.getElementById('parentHealth');
     if (!view || view.hidden || !card || !box) return;
     let k = null;
     try { k = parentKid(); } catch (e) { k = null; }
-    if (!k) { card.hidden = true; return; }
-    const p = (attDay()[today()] || {})[k.id];
-    const all = kidAllergy(k);
-    if (p === undefined && !all) { card.hidden = true; return; }
+    const all = k ? kidAllergy(k) : '';
+    if (!k || !all) { card.hidden = true; return; }
     card.hidden = false;
-    box.innerHTML =
-      (p === true ? `<p class="today-line ok">✅ ${esc(k.name.split(' ')[0])} oggi è al nido</p>` : '') +
-      (p === false ? `<p class="today-line off">🏠 Oggi ${esc(k.name.split(' ')[0])} è a casa</p>` : '') +
-      (all ? `<p class="today-line warn">⚠️ ${esc(all)}</p>` : '');
+    box.innerHTML = `<p class="today-line warn">⚠️ ${esc(all)}</p>`;
   }
 
   /* ---------- riepilogo bollettino pasti ---------- */
@@ -131,11 +99,7 @@
     const t = e.target;
     if (!(t instanceof Element)) return;
     if (t.closest('.kid-card')) renderAllergyDrawer(); // script.js ha già aperto il drawer
-    const att = t.closest('[data-att]');
-    if (att) markAttendance(att.getAttribute('data-id'), att.getAttribute('data-att') === '1');
     if (t.closest('#panePasti')) requestAnimationFrame(renderMealsStats);
-    if (t.closest('[data-action="tab"]') || t.closest('[data-action^="kid-"]'))
-      requestAnimationFrame(renderAttendance); // tab o gestione bambini: righe aggiornate
   });
   document.addEventListener('submit', e => {
     const t = e.target;
@@ -143,15 +107,13 @@
     const f = t.closest('[data-allergy-form]');
     if (f) { e.preventDefault(); saveAllergy(f); return; }
     if (t.id === 'loginForm' || t.id === 'addKidForm')
-      requestAnimationFrame(() => { renderAttendance(); renderParentToday(); renderMealsStats(); });
+      requestAnimationFrame(() => { renderParentHealth(); renderMealsStats(); });
   });
   document.addEventListener('change', e => {
     const t = e.target;
     if (!(t instanceof Element)) return;
-    if (t.closest('#panePasti') || t.id === 'drawerSection')
-      requestAnimationFrame(() => { renderMealsStats(); renderAttendance(); });
+    if (t.closest('#panePasti')) requestAnimationFrame(renderMealsStats);
   });
 
-  purgeAttendance();
-  renderAttendance(); renderParentToday(); renderMealsStats();
+  flagKidCards(); renderParentHealth(); renderMealsStats();
 })();
