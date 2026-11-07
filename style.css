@@ -320,6 +320,30 @@ button.cal-day.off:hover { transform: none; box-shadow: none; }
 .quick-btn:hover { box-shadow: var(--sh-md); border-color: #ddd7d0; color: var(--ink); }
 .quick-btn:active, .quick-btn.pressed { background: var(--sage-soft); border-color: var(--sage); color: var(--sage-ink); transform: scale(.96); }
 .quick-btn span { font-size: 1.2rem; }
+
+/* ---------- presenze, allergie, riepilogo pasti (extra.js) ---------- */
+.att-card { display: grid; gap: .6rem; }
+.att-list { display: grid; gap: .35rem; }
+.att-list li { display: flex; align-items: center; gap: .55rem; flex-wrap: wrap; background: var(--bg); border: 1px solid var(--line); border-radius: var(--r-sm); padding: .4rem .55rem; box-shadow: var(--sh-sm); }
+.att-name { flex: 1; min-width: 120px; font-size: .88rem; font-weight: 600; display: flex; align-items: center; gap: .3rem; flex-wrap: wrap; }
+.att-name small { width: 100%; font-size: .68rem; color: var(--muted); font-weight: 500; }
+.att-warn { cursor: help; }
+.att-btns { display: flex; gap: .3rem; }
+.att-btn { font-size: .72rem; font-weight: 700; border: 1px solid var(--line); border-radius: 999px; padding: .3rem .65rem; color: var(--muted); background: var(--card); transition: background var(--t), color var(--t), border-color var(--t); }
+.att-btn:active { transform: scale(.96); }
+.att-btn.ok.on { background: var(--sage-soft); color: var(--sage-ink); border-color: var(--sage); }
+.att-btn.no.on { background: var(--terra-soft); color: var(--terra-ink); border-color: var(--terra); }
+
+.today-card { border-left: 4px solid var(--sky); }
+.today-line { font-size: .92rem; }
+.today-line + .today-line { margin-top: .45rem; }
+.today-line.ok { color: var(--sage-ink); font-weight: 600; }
+.today-line.off { color: var(--ink-soft); }
+.today-line.warn { background: var(--amber-soft); color: var(--amber-ink); border-radius: var(--r-sm); padding: .45rem .6rem; font-weight: 600; }
+
+.stats-row { display: flex; gap: .4rem; flex-wrap: wrap; }
+.stats-row .chip { background: var(--sage-soft); color: var(--sage-ink); }
+.stats-row .chip.warn { background: var(--amber-soft); color: var(--amber-ink); }
 .quick-btn small { font-size: .72rem; text-align: center; line-height: 1.25; }
 
 /* ---------- diario della giornata ---------- */
