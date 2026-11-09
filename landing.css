@@ -181,3 +181,13 @@
 }
 .sa-sec-list .tpl-txt { flex: 1; min-width: 0; overflow-wrap: anywhere; }
 .sa-sec-list small { color: var(--muted); font-weight: 500; }
+
+/* ---------- banner «entrato come superadmin» nell'asilo ---------- */
+.sa-enter-bar {
+  display: flex; align-items: center; justify-content: space-between; gap: .6rem; flex-wrap: wrap;
+  background: var(--amber-soft); color: var(--amber-ink);
+  border: 1px solid #e7d9b4; border-radius: var(--r);
+  padding: .55rem .85rem; font-size: .82rem; font-weight: 600;
+  box-shadow: var(--sh-sm);
+}
+.sa-enter-bar .btn-ghost { background: var(--card); }

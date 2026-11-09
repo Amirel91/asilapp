@@ -7,6 +7,10 @@
    (asilapp_t_<id>); la demo usa la chiave storica asilapp_v1.
    L'asilo "corrente" vive in sessionStorage, così ogni tab del
    browser può anche restare su un asilo diverso.
+
+   In coda: modulo «superadmin entra senza login» — aggiunge il
+   bottone 🔑 sulle card del pannello superadmin e apre l'asilo
+   come maestra senza chiedere credenziali.
    ============================================================ */
 window.ASILO = (function () {
   const REG = 'asilapp_registry';
@@ -126,5 +130,97 @@ window.ASILO = (function () {
       const inp = document.getElementById('loginAsilo');
       if (a && inp && !inp.value) inp.value = a.name;
     }
+  });
+})();
+
+/* ============================================================
+   SUPERADMIN — accesso diretto agli asili (bypass del login)
+   Sulla card di ogni asilo del pannello superadmin compare
+   «🔑 Entra senza login»: imposta l'asilo come corrente, carica
+   il suo stato (KEY + load() di script.js) e apre la vista
+   maestre con showAdmin(), senza toccare la password dell'asilo.
+   Un banner ambra ricorda la sessione speciale; «Esci» o il
+   bottone del banner riportano al pannello superadmin.
+   ============================================================ */
+(function () {
+  if (typeof ASILO === 'undefined') return;
+  const FLAG = 'asilapp_sa_entered';
+
+  const saToast = m => { if (typeof toast === 'function') toast(m); };
+  const inSuper = () => { try { return sessionStorage.getItem(FLAG) === '1'; } catch (e) { return false; } };
+  const known = id => id === 'demo' || ASILO.registry().some(x => x.id === id);
+
+  function backToSuper() {
+    try { sessionStorage.removeItem(FLAG); } catch (e) {}
+    ASILO.exit();
+    location.hash = 'superadmin'; // alla load il pannello si riapre (sessione superadmin ancora valida in sessionStorage)
+    location.reload();
+  }
+
+  function enterAsilo(id) {
+    if (typeof load !== 'function' || typeof showAdmin !== 'function') return; // script.js assente
+    if (!known(id)) { saToast('Asilo non trovato'); return; }
+    const a = id === 'demo' ? { name: 'Asilo Nido Arcobaleno (demo)' } : ASILO.registry().find(x => x.id === id);
+    ASILO.enter(id);
+    try {
+      KEY = ASILO.keyFor(id);  // let di script.js: da qui in poi save() scrive sull'asilo giusto
+      state = load();
+    } catch (e) { saToast('Impossibile aprire l\u2019asilo'); return; }
+    try { sessionStorage.setItem(FLAG, '1'); } catch (e) {}
+    showAdmin();
+    mountBanner();
+    saToast('Entrata in «' + a.name + '» senza login \u2713');
+  }
+
+  /* banner «sei dentro come superadmin» sopra le tab dell'asilo */
+  function mountBanner() {
+    if (!inSuper()) return;
+    const view = document.getElementById('viewAdmin');
+    if (!view || view.hidden || document.getElementById('saEnterBar')) return;
+    const bar = document.createElement('div');
+    bar.id = 'saEnterBar';
+    bar.className = 'sa-enter-bar';
+    bar.innerHTML =
+      '<span>\uD83D\uDD11 Sei dentro come <strong>superadmin</strong>: puoi modificare tutto senza login.</span>' +
+      '<button type="button" class="btn btn-ghost btn-sm" data-sa-back="1">\u2190 Pannello superadmin</button>';
+    const tabs = view.querySelector('.tabs');
+    view.insertBefore(bar, tabs || view.firstChild);
+  }
+
+  /* inietta il bottone sulle card asilo del pannello superadmin */
+  function decorate() {
+    document.querySelectorAll('.sa-item').forEach(card => {
+      if (card.querySelector('[data-sa-enter]')) return;
+      let id = card.getAttribute('data-id');
+      if (!id) { const b = card.querySelector('[data-id]'); id = b && b.getAttribute('data-id'); }
+      if (!id || !known(id)) return;
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn btn-outline btn-sm';
+      btn.setAttribute('data-sa-enter', id);
+      btn.textContent = '\uD83D\uDD11 Entra senza login';
+      (card.querySelector('.sa-actions') || card).appendChild(btn);
+    });
+    mountBanner();
+  }
+
+  /* questo file è caricato prima di script.js: i listener qui
+     registrati girano PRIMA dei suoi, quindi posso fermare il
+     logout standard quando la sessione superadmin è attiva */
+  document.addEventListener('click', e => {
+    const t = e.target;
+    if (!(t instanceof Element)) return;
+    const b = t.closest('[data-sa-enter]');
+    if (b) { e.stopImmediatePropagation(); enterAsilo(b.getAttribute('data-sa-enter')); return; }
+    if (t.closest('[data-sa-back]')) { e.stopImmediatePropagation(); backToSuper(); return; }
+    if (inSuper() && t.closest('[data-action="logout"]')) {
+      e.stopImmediatePropagation(); // niente logout normale: si torna al pannello
+      backToSuper();
+    }
+  });
+
+  window.addEventListener('load', () => {
+    decorate();
+    new MutationObserver(decorate).observe(document.body, { childList: true, subtree: true });
   });
 })();
