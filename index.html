@@ -6,9 +6,9 @@
 <title>Asilapp — memo, menù e pasti del nido</title>
 <meta name="description" content="Asilapp: lo spazio digitale del tuo nido. Memo alle famiglie, menù mensile, bollettino pasti e diario della giornata — ogni asilo con i suoi bambini e i suoi codici famiglia.">
 <meta name="theme-color" content="#faf9f7">
-<link rel="stylesheet" href="style.css">
-<script src="demo.js" defer></script>
-<link rel="stylesheet" href="landing.css">
+ <link rel="stylesheet" href="style.css">
+ <script src="demo.js" defer></script>
+ <script src="demo-parent.js" defer></script><link rel="stylesheet" href="landing.css">
 <link rel="stylesheet" href="landing-extra.css">
 </head>
 <body>
@@ -45,8 +45,99 @@
         <li>🔒 Dati solo nel vostro browser</li>
       </ul>
     </div>
-    <figure class="hero-art">
-      <img src="![[EVOCI|illustrazione ad acquerello morbido di una maestra che racconta una storia a tre bambini piccoli seduti su un tappeto rotondo in un asilo luminoso e ordinato, palette salvia terracotta e crema, luce naturale dalla finestra, atmosfera serena e dolce|1152x864]]" alt="Una maestra racconta una storia a tre bambini seduti su un tappeto in un asilo luminoso" width="1152" height="864">
+    <figure class="hero-art" role="img" aria-label="Una maestra racconta una storia a tre bambini seduti su un tappeto rotondo in un asilo luminoso">
+      <svg viewBox="0 0 576 432" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+        <rect width="576" height="432" fill="#f7f2e9"/>
+        <circle cx="548" cy="28" r="120" fill="#e3ecdf" opacity=".5"/>
+        <circle cx="18" cy="416" r="110" fill="#e6eff1" opacity=".55"/>
+        <rect y="302" width="576" height="130" fill="#efe6d4"/>
+        <line x1="0" y1="302" x2="576" y2="302" stroke="#e0d3bc" stroke-width="3"/>
+        <!-- finestra e luce naturale -->
+        <rect x="54" y="44" width="116" height="134" rx="10" fill="#dff0f4" stroke="#8fae8b" stroke-width="7"/>
+        <line x1="112" y1="50" x2="112" y2="172" stroke="#8fae8b" stroke-width="5"/>
+        <line x1="60" y1="111" x2="164" y2="111" stroke="#8fae8b" stroke-width="5"/>
+        <circle cx="84" cy="76" r="11" fill="#f4d489"/>
+        <path d="M172 64 L372 224 L300 268 L128 132 Z" fill="#f9e9bf" opacity=".45"/>
+        <!-- pianta sul davanzale -->
+        <rect x="492" y="196" width="54" height="7" rx="3" fill="#d8c9a8"/>
+        <path d="M504 168 h30 l-5 28 h-20 Z" fill="#c2704e"/>
+        <rect x="500" y="162" width="38" height="8" rx="3" fill="#a95c3c"/>
+        <path d="M519 160 q-4 -24 -18 -32 M519 160 q2 -26 18 -34" stroke="#7d9b76" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <ellipse cx="498" cy="126" rx="10" ry="6" fill="#8fb089" transform="rotate(-28 498 126)"/>
+        <ellipse cx="542" cy="124" rx="10" ry="6" fill="#8fb089" transform="rotate(26 542 124)"/>
+        <!-- tappeto rotondo -->
+        <ellipse cx="292" cy="340" rx="184" ry="52" fill="#c47a55"/>
+        <ellipse cx="292" cy="340" rx="150" ry="41" fill="#e2a483"/>
+        <ellipse cx="292" cy="340" rx="106" ry="28" fill="#d8c5a4"/>
+        <!-- bambino in terracotta -->
+        <g>
+          <path d="M146 334 Q146 292 168 292 Q190 292 190 334 Z" fill="#d98e5f"/>
+          <circle cx="168" cy="277" r="13" fill="#f2c49b"/>
+          <path d="M155 275 a13 13 0 0 1 26 0 q1 -11 -13 -12 q-14 1 -13 12 Z" fill="#3f3128"/>
+          <circle cx="163" cy="278" r="1.9" fill="#4a3b2f"/>
+          <circle cx="173" cy="278" r="1.9" fill="#4a3b2f"/>
+          <path d="M163 284 q5 4 10 0" stroke="#b0674a" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+          <path d="M186 306 q14 -2 20 -12" stroke="#d98e5f" stroke-width="8" fill="none" stroke-linecap="round"/>
+        </g>
+        <!-- bambina in salvia con codini -->
+        <g>
+          <path d="M202 342 Q202 304 222 304 Q242 304 242 342 Z" fill="#8fb089"/>
+          <circle cx="222" cy="291" r="12" fill="#d99b73"/>
+          <circle cx="210" cy="286" r="4.5" fill="#3f3128"/>
+          <circle cx="234" cy="286" r="4.5" fill="#3f3128"/>
+          <path d="M210 289 a12 12 0 0 1 24 0 q1 -10 -12 -11 q-13 1 -12 11 Z" fill="#3f3128"/>
+          <circle cx="217" cy="292" r="1.8" fill="#4a3b2f"/>
+          <circle cx="227" cy="292" r="1.8" fill="#4a3b2f"/>
+          <path d="M217 297 q5 4 10 0" stroke="#9c5f3e" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <path d="M240 316 q13 -1 18 -10" stroke="#8fb089" stroke-width="7" fill="none" stroke-linecap="round"/>
+        </g>
+        <!-- bimba piccola in lavanda -->
+        <g>
+          <path d="M252 346 Q252 314 270 314 Q288 314 288 346 Z" fill="#b3a7cf"/>
+          <circle cx="270" cy="303" r="10.5" fill="#b97a52"/>
+          <path d="M259 301 a11 11 0 0 1 22 0 q1 -9 -11 -10 q-12 1 -11 10 Z" fill="#2e241d"/>
+          <circle cx="266" cy="304" r="1.7" fill="#3f3128"/>
+          <circle cx="274" cy="304" r="1.7" fill="#3f3128"/>
+          <path d="M266 309 q4 3.5 8 0" stroke="#8a5436" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <path d="M286 326 q11 -1 15 -9" stroke="#b3a7cf" stroke-width="6" fill="none" stroke-linecap="round"/>
+        </g>
+        <!-- maestra con libro -->
+        <g>
+          <path d="M346 348 Q346 286 379 286 Q412 286 412 348 Z" fill="#5f7d57"/>
+          <circle cx="379" cy="265" r="17" fill="#edbd94"/>
+          <path d="M361 264 a18 18 0 0 1 36 0 q2 -14 -18 -16 q-20 2 -18 16 Z" fill="#6b4a35"/>
+          <circle cx="379" cy="245" r="7" fill="#6b4a35"/>
+          <circle cx="372" cy="266" r="2" fill="#4a3b2f"/>
+          <circle cx="386" cy="266" r="2" fill="#4a3b2f"/>
+          <path d="M373 274 q6 5 12 0" stroke="#b0674a" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+          <circle cx="366" cy="271" r="2.6" fill="#eba48c" opacity=".7"/>
+          <circle cx="392" cy="271" r="2.6" fill="#eba48c" opacity=".7"/>
+        </g>
+        <g transform="translate(334,304)">
+          <path d="M0 0 L-22 -9 L-22 11 L0 20 Z" fill="#fdf6e6" stroke="#c2704e" stroke-width="3" stroke-linejoin="round"/>
+          <path d="M0 0 L22 -9 L22 11 L0 20 Z" fill="#fdf6e6" stroke="#c2704e" stroke-width="3" stroke-linejoin="round"/>
+          <line x1="-16" y1="-4" x2="-6" y2="0" stroke="#d8c9a8" stroke-width="2"/>
+          <line x1="-16" y1="1" x2="-6" y2="5" stroke="#d8c9a8" stroke-width="2"/>
+          <line x1="6" y1="0" x2="16" y2="-4" stroke="#d8c9a8" stroke-width="2"/>
+          <line x1="6" y1="5" x2="16" y2="1" stroke="#d8c9a8" stroke-width="2"/>
+        </g>
+        <path d="M360 312 Q344 310 336 302" stroke="#5f7d57" stroke-width="9" fill="none" stroke-linecap="round"/>
+        <!-- stelline della storia -->
+        <path d="M318 250 l3 8 8 3 -8 3 -3 8 -3 -8 -8 -3 8 -3 Z" fill="#e0a94f"/>
+        <path d="M296 226 l2.5 6.5 6.5 2.5 -6.5 2.5 -2.5 6.5 -2.5 -6.5 -6.5 -2.5 6.5 -2.5 Z" fill="#e8c479"/>
+        <path d="M342 226 l2.5 6.5 6.5 2.5 -6.5 2.5 -2.5 6.5 -2.5 -6.5 -6.5 -2.5 6.5 -2.5 Z" fill="#e8c479"/>
+        <!-- coniglietto di peluche -->
+        <g>
+          <ellipse cx="474" cy="344" rx="17" ry="14" fill="#f4eee3"/>
+          <circle cx="474" cy="323" r="10" fill="#f4eee3"/>
+          <ellipse cx="468" cy="309" rx="3.6" ry="9" fill="#f4eee3" stroke="#e3d8c6" stroke-width="1.4"/>
+          <ellipse cx="480" cy="309" rx="3.6" ry="9" fill="#f4eee3" stroke="#e3d8c6" stroke-width="1.4"/>
+          <circle cx="470.5" cy="322" r="1.6" fill="#5b4a3a"/>
+          <circle cx="477.5" cy="322" r="1.6" fill="#5b4a3a"/>
+          <circle cx="474" cy="326" r="1.4" fill="#d98e8e"/>
+          <path d="M491 338 q8 4 6 12" stroke="#e3d8c6" stroke-width="4" fill="none" stroke-linecap="round"/>
+        </g>
+      </svg>
     </figure>
   </div>
 
@@ -134,8 +225,11 @@
         <li><span aria-hidden="true">💾</span><div><strong>Backup in un tap</strong><small>Esporta e ripristina i dati quando vuoi, su qualunque dispositivo.</small></div></li>
       </ul>
       <div class="demo-strip">
-        <p class="hint">Vuoi solo guardare? La demo contiene un asilo già pronto.</p>
-        <button type="button" class="btn btn-outline btn-sm" data-action="goto-demo">Apri la demo</button>
+        <p class="hint">Vuoi solo guardare? La demo contiene un asilo già pronto, in sola lettura.</p>
+        <span class="demo-strip-btns">
+          <button type="button" class="btn btn-outline btn-sm" data-action="goto-demo">Apri la demo</button>
+          <button type="button" class="btn btn-outline btn-sm" data-action="goto-demo-parent">Area famiglie →</button>
+        </span>
       </div>
       <p class="hint">Hai già uno spazio? <button type="button" class="link-btn" data-action="goto-login">Accedi col nome del tuo asilo</button></p>
     </aside>
@@ -158,7 +252,7 @@
       </details>
       <details>
         <summary>Posso provarlo prima di registrare il mio asilo?</summary>
-        <p>Certo: la demo «Asilo Nido Arcobaleno» è già pronta con bambini, memo e menù. Entra come maestra con admin e nido2024, o come genitore col codice B001.</p>
+        <p>Certo: la demo «Asilo Nido Arcobaleno» è già pronta con bambini, memo e menù. Entra come maestra con admin e nido2024, come genitore col codice B001, oppure apri l'area famiglie in un tap direttamente dalla home.</p>
       </details>
       <details>
         <summary>Se cambio telefono o computer?</summary>
@@ -217,6 +311,7 @@
 
     <div class="login-demo">
       <p>Vuoi prima dare un'occhiata? <button type="button" class="link-btn" data-action="goto-demo">Apri la demo in sola lettura →</button></p>
+      <p>Sei un genitore? <button type="button" class="link-btn" data-action="goto-demo-parent">Vedi l'area famiglie della demo →</button></p>
     </div>
     <button type="button" class="link-btn" data-action="switch-asilo" style="margin:.4rem auto 0">↩ Torna alla home di Asilapp</button>
   </div>

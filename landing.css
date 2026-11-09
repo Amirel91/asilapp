@@ -50,7 +50,7 @@
     border: 1px solid var(--line); box-shadow: var(--sh-md);
     max-height: 300px;
   }
-  .hero-art img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .hero-art img, .hero-art svg { display: block; width: 100%; height: 100%; object-fit: cover; }
 }
 
 /* ---------- griglia funzioni ---------- */

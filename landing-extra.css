@@ -73,3 +73,6 @@
 }
 .landing-footer p { font-size: .76rem; color: var(--muted); margin: 0; }
 .landing-footer nav { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+
+/* ---------- coppia di bottoni nella fascia demo della landing ---------- */
+.demo-strip-btns { display: flex; gap: .45rem; flex-wrap: wrap; }

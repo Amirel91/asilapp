@@ -8,9 +8,8 @@
    L'asilo "corrente" vive in sessionStorage, così ogni tab del
    browser può anche restare su un asilo diverso.
 
-   In coda: modulo «superadmin entra senza login» — aggiunge il
-   bottone 🔑 sulle card del pannello superadmin e apre l'asilo
-   come maestra senza chiedere credenziali.
+   In coda: modulo «superadmin entra senza login» e modulo
+   «demo area famiglie» (ingresso diretto genitore dalla landing).
    ============================================================ */
 window.ASILO = (function () {
   const REG = 'asilapp_registry';
@@ -47,7 +46,6 @@ window.ASILO = (function () {
       if (registry().some(a => a.slug === s)) return { err: 'Esiste già un asilo con questo nome su questo dispositivo.' };
       const id = 'a' + Math.random().toString(36).slice(2, 9);
       const r = registry(); r.push({ id, name, slug: s }); saveReg(r);
-      // stato iniziale pulito per il nuovo asilo (seed è di script.js, qui siamo su evento: esiste già)
       const st = (typeof seed === 'function') ? seed() : null;
       if (st) {
         st.school = name;
@@ -63,7 +61,7 @@ window.ASILO = (function () {
   };
 })();
 
-/* ---------- UI della landing (gira a fine caricamento, quando script.js è pronto) ---------- */
+/* ---------- UI della landing ---------- */
 (function () {
   if (typeof ASILO === 'undefined') return;
 
@@ -106,6 +104,13 @@ window.ASILO = (function () {
     const b = t.closest('[data-action="asilo-enter"]');
     if (b) { enter(b.getAttribute('data-id')); return; }
     if (t.closest('[data-action="goto-demo"]')) { enter('demo'); return; }
+    /* demo area famiglie: entra nella demo con flag genitore,
+       demo-parent.js al load farà il login automatico col codice B001 */
+    if (t.closest('[data-action="goto-demo-parent"]')) {
+      try { sessionStorage.setItem('asilapp_demo_parent', '1'); } catch (err) {}
+      enter('demo');
+      return;
+    }
     if (t.closest('[data-action="goto-login"]')) {
       if (typeof show === 'function') show('viewLogin');
       const a = document.getElementById('loginAsilo');
@@ -123,11 +128,9 @@ window.ASILO = (function () {
     if (e.target instanceof Element && e.target.id === 'signupForm') onSignup(e);
   });
 
-  /* vista iniziale: senza asilo scelto si parte dalla landing */
   window.addEventListener('load', () => {
     if (!ASILO.cur()) showLanding();
     else {
-      // asilo scelto: precompila il campo nome per il login
       const a = ASILO.registry().find(x => x.id === ASILO.cur());
       const inp = document.getElementById('loginAsilo');
       if (a && inp && !inp.value) inp.value = a.name;
@@ -137,12 +140,6 @@ window.ASILO = (function () {
 
 /* ============================================================
    SUPERADMIN — accesso diretto agli asili (bypass del login)
-   Sulla card di ogni asilo del pannello superadmin compare
-   «🔑 Entra senza login»: imposta l'asilo come corrente, carica
-   il suo stato (KEY + load() di script.js) e apre la vista
-   maestre con showAdmin(), senza toccare la password dell'asilo.
-   Un banner ambra ricorda la sessione speciale; «Esci» o il
-   bottone del banner riportano al pannello superadmin.
    ============================================================ */
 (function () {
   if (typeof ASILO === 'undefined') return;
@@ -155,17 +152,17 @@ window.ASILO = (function () {
   function backToSuper() {
     try { sessionStorage.removeItem(FLAG); } catch (e) {}
     ASILO.exit();
-    location.hash = 'superadmin'; // alla load il pannello si riapre (sessione superadmin ancora valida in sessionStorage)
+    location.hash = 'superadmin';
     location.reload();
   }
 
   function enterAsilo(id) {
-    if (typeof load !== 'function' || typeof showAdmin !== 'function') return; // script.js assente
+    if (typeof load !== 'function' || typeof showAdmin !== 'function') return;
     if (!known(id)) { saToast('Asilo non trovato'); return; }
     const a = id === 'demo' ? { name: 'Asilo Nido Arcobaleno (demo)' } : ASILO.registry().find(x => x.id === id);
     ASILO.enter(id);
     try {
-      KEY = ASILO.keyFor(id);  // let di script.js: da qui in poi save() scrive sull'asilo giusto
+      KEY = ASILO.keyFor(id);
       state = load();
     } catch (e) { saToast('Impossibile aprire l\u2019asilo'); return; }
     try { sessionStorage.setItem(FLAG, '1'); } catch (e) {}
@@ -174,7 +171,6 @@ window.ASILO = (function () {
     saToast('Entrata in «' + a.name + '» senza login \u2713');
   }
 
-  /* banner «sei dentro come superadmin» sopra le tab dell'asilo */
   function mountBanner() {
     if (!inSuper()) return;
     const view = document.getElementById('viewAdmin');
@@ -189,7 +185,6 @@ window.ASILO = (function () {
     view.insertBefore(bar, tabs || view.firstChild);
   }
 
-  /* inietta il bottone sulle card asilo del pannello superadmin */
   function decorate() {
     document.querySelectorAll('.sa-item').forEach(card => {
       if (card.querySelector('[data-sa-enter]')) return;
@@ -206,9 +201,6 @@ window.ASILO = (function () {
     mountBanner();
   }
 
-  /* questo file è caricato prima di script.js: i listener qui
-     registrati girano PRIMA dei suoi, quindi posso fermare il
-     logout standard quando la sessione superadmin è attiva */
   document.addEventListener('click', e => {
     const t = e.target;
     if (!(t instanceof Element)) return;
@@ -216,7 +208,7 @@ window.ASILO = (function () {
     if (b) { e.stopImmediatePropagation(); enterAsilo(b.getAttribute('data-sa-enter')); return; }
     if (t.closest('[data-sa-back]')) { e.stopImmediatePropagation(); backToSuper(); return; }
     if (inSuper() && t.closest('[data-action="logout"]')) {
-      e.stopImmediatePropagation(); // niente logout normale: si torna al pannello
+      e.stopImmediatePropagation();
       backToSuper();
     }
   });
@@ -229,24 +221,14 @@ window.ASILO = (function () {
 
 /* ============================================================
    SUPERADMIN EXTRA — dashboard, ricerca, backup globali
-   Quarto modulo: estende il pannello superadmin con
-   - statistiche globali (asili, bambini, classi, memo, pasti, diete)
-   - ricerca e ordinamento delle card asilo
-   - backup di TUTTI gli asili in un unico file + ripristino
-   - export di un singolo asilo e import su un altro dispositivo
-   - duplica asilo / svuota asilo (struttura intatta)
-   Legge gli stati direttamene da localStorage senza toccare lo
-   stato corrente dell'app. Tutte le mutazioni sono idempotenti
-   (cache su dataset/variabile) per non far impazzire l'observer.
    ============================================================ */
 (function () {
   if (typeof ASILO === 'undefined') return;
 
-  const REGKEY = 'asilapp_registry'; // stessa chiave di saas.js (non esposta)
+  const REGKEY = 'asilapp_registry';
   const saToast = m => { if (typeof toast === 'function') toast(m); };
   const fail = m => { const e = document.getElementById('saErr'); if (e) { e.textContent = m; e.hidden = false; } };
 
-  /* ---------- letture da localStorage, mai dallo stato corrente ---------- */
   function readState(id) {
     try {
       const d = JSON.parse(localStorage.getItem(ASILO.keyFor(id)));
@@ -272,7 +254,6 @@ window.ASILO = (function () {
     return n;
   };
 
-  /* ---------- statistiche globali ---------- */
   function statsHtml() {
     let kids = 0, secs = 0, memo = 0, meals = 0, diets = 0;
     const list = tenants();
@@ -299,7 +280,6 @@ window.ASILO = (function () {
     statsCache = h; box.innerHTML = h;
   }
 
-  /* ---------- barra strumenti in cima al pannello ---------- */
   const panel = () => document.querySelector('.sa-view') || document.getElementById('viewSuperadmin');
   function mountBar() {
     const p = panel();
@@ -330,7 +310,6 @@ window.ASILO = (function () {
     if (grid) p.insertBefore(bar, grid); else p.prepend(bar);
   }
 
-  /* ---------- ricerca e ordinamento (live, senza reload) ---------- */
   const cardId = card => {
     let id = card.getAttribute('data-id');
     if (!id) { const b = card.querySelector('[data-id]'); id = b && b.getAttribute('data-id'); }
@@ -353,7 +332,6 @@ window.ASILO = (function () {
       .forEach(c => grid.appendChild(c));
   }
 
-  /* ---------- decorazione card: azioni extra + chip dati ---------- */
   function decorateCards() {
     const p = panel(); const grid = p && p.querySelector('.sa-grid'); if (!grid) return;
     grid.querySelectorAll('.sa-item').forEach(card => {
@@ -385,7 +363,6 @@ window.ASILO = (function () {
     });
   }
 
-  /* ---------- download helper ---------- */
   function download(obj, filename) {
     try {
       const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
@@ -402,7 +379,6 @@ window.ASILO = (function () {
     location.reload();
   };
 
-  /* ---------- backup globale / singolo / import ---------- */
   function backupAll() {
     const out = { asilapp_global: 1, exported: today(), registry: ASILO.registry(), tenants: {} };
     tenants().forEach(t => { const st = readState(t.id); if (st) out.tenants[t.id] = st; });
@@ -460,7 +436,6 @@ window.ASILO = (function () {
     }).catch(() => fail('Impossibile leggere il file.'));
   }
 
-  /* ---------- duplica / svuota ---------- */
   function dupAsilo(id) {
     const st = readState(id); if (!st) return fail('Dati dell\u2019asilo non leggibili.');
     const reg = ASILO.registry();
@@ -488,7 +463,6 @@ window.ASILO = (function () {
     setTimeout(reloadPanel, 400);
   }
 
-  /* ---------- aggancio eventi ---------- */
   document.addEventListener('click', e => {
     const t = e.target;
     if (!(t instanceof Element)) return;
@@ -497,11 +471,10 @@ window.ASILO = (function () {
     if (!b) return;
     const id = b.getAttribute('data-id') || (b.closest('.sa-item') && cardId(b.closest('.sa-item')));
     if (!id) return;
-    const act = b.getAttribute('data-sax');
-    const e2 = document.getElementById('saErr'); if (e2) e2.hidden = true;
-    if (act === 'export') exportOne(id);
-    else if (act === 'dup') dupAsilo(id);
-    else if (act === 'reset') resetAsilo(id);
+    const ax = b.getAttribute('data-sax');
+    if (ax === 'export') exportOne(id);
+    else if (ax === 'dup') dupAsilo(id);
+    else if (ax === 'reset') resetAsilo(id);
   });
   document.addEventListener('input', e => {
     if (e.target instanceof Element && e.target.id === 'saSearch') applyFilter();
@@ -509,18 +482,24 @@ window.ASILO = (function () {
   document.addEventListener('change', e => {
     const t = e.target;
     if (!(t instanceof Element)) return;
-    if (t.id === 'saSort') { applySort(); applyFilter(); return; }
-    const f = t.files && t.files[0];
-    if (!f) return;
-    t.value = '';
-    if (t.id === 'saRestoreAll') restoreAll(f);
-    if (t.id === 'saImportOne') importOne(f);
+    if (t.id === 'saSort') applySort();
+    if (t.id === 'saRestoreAll') {
+      const f = t.files && t.files[0];
+      t.value = '';
+      if (f) restoreAll(f);
+    }
+    if (t.id === 'saImportOne') {
+      const f = t.files && t.files[0];
+      t.value = '';
+      if (f) importOne(f);
+    }
   });
 
-  /* ---------- ciclo di vita: monta e ridipingi quando il pannello cambia ---------- */
-  function refresh() { mountBar(); renderStats(); decorateCards(); }
   window.addEventListener('load', () => {
-    refresh();
-    new MutationObserver(refresh).observe(document.body, { childList: true, subtree: true });
+    const p = panel();
+    if (!p || p.hidden) return;
+    mountBar(); renderStats(); decorateCards();
+    new MutationObserver(() => { mountBar(); renderStats(); decorateCards(); })
+      .observe(document.body, { childList: true, subtree: true });
   });
 })();
