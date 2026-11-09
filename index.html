@@ -7,6 +7,7 @@
 <meta name="description" content="Asilapp: lo spazio digitale del tuo nido. Memo alle famiglie, menù mensile, bollettino pasti e diario della giornata — ogni asilo con i suoi bambini e i suoi codici famiglia.">
 <meta name="theme-color" content="#faf9f7">
 <link rel="stylesheet" href="style.css">
+<script src="demo.js" defer></script>
 <link rel="stylesheet" href="landing.css">
 <link rel="stylesheet" href="landing-extra.css">
 </head>
@@ -26,7 +27,6 @@
     </div>
     <nav class="landing-nav" aria-label="Azioni principali">
       <button type="button" class="btn btn-ghost btn-sm" data-action="goto-login">Accedi al tuo asilo</button>
-      <button type="button" class="btn btn-outline btn-sm" data-action="goto-demo">Prova la demo</button>
     </nav>
   </header>
 
@@ -216,8 +216,7 @@
     </form>
 
     <div class="login-demo">
-      <p><strong>Demo maestre:</strong> Asilo Nido Arcobaleno · <code>admin</code> · <code>nido2024</code></p>
-      <p><strong>Demo genitori:</strong> stesso asilo · codice <code>B001</code></p>
+      <p>Vuoi prima dare un'occhiata? <button type="button" class="link-btn" data-action="goto-demo">Apri la demo in sola lettura →</button></p>
     </div>
     <button type="button" class="link-btn" data-action="switch-asilo" style="margin:.4rem auto 0">↩ Torna alla home di Asilapp</button>
   </div>
