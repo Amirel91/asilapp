@@ -76,3 +76,58 @@
 
 /* ---------- coppia di bottoni nella fascia demo della landing ---------- */
 .demo-strip-btns { display: flex; gap: .45rem; flex-wrap: wrap; }
+
+/* ============================================================
+   Classi del pannello maestre e dell'area famiglie
+   (prima usate nel markup di index.html senza definizione CSS)
+   ============================================================ */
+
+/* ---------- calendario menù del mese ---------- */
+.menu-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: .5rem; margin: .6rem 0;
+}
+.menu-grid .menu-day {
+  background: var(--bg); border: 1px solid var(--line); border-radius: var(--r-sm);
+  padding: .55rem .6rem; display: grid; gap: .3rem; align-content: start;
+  box-shadow: var(--sh-sm); font-size: .82rem; min-height: 92px;
+}
+.menu-grid .menu-day.has-menu { background: var(--card); border-color: #ddd7d0; }
+.menu-grid .menu-day .menu-date { font-weight: 700; font-size: .74rem; color: var(--sage-ink); }
+.menu-grid .menu-day .menu-txt { color: var(--ink-soft); line-height: 1.35; overflow-wrap: anywhere; }
+
+/* ---------- riepilogo del bollettino pasti ---------- */
+.meals-stats { display: flex; flex-wrap: wrap; gap: .4rem; margin: .6rem 0; }
+
+/* ---------- tabella pasti del mese ---------- */
+.meals-table {
+  width: 100%; border-collapse: collapse; font-size: .84rem;
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: var(--r); overflow: hidden; box-shadow: var(--sh-sm);
+}
+.meals-table th, .meals-table td {
+  padding: .5rem .65rem; text-align: left; border-bottom: 1px solid var(--line);
+}
+.meals-table th { font-size: .74rem; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); background: var(--bg); }
+.meals-table td.num, .meals-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.meals-table tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- drawer scheda bambino ---------- */
+.drawer-backdrop {
+  position: fixed; inset: 0; z-index: 40;
+  background: rgba(41, 37, 36, .45);
+  opacity: 0; transition: opacity 200ms ease-out;
+}
+.drawer-backdrop.on { opacity: 1; }
+.drawer-foot {
+  display: flex; gap: .45rem; flex-wrap: wrap; align-items: center;
+  border-top: 1px dashed var(--line); margin-top: .8rem; padding-top: .7rem;
+}
+
+/* ---------- saluto nell'area famiglie ---------- */
+.parent-hello {
+  display: flex; align-items: baseline; gap: .5rem; flex-wrap: wrap;
+  margin: 0;
+}
+.parent-hello strong { font-size: 1.05rem; letter-spacing: -.01em; }
+.parent-hello small { color: var(--muted); font-size: .8rem; }
