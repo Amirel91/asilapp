@@ -45,8 +45,9 @@
       <h1>Il ponte digitale tra il tuo nido e le famiglie</h1>
       <p>Asilapp è la casa comune dei nidi: ogni struttura crea il proprio spazio con i suoi bambini, le sue classi e i suoi codici famiglia. Memo, menù, bollettino pasti, diario e avvisi — senza installare nulla.</p>
       <div class="hero-cta">
-        <button type="button" class="btn btn-primary" data-action="goto-signup">Crea lo spazio del tuo asilo</button>
-        <button type="button" class="btn btn-ghost" data-action="goto-login">Ho già un asilo</button>
+        <a class="btn btn-primary" href="registrazione.html">Crea lo spazio del tuo asilo</a>
+        <a class="btn btn-ghost" href="info.html">Scopri come funziona</a>
+        <button type="button" class="btn btn-ghost" data-action="goto-login">Accedi al tuo asilo</button>
       </div>
       <ul class="trust-row" aria-label="Perché è semplice iniziare">
         <li>⏱️ Pronto in un minuto</li>
@@ -150,15 +151,6 @@
     </figure>
   </div>
 
-  <ul class="landing-feats">
-    <li><span aria-hidden="true">🍼</span><strong>Memo rapidi</strong><small>Cosa portare in nido, con conferma dei genitori</small></li>
-    <li><span aria-hidden="true">🍝</span><strong>Menù del mese</strong><small>Calendario pasti visibile alle famiglie</small></li>
-    <li><span aria-hidden="true">🧾</span><strong>Bollettino pasti</strong><small>Pasti, tariffe e totali pronti per l'export</small></li>
-    <li><span aria-hidden="true">😴</span><strong>Diario della giornata</strong><small>Pranzo, riposo e note per i genitori</small></li>
-    <li><span aria-hidden="true">📣</span><strong>Avvisi a tutte le famiglie</strong><small>Un tocco e il messaggio arriva a tutti</small></li>
-    <li><span aria-hidden="true">🏫</span><strong>Multi-asilo</strong><small>Ogni struttura con dati e accessi separati</small></li>
-  </ul>
-
   <section class="landing-audience" aria-labelledby="audTitle">
     <h2 id="audTitle" class="landing-sec-title">Due mani sulla stessa giornata</h2>
     <p class="landing-sec-sub">Le maestre scrivono, le famiglie leggono: Asilapp tiene insieme le due parti con strumenti semplici.</p>
@@ -186,46 +178,7 @@
     </div>
   </section>
 
-  <section class="landing-steps" aria-labelledby="stepsTitle">
-    <h2 id="stepsTitle" class="landing-sec-title">Come funziona</h2>
-    <ol class="steps-grid">
-      <li class="step"><span class="step-num" aria-hidden="true">1</span><strong>Registra il tuo asilo</strong><small>Scegli il nome della struttura e una password per le maestre: lo spazio è subito pronto.</small></li>
-      <li class="step"><span class="step-num" aria-hidden="true">2</span><strong>Aggiungi bambini e classi</strong><small>Iscrivi i bambini, organizzali per classe e assegna a ognuno il suo codice famiglia.</small></li>
-      <li class="step"><span class="step-num" aria-hidden="true">3</span><strong>Invita le famiglie</strong><small>I genitori entrano con il codice del bambino e trovano memo, menù, diario e avvisi.</small></li>
-    </ol>
-  </section>
-
   <div class="landing-cols">
-    <section class="card signup-card" aria-labelledby="signupTitle">
-      <p class="drawer-sec" id="signupTitle">Registra il tuo asilo</p>
-      <p class="hint">Un minuto ed è pronto: nessuna installazione, nessun costo.</p>
-      <form id="signupForm" novalidate>
-        <label class="field"><span>Nome dell'asilo</span>
-          <input type="text" class="input" id="signupName" maxlength="40" placeholder="es. Asilo Nido Arcobaleno" autocomplete="organization" required>
-        </label>
-        <label class="field"><span>Password maestre</span>
-          <span class="pw-wrap">
-            <input type="password" class="input" id="signupPass" minlength="6" maxlength="40" placeholder="almeno 6 caratteri" autocomplete="new-password" required>
-            <button type="button" class="pw-toggle" data-pw-toggle="signupPass" aria-label="Mostra la password" aria-pressed="false">👁</button>
-          </span>
-        </label>
-        <label class="field"><span>Ripeti la password</span>
-          <span class="pw-wrap">
-            <input type="password" class="input" id="signupPass2" maxlength="40" placeholder="ancora la stessa password" autocomplete="new-password" required>
-            <button type="button" class="pw-toggle" data-pw-toggle="signupPass2" aria-label="Mostra la password" aria-pressed="false">👁</button>
-          </span>
-        </label>
-        <ul class="pw-check" id="pwCheck" aria-label="Requisiti per completare la registrazione">
-          <li data-need="name">Nome dell'asilo di almeno 3 lettere</li>
-          <li data-need="len">Password di almeno 6 caratteri</li>
-          <li data-need="match">Le due password coincidono</li>
-        </ul>
-        <p class="login-err" id="signupErr" hidden></p>
-        <button type="submit" class="btn btn-primary btn-block" id="signupBtn">Crea lo spazio del mio asilo</button>
-      </form>
-      <p class="hint">Dopo la registrazione entri subito: username <code>admin</code> e la password scelta. I genitori accedono col codice bambino.</p>
-    </section>
-
     <aside class="card landing-aside" aria-labelledby="whyTitle">
       <p class="drawer-sec" id="whyTitle">Perché Asilapp</p>
       <ul class="perk-list">
@@ -240,35 +193,11 @@
           <button type="button" class="btn btn-outline btn-sm" data-action="goto-demo-parent">Area famiglie →</button>
         </span>
       </div>
+      <p class="hint">Vuoi saperne di più? <a class="link-btn" href="info.html">Come funziona Asilapp →</a></p>
       <p class="hint">Hai già uno spazio? <button type="button" class="link-btn" data-action="goto-login">Accedi col nome del tuo asilo</button></p>
+      <p class="hint">Domande o dubbi? <a class="link-btn" href="contatti.html">Scrivici →</a></p>
     </aside>
   </div>
-
-  <section class="landing-faq" aria-labelledby="faqTitle">
-    <h2 id="faqTitle" class="landing-sec-title">Domande frequenti</h2>
-    <div class="faq">
-      <details>
-        <summary>Quanto costa Asilapp?</summary>
-        <p>Niente abbonamenti e nessuna carta di credito: registri l'asilo in un minuto e lo spazio è subito tuo, gratis e senza pubblicità.</p>
-      </details>
-      <details>
-        <summary>Dove finiscono i dati del mio asilo?</summary>
-        <p>Solo nel browser che li ha creati: ogni asilo ha la sua chiave di salvataggio separata e i nomi delle strutture non vengono mai mostrati in giro. Dalle Impostazioni puoi scaricare un backup e ripristinarlo quando vuoi.</p>
-      </details>
-      <details>
-        <summary>Le famiglie devono installare qualcosa?</summary>
-        <p>No: basta aprire Asilapp dal browser e inserire il nome dell'asilo insieme al codice famiglia del bambino, per esempio B001. Nessuna app, nessuna registrazione con email.</p>
-      </details>
-      <details>
-        <summary>Posso provarlo prima di registrare il mio asilo?</summary>
-        <p>Certo: la demo «Asilo Nido Arcobaleno» è già pronta con bambini, memo e menù. Entra come maestra con admin e nido2024, come genitore col codice B001, oppure apri l'area famiglie in un tap direttamente dalla home.</p>
-      </details>
-      <details>
-        <summary>Se cambio telefono o computer?</summary>
-        <p>Scarica il backup dalle Impostazioni del vecchio dispositivo e ripristinalo sul nuovo: tornano bambini, classi, memo, menù e bollettini pasti.</p>
-      </details>
-    </div>
-  </section>
 
   <footer class="landing-footer">
     <div class="brand">
@@ -278,9 +207,11 @@
       <div class="brand-txt"><strong>Asilapp</strong><small>il nido, in tasca alle famiglie</small></div>
     </div>
     <nav class="landing-links" aria-label="Link rapidi">
-      <button type="button" class="link-btn" data-action="goto-signup">Crea il tuo asilo</button>
+      <a class="link-btn" href="info.html">Come funziona</a>
+      <a class="link-btn" href="registrazione.html">Crea il tuo asilo</a>
       <button type="button" class="link-btn" data-action="goto-login">Accedi</button>
       <button type="button" class="link-btn" data-action="goto-demo">Demo</button>
+      <a class="link-btn" href="contatti.html">Contatti</a>
     </nav>
   </footer>
   <p class="login-foot">I dati di ogni asilo restano salvati solo nel browser che li ha creati: nessun server, nessun cloud.</p>

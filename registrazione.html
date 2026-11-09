@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registra il tuo asilo — Asilapp</title>
+<meta name="description" content="Crea lo spazio digitale del tuo nido su Asilapp in un minuto: nome dell'asilo, password per le maestre e sei pronto ad accogliere le famiglie. Gratis, senza installare nulla.">
+<meta name="theme-color" content="#faf9f7">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="landing.css">
+<link rel="stylesheet" href="pages.css">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+</head>
+<body class="page-body">
+
+<header class="page-top">
+  <a class="brand" href="index.html">
+    <span class="logo logo-sm" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-8"/><path d="M12 13c0-4 3-7 8-7 0 5-3 8-8 8z"/><path d="M12 10C12 6.5 9.5 4 5 4c0 4.5 2.5 7 7 7z"/></svg>
+    </span>
+    <span class="brand-txt"><strong>Asilapp</strong><small>il nido, in tasca alle famiglie</small></span>
+  </a>
+  <nav class="page-nav" aria-label="Navigazione del sito">
+    <a class="link-btn" href="index.html">Home</a>
+    <a class="link-btn" href="info.html">Come funziona</a>
+    <a class="link-btn" href="contatti.html">Contatti</a>
+  </nav>
+</header>
+
+<main class="page-main page-main-narrow">
+
+  <section class="page-hero">
+    <h1>Registra il tuo asilo</h1>
+    <p>Un minuto ed è pronto. Nessuna installazione, nessun costo: scegli il nome della struttura e una password per le maestre.</p>
+  </section>
+
+  <section class="card signup-card" aria-labelledby="signupTitle">
+    <p class="drawer-sec" id="signupTitle">Crea lo spazio del tuo asilo</p>
+    <form id="signupForm" novalidate>
+      <label class="field"><span>Nome dell'asilo</span>
+        <input type="text" class="input" id="signupName" maxlength="40" placeholder="es. Asilo Nido Arcobaleno" autocomplete="organization" required>
+      </label>
+      <label class="field"><span>Password maestre</span>
+        <span class="pw-wrap">
+          <input type="password" class="input" id="signupPass" minlength="6" maxlength="40" placeholder="almeno 6 caratteri" autocomplete="new-password" required>
+          <button type="button" class="pw-toggle" data-pw-toggle="signupPass" aria-label="Mostra la password" aria-pressed="false">👁</button>
+        </span>
+      </label>
+      <label class="field"><span>Ripeti la password</span>
+        <span class="pw-wrap">
+          <input type="password" class="input" id="signupPass2" maxlength="40" placeholder="ancora la stessa password" autocomplete="new-password" required>
+          <button type="button" class="pw-toggle" data-pw-toggle="signupPass2" aria-label="Mostra la password" aria-pressed="false">👁</button>
+        </span>
+      </label>
+      <ul class="pw-check" id="pwCheck" aria-label="Requisiti per completare la registrazione">
+        <li data-need="name">Nome dell'asilo di almeno 3 lettere</li>
+        <li data-need="len">Password di almeno 6 caratteri</li>
+        <li data-need="match">Le due password coincidono</li>
+      </ul>
+      <p class="login-err" id="signupErr" hidden></p>
+      <button type="submit" class="btn btn-primary btn-block" id="signupBtn">Crea lo spazio del mio asilo</button>
+    </form>
+    <p class="hint">Dopo la registrazione entri subito: username <code>admin</code> e la password scelta. I genitori accedono col codice bambino.</p>
+    <p class="hint">I dati restano nel tuo browser: puoi scaricare un backup dalle Impostazioni in qualunque momento.</p>
+  </section>
+
+</main>
+
+<footer class="page-foot">
+  <p>Asilapp — il nido, in tasca alle famiglie. <a href="contatti.html">Contatti</a></p>
+</footer>
+
+<script src="registrazione.js" defer></script>
+</body>
+</html>
