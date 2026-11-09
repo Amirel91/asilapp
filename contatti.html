@@ -13,6 +13,7 @@
 </head>
 <body class="page-body">
 
+<!-- HEADER -->
 <header class="page-top">
   <a class="brand" href="index.html">
     <span class="logo logo-sm" aria-hidden="true">
@@ -27,32 +28,48 @@
   </nav>
 </header>
 
+<!-- CORPO -->
 <main class="page-main page-main-narrow">
 
+  <!-- HERO -->
   <section class="page-hero">
+    <span class="hero-badge">Supporto per maestre e famiglie</span>
     <h1>Parliamone</h1>
     <p>Hai una domanda su Asilapp, un'idea da proporre o ti serve una mano con lo spazio del tuo asilo? Scrivici: rispondiamo in genere entro un giorno lavorativo.</p>
   </section>
 
-  <section class="card" aria-labelledby="ccTitle">
-    <p class="drawer-sec" id="ccTitle">Scrivici un messaggio</p>
-    <form id="contactForm" novalidate>
-      <label class="field"><span>Il tuo nome</span>
-        <input type="text" class="input" id="ccName" maxlength="60" placeholder="es. Martina Rossi" autocomplete="name" required>
-      </label>
-      <label class="field"><span>La tua email</span>
-        <input type="email" class="input" id="ccMail" maxlength="80" placeholder="es. martina@example.it" autocomplete="email" required>
-      </label>
-      <label class="field"><span>Messaggio</span>
-        <textarea class="input" id="ccMsg" rows="5" maxlength="600" placeholder="Come possiamo aiutarti?" required></textarea>
-      </label>
-      <p class="login-err" id="ccErr" hidden></p>
-      <button type="submit" class="btn btn-primary btn-block" id="ccBtn">Invia il messaggio</button>
-    </form>
-    <p class="hint" id="ccOk" hidden>✓ Messaggio pronto: si apre il tuo programma di posta con il testo già compilato — basta premere invio da lì.</p>
-    <p class="hint">Oppure scrivi direttamente a <a href="mailto:ciao@asilapp.it">ciao@asilapp.it</a>.</p>
+  <!-- FORM + INFO PRATICHE -->
+  <section class="contact-grid" aria-label="Modulo di contatto e informazioni pratiche">
+    <div class="card contact-card">
+      <p class="card-title" id="ccTitle">Scrivici un messaggio</p>
+      <form id="contactForm" novalidate>
+        <label class="field"><span>Il tuo nome</span>
+          <input type="text" class="input" id="ccName" maxlength="60" placeholder="es. Martina Rossi" autocomplete="name" required>
+        </label>
+        <label class="field"><span>La tua email</span>
+          <input type="email" class="input" id="ccMail" maxlength="80" placeholder="es. martina@example.it" autocomplete="email" required>
+        </label>
+        <label class="field"><span>Messaggio</span>
+          <textarea class="input" id="ccMsg" rows="5" maxlength="600" placeholder="Come possiamo aiutarti?" required></textarea>
+        </label>
+        <p class="login-err" id="ccErr" hidden></p>
+        <button type="submit" class="btn btn-primary btn-block" id="ccBtn">Invia il messaggio</button>
+      </form>
+      <p class="hint" id="ccOk" hidden>✓ Messaggio pronto: si apre il tuo programma di posta con il testo già compilato — basta premere invio da lì.</p>
+      <p class="hint">Oppure scrivi direttamente a <a href="mailto:ciao@asilapp.it">ciao@asilapp.it</a>.</p>
+    </div>
+
+    <aside class="contact-aside" aria-label="Informazioni pratiche">
+      <ul class="contact-meta">
+        <li><span aria-hidden="true">✉️</span><div><strong>Email diretta</strong><small>ciao@asilapp.it — anche senza passare dal form.</small></div></li>
+        <li><span aria-hidden="true">⏱️</span><div><strong>Tempi di risposta</strong><small>In genere entro un giorno lavorativo.</small></div></li>
+        <li><span aria-hidden="true">🔒</span><div><strong>Privacy</strong><small>Il form apre la tua posta: il messaggio resta tra te e noi, niente viene salvato sul sito.</small></div></li>
+        <li><span aria-hidden="true">🏫</span><div><strong>Asili con più sedi</strong><small>Raccontaci com'è organizzata la tua struttura: troviamo la soluzione giusta.</small></div></li>
+      </ul>
+    </aside>
   </section>
 
+  <!-- FAQ -->
   <section class="page-sec" aria-labelledby="ccFaq">
     <h2 id="ccFaq">Risposte rapide</h2>
     <div class="faq">
@@ -65,6 +82,10 @@
         <p>Serve il nome esatto dell'asilo e il codice bambino (es. B001): controlla che il codice nella scheda del bambino corrisponda a quello consegnato alla famiglia.</p>
       </details>
       <details>
+        <summary>Il nostro asilo ha più sezioni o sedi: va bene lo stesso?</summary>
+        <p>Sì: dalle Impostazioni puoi creare tutte le classi, sezioni o sedi che servono e iscrivere ogni bambino alla sua. Le famiglie vedono la classe del bambino nell'area riservata.</p>
+      </details>
+      <details>
         <summary>Volete sviluppare qualcosa per il nostro nido?</summary>
         <p>Volentieri: scrivici con qualche dettaglio sulla struttura e su cosa vi servirebbe, e ne parliamo.</p>
       </details>
@@ -73,6 +94,7 @@
 
 </main>
 
+<!-- FOOTER -->
 <footer class="page-foot">
   <p>Asilapp — il nido, in tasca alle famiglie. <a href="info.html">Come funziona</a></p>
   <p class="page-credit">Asilapp è un progetto di <a href="https://www.mecalab.org" target="_blank" rel="noopener">MecaLab</a> · <a href="https://www.mecalab.org" target="_blank" rel="noopener">www.mecalab.org</a></p>
