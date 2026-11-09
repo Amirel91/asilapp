@@ -108,3 +108,16 @@
 .demo-strip { display: flex; align-items: center; justify-content: space-between; gap: .6rem; flex-wrap: wrap; border-top: 1px dashed var(--line); margin-top: .8rem; padding-top: .7rem; }
 
 .login-foot { font-size: .72rem; color: var(--muted); text-align: center; }
+
+/* ---------- barra superiore landing ---------- */
+.landing-top {
+  display: flex; align-items: center; justify-content: space-between; gap: .8rem; flex-wrap: wrap;
+  padding-top: calc(1rem + env(safe-area-inset-top));
+}
+.landing-top .landing-nav { display: flex; gap: .5rem; flex-wrap: wrap; padding-top: 0; }
+
+/* ---------- card registrazione asilo ---------- */
+.signup-card { display: grid; gap: .7rem; border-left: 4px solid var(--sage); }
+
+/* ---------- aside informativo ---------- */
+.landing-aside { display: grid; gap: .8rem; align-content: start; }
