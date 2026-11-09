@@ -104,11 +104,11 @@
   ].join('\n');
   document.head.appendChild(css);
 
-  const uid = () => (typeof uid === 'function') ? uid() : 'x' + Math.random().toString(36).slice(2, 8);
-  const iso = d => (typeof iso === 'function') ? iso(d)
+  const newId = () => (typeof uid === 'function') ? uid() : 'x' + Math.random().toString(36).slice(2, 8);
+  const isoLocal = d => (typeof iso === 'function') ? iso(d)
     : d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   const curYmLocal = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); };
-  const today = () => iso(new Date());
+  const today = () => isoLocal(new Date());
 
   /* dati di fabbrica della demo: memo, menù e diario d'esempio */
   function seedDemo() {
@@ -116,8 +116,8 @@
     const t = today();
     const kids = state.kids || [];
     state.memos = [
-      { id: uid(), kid: kids[0] && kids[0].id, text: 'Domani gita al parco: portare la giacca antipioggia', done: false, ts: Date.now() },
-      { id: uid(), kid: kids[1] && kids[1].id, text: 'Portare il cambio completo nello zainetto', done: true, ts: Date.now() - 864e5 }
+      { id: newId(), kid: kids[0] && kids[0].id, text: 'Domani gita al parco: portare la giacca antipioggia', done: false, ts: Date.now() },
+      { id: newId(), kid: kids[1] && kids[1].id, text: 'Portare il cambio completo nello zainetto', done: true, ts: Date.now() - 864e5 }
     ];
     state.menu = state.menu || {};
     const days = ['Lunedì: pasta al pomodoro e polpettine', 'Martedì: risotto alla zucca e formaggio',
