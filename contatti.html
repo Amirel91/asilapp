@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="landing.css">
 <link rel="stylesheet" href="pages.css">
+<link rel="stylesheet" href="modern.css">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 </head>
 <body class="page-body">
@@ -32,15 +33,15 @@
 <main class="page-main page-main-narrow">
 
   <!-- HERO -->
-  <section class="page-hero">
+  <section class="page-hero reveal">
     <span class="hero-badge">Supporto per maestre e famiglie</span>
     <h1>Parliamone</h1>
-    <p>Hai una domanda su Asilapp, un'idea da proporre o ti serve una mano con lo spazio del tuo asilo? Scrivici: rispondiamo in genere entro un giorno lavorativo.</p>
+    <p>Domande, idee o una mano con lo spazio del tuo asilo: ti rispondiamo entro un giorno lavorativo.</p>
   </section>
 
   <!-- FORM + INFO PRATICHE -->
   <section class="contact-grid" aria-label="Modulo di contatto e informazioni pratiche">
-    <div class="card contact-card">
+    <div class="card contact-card reveal">
       <p class="card-title" id="ccTitle">Scrivici un messaggio</p>
       <form id="contactForm" novalidate>
         <label class="field"><span>Il tuo nome</span>
@@ -50,21 +51,21 @@
           <input type="email" class="input" id="ccMail" maxlength="80" placeholder="es. martina@example.it" autocomplete="email" required>
         </label>
         <label class="field"><span>Messaggio</span>
-          <textarea class="input" id="ccMsg" rows="5" maxlength="600" placeholder="Come possiamo aiutarti?" required></textarea>
+          <textarea class="input" id="ccMsg" rows="4" maxlength="600" placeholder="Come possiamo aiutarti?" required></textarea>
         </label>
         <p class="login-err" id="ccErr" hidden></p>
         <button type="submit" class="btn btn-primary btn-block" id="ccBtn">Invia il messaggio</button>
       </form>
-      <p class="hint" id="ccOk" hidden>✓ Messaggio pronto: si apre il tuo programma di posta con il testo già compilato — basta premere invio da lì.</p>
+      <p class="hint" id="ccOk" hidden>✓ Messaggio pronto: si apre la tua posta con il testo già compilato — basta premere invio da lì.</p>
       <p class="hint">Oppure scrivi direttamente a <a href="mailto:ciao@asilapp.it">ciao@asilapp.it</a>.</p>
     </div>
 
     <aside class="contact-aside" aria-label="Informazioni pratiche">
       <ul class="contact-meta">
-        <li><span aria-hidden="true">✉️</span><div><strong>Email diretta</strong><small>ciao@asilapp.it — anche senza passare dal form.</small></div></li>
-        <li><span aria-hidden="true">⏱️</span><div><strong>Tempi di risposta</strong><small>In genere entro un giorno lavorativo.</small></div></li>
-        <li><span aria-hidden="true">🔒</span><div><strong>Privacy</strong><small>Il form apre la tua posta: il messaggio resta tra te e noi, niente viene salvato sul sito.</small></div></li>
-        <li><span aria-hidden="true">🏫</span><div><strong>Asili con più sedi</strong><small>Raccontaci com'è organizzata la tua struttura: troviamo la soluzione giusta.</small></div></li>
+        <li class="reveal"><span aria-hidden="true">✉️</span><div><strong>Email diretta</strong><small>ciao@asilapp.it</small></div></li>
+        <li class="reveal"><span aria-hidden="true">⏱️</span><div><strong>Risposta</strong><small>Entro un giorno lavorativo.</small></div></li>
+        <li class="reveal"><span aria-hidden="true">🔒</span><div><strong>Privacy</strong><small>Il form apre la tua posta: niente resta sul sito.</small></div></li>
+        <li class="reveal"><span aria-hidden="true">🏫</span><div><strong>Più sedi?</strong><small>Raccontaci la struttura: troviamo la soluzione.</small></div></li>
       </ul>
     </aside>
   </section>
@@ -75,19 +76,19 @@
     <div class="faq">
       <details>
         <summary>Ho perso la password dell'area maestre</summary>
-        <p>Purtroppo i dati restano solo nel tuo browser e la password non è recuperabile. Se hai un backup, ripristinalo: ritroverai i dati com'erano al momento della copia, con la password di allora. Altrimenti occorre ricreare lo spazio dell'asilo.</p>
+        <p>I dati restano nel tuo browser e la password non è recuperabile. Se hai un backup, ripristinalo: altrimenti occorre ricreare lo spazio dell'asilo.</p>
       </details>
       <details>
         <summary>I genitori non riescono a entrare</summary>
-        <p>Serve il nome esatto dell'asilo e il codice bambino (es. B001): controlla che il codice nella scheda del bambino corrisponda a quello consegnato alla famiglia.</p>
+        <p>Serve il nome esatto dell'asilo e il codice bambino (es. B001): controlla che corrisponda a quello consegnato alla famiglia.</p>
       </details>
       <details>
-        <summary>Il nostro asilo ha più sezioni o sedi: va bene lo stesso?</summary>
-        <p>Sì: dalle Impostazioni puoi creare tutte le classi, sezioni o sedi che servono e iscrivere ogni bambino alla sua. Le famiglie vedono la classe del bambino nell'area riservata.</p>
+        <summary>Il nostro asilo ha più sezioni o sedi</summary>
+        <p> Nessun problema: dalle Impostazioni crei tutte le classi che servono e iscrivi ogni bambino alla sua.</p>
       </details>
       <details>
         <summary>Volete sviluppare qualcosa per il nostro nido?</summary>
-        <p>Volentieri: scrivici con qualche dettaglio sulla struttura e su cosa vi servirebbe, e ne parliamo.</p>
+        <p>Volentieri: scrivici due righe su struttura e esigenze, e ne parliamo.</p>
       </details>
     </div>
   </section>
@@ -101,5 +102,6 @@
 </footer>
 
 <script src="contatti.js" defer></script>
+<script src="modern.js" defer></script>
 </body>
 </html>

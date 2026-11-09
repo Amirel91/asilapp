@@ -1,0 +1,109 @@
+/* ============================================================
+   modern.css — layer di modernizzazione grafica (caricato per ultimo)
+   Tipografia fluida, micro-transizioni, reveal on scroll.
+   Riusa variabili e palette del design system esistente.
+   ============================================================ */
+
+/* ---------- carattere e scala tipografica ---------- */
+:root {
+  --font-modern: "Segoe UI Variable Text", "Segoe UI", -apple-system,
+    "SF Pro Text", system-ui, "Helvetica Neue", Arial, sans-serif;
+}
+
+body {
+  font-family: var(--font-modern);
+  font-size: .98rem;
+  line-height: 1.65;
+  letter-spacing: .002em;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4 {
+  line-height: 1.15;
+  letter-spacing: -.025em;
+  font-weight: 700;
+}
+h1 { font-size: clamp(1.85rem, 4.5vw, 2.65rem); }
+h2 { font-size: clamp(1.3rem, 3vw, 1.7rem); }
+h3 { font-size: 1.04rem; }
+
+::selection { background: var(--sage, #5f7d57); color: #fff; }
+
+/* ---------- titolo hero con accento sfumato (solo pagine pubbliche) ---------- */
+.page-hero h1 {
+  background: linear-gradient(115deg, var(--sage-ink, #3f5138) 20%, var(--terra, #b45f3f) 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ---------- bottoni: respiro e feedback ---------- */
+.btn {
+  transition: transform .16s ease-out, box-shadow .22s ease-out,
+    background-color .22s ease-out, border-color .22s ease-out, color .22s ease-out;
+}
+.btn:hover  { transform: translateY(-1px); }
+.btn:active { transform: translateY(0) scale(.985); }
+
+.btn-primary {
+  box-shadow: 0 6px 16px -8px rgba(95, 125, 87, .55);
+}
+.btn-primary:hover { box-shadow: 0 10px 22px -10px rgba(95, 125, 87, .6); }
+
+.link-btn { transition: color .18s ease-out, transform .18s ease-out; }
+.link-btn:hover { transform: translateX(2px); }
+
+/* ---------- campi: anello di focus morbido ---------- */
+.input { transition: border-color .2s ease-out, box-shadow .2s ease-out; }
+.input:focus { box-shadow: 0 0 0 3px rgba(95, 125, 87, .16); }
+
+:focus-visible {
+  outline: 2px solid var(--sage, #5f7d57);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ---------- card pubbliche: sollevamento sobrio ---------- */
+body.page-body .card {
+  transition: transform .22s ease-out, box-shadow .22s ease-out, border-color .22s ease-out;
+}
+body.page-body .card:hover {
+  transform: translateY(-3px);
+  border-color: #d9d2ca;
+  box-shadow: var(--sh-md, 0 10px 30px rgba(0, 0, 0, .12));
+}
+
+/* ---------- header vetro (pagina pubblica) ---------- */
+.page-top {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: rgba(250, 249, 247, .86);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  backdrop-filter: blur(12px) saturate(1.4);
+  border-bottom: 1px solid var(--line, #e7e5e4);
+}
+
+/* ---------- reveal on scroll (attivato da modern.js) ---------- */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity .55s ease-out, transform .55s ease-out;
+  transition-delay: var(--rd, 0ms);
+}
+[data-reveal].in { opacity: 1; transform: none; }
+
+/* scaglionamento automatico delle card nelle griglie */
+.page-grid > [data-reveal]:nth-child(2) { --rd: 80ms; }
+.page-grid > [data-reveal]:nth-child(3) { --rd: 160ms; }
+.page-grid > [data-reveal]:nth-child(4) { --rd: 240ms; }
+.page-grid > [data-reveal]:nth-child(5) { --rd: 320ms; }
+.page-grid > [data-reveal]:nth-child(6) { --rd: 400ms; }
+
+/* ---------- rispetto per chi riduce le animazioni ---------- */
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] { opacity: 1; transform: none; transition: none; }
+  .btn:hover, .link-btn:hover, body.page-body .card:hover { transform: none; }
+  * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}

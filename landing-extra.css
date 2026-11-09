@@ -77,6 +77,20 @@
 /* ---------- coppia di bottoni nella fascia demo della landing ---------- */
 .demo-strip-btns { display: flex; gap: .45rem; flex-wrap: wrap; }
 
+/* ---------- animazioni d'ingresso (reveal) usate dalle pagine pubbliche ---------- */
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity .45s ease-out, transform .45s ease-out;
+}
+.reveal.in {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
+
 /* ============================================================
    Classi del pannello maestre e dell'area famiglie
    (prima usate nel markup di index.html senza definizione CSS)
