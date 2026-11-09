@@ -191,3 +191,21 @@
   box-shadow: var(--sh-sm);
 }
 .sa-enter-bar .btn-ghost { background: var(--card); }
+
+/* ---------- superadmin extra: toolbar, statistiche, chip sulle card ---------- */
+.sa-tools {
+  display: grid; gap: .65rem;
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--r);
+  padding: .85rem .9rem; box-shadow: var(--sh-sm);
+}
+.sa-stats { display: flex; flex-wrap: wrap; gap: .4rem; }
+.sa-stats .sa-stat { background: var(--sage-soft); color: var(--sage-ink); }
+.sa-stats .sa-stat.warn { background: var(--amber-soft); color: var(--amber-ink); }
+
+.sa-tools-row { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; }
+.sa-tools-row .input { width: auto; flex: 1 1 180px; padding: .5rem .7rem; font-size: .9rem; }
+.sa-tools-row .input:not([type="search"]) { flex: 0 0 auto; }
+
+.sa-chips { display: flex; flex-wrap: wrap; gap: .35rem; }
+.sa-chips .sa-stat { background: var(--bg); color: var(--ink-soft); border: 1px solid var(--line); }
+.sa-chips .sa-stat.warn { background: var(--amber-soft); color: var(--amber-ink); border-color: #e7d9b4; }
