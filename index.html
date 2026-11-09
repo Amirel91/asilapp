@@ -23,34 +23,50 @@
       </span>
       <div class="brand-txt"><strong>Asilapp</strong><small>il nido, in tasca alle famiglie</small></div>
     </div>
-    <button type="button" class="btn btn-outline btn-sm" data-action="goto-demo">Prova la demo</button>
+    <nav class="landing-nav" aria-label="Azioni principali">
+      <button type="button" class="btn btn-ghost btn-sm" data-action="goto-login">Accedi al tuo asilo</button>
+      <button type="button" class="btn btn-outline btn-sm" data-action="goto-demo">Prova la demo</button>
+    </nav>
   </header>
 
   <div class="landing-hero">
-    <h1>Il ponte digitale tra il tuo nido e le famiglie</h1>
-    <p>Ogni asilo ha il suo spazio: memo, menù mensile, bollettino pasti, diario della giornata e avvisi — con bambini e codici famiglia separati per struttura.</p>
-    <ul class="landing-feats">
-      <li><span aria-hidden="true">🍼</span><strong>Memo rapidi</strong><small>Cosa portare in nido, con conferma dei genitori</small></li>
-      <li><span aria-hidden="true">🍝</span><strong>Menù del mese</strong><small>Calendario pasti visibile alle famiglie</small></li>
-      <li><span aria-hidden="true">🧾</span><strong>Bollettino pasti</strong><small>Pasti, tariffe e totali pronti per l'esport</small></li>
-      <li><span aria-hidden="true">😴</span><strong>Diario della giornata</strong><small>Pranzo, riposo e note per i genitori</small></li>
-    </ul>
+    <div class="hero-copy">
+      <span class="hero-badge">Uno spazio privato per ogni asilo</span>
+      <h1>Il ponte digitale tra il tuo nido e le famiglie</h1>
+      <p>Asilapp è la casa comune dei nidi: ogni struttura crea il proprio spazio con i suoi bambini, le sue classi e i suoi codici famiglia. Memo, menù, bollettino pasti, diario e avvisi — senza installare nulla.</p>
+      <div class="hero-cta">
+        <button type="button" class="btn btn-primary" data-action="goto-signup">Crea lo spazio del tuo asilo</button>
+        <button type="button" class="btn btn-ghost" data-action="goto-login">Ho già un asilo</button>
+      </div>
+      <p class="hint">Funziona dal browser: i dati restano sul dispositivo dell'asilo.</p>
+    </div>
+    <figure class="hero-art">
+      <img src="![[EVOCI|illustrazione in acquerello morbido di un'educatrice che legge un libro a tre bambini piccoli seduti su un tappeto in un asilo luminoso e ordinato, colori caldi salvia terracotta e crema, luce naturale dalla finestra, atmosfera serena e dolce|1152x864]]" alt="Un'educatrice racconta una storia a tre bambini in un asilo luminoso" width="1152" height="864">
+    </figure>
   </div>
 
-  <div class="landing-cols">
-    <section class="card" aria-labelledby="asiliTitle">
-      <p class="drawer-sec" id="asiliTitle">Entra nel tuo asilo</p>
-      <p class="hint">Ogni struttura ha i propri bambini e codici famiglia, salvati in modo separato.</p>
-      <ul class="asilo-list" id="asiloList"></ul>
-      <p class="empty" id="asiloEmpty" hidden>Nessun asilo registrato su questo dispositivo: crea il primo qui a fianco.</p>
-      <div class="demo-strip">
-        <p class="hint">Vuoi solo guardare? La demo contiene un asilo già pronto.</p>
-        <button type="button" class="btn btn-ghost btn-sm" data-action="goto-demo">Apri la demo</button>
-      </div>
-    </section>
+  <ul class="landing-feats">
+    <li><span aria-hidden="true">🍼</span><strong>Memo rapidi</strong><small>Cosa portare in nido, con conferma dei genitori</small></li>
+    <li><span aria-hidden="true">🍝</span><strong>Menù del mese</strong><small>Calendario pasti visibile alle famiglie</small></li>
+    <li><span aria-hidden="true">🧾</span><strong>Bollettino pasti</strong><small>Pasti, tariffe e totali pronti per l'export</small></li>
+    <li><span aria-hidden="true">😴</span><strong>Diario della giornata</strong><small>Pranzo, riposo e note per i genitori</small></li>
+    <li><span aria-hidden="true">📣</span><strong>Avvisi a tutte le famiglie</strong><small>Un tocco e il messaggio arriva a tutti</small></li>
+    <li><span aria-hidden="true">🏫</span><strong>Multi-asilo</strong><small>Ogni struttura con dati e accessi separati</small></li>
+  </ul>
 
-    <section class="card" aria-labelledby="signupTitle">
+  <section class="landing-steps" aria-labelledby="stepsTitle">
+    <h2 id="stepsTitle" class="landing-sec-title">Come funziona</h2>
+    <ol class="steps-grid">
+      <li class="step"><span class="step-num" aria-hidden="true">1</span><strong>Registra il tuo asilo</strong><small>Scegli il nome della struttura e una password per le maestre: lo spazio è subito pronto.</small></li>
+      <li class="step"><span class="step-num" aria-hidden="true">2</span><strong>Aggiungi bambini e classi</strong><small>Iscrivi i bambini, organizzali per classe e assegna a ognuno il suo codice famiglia.</small></li>
+      <li class="step"><span class="step-num" aria-hidden="true">3</span><strong>Invita le famiglie</strong><small>I genitori entrano con il codice del bambino e trovano memo, menù, diario e avvisi.</small></li>
+    </ol>
+  </section>
+
+  <div class="landing-cols">
+    <section class="card signup-card" aria-labelledby="signupTitle">
       <p class="drawer-sec" id="signupTitle">Registra il tuo asilo</p>
+      <p class="hint">Un minuto ed è pronto: nessuna installazione, nessun costo.</p>
       <form id="signupForm" novalidate>
         <label class="field"><span>Nome dell'asilo</span>
           <input type="text" class="input" id="signupName" maxlength="40" placeholder="es. Asilo Nido Arcobaleno" autocomplete="organization" required>
@@ -66,9 +82,23 @@
       </form>
       <p class="hint">Dopo la registrazione entri subito: username <code>admin</code> e la password scelta. I genitori accedono col codice bambino.</p>
     </section>
+
+    <aside class="card landing-aside" aria-labelledby="whyTitle">
+      <p class="drawer-sec" id="whyTitle">Perché Asilapp</p>
+      <ul class="perk-list">
+        <li><span aria-hidden="true">🔒</span><div><strong>Ogni asilo è un'isola</strong><small>Bambini, classi e codici famiglia separati per struttura: i nomi degli asili non vengono mai mostrati in giro.</small></div></li>
+        <li><span aria-hidden="true">📱</span><div><strong>Dal browser del telefono</strong><small>Le maestre aggiornano tutto al volo, le famiglie leggono da casa.</small></div></li>
+        <li><span aria-hidden="true">💾</span><div><strong>Backup in un tap</strong><small>Esporta e ripristina i dati quando vuoi, su qualunque dispositivo.</small></div></li>
+      </ul>
+      <div class="demo-strip">
+        <p class="hint">Vuoi solo guardare? La demo contiene un asilo già pronto.</p>
+        <button type="button" class="btn btn-outline btn-sm" data-action="goto-demo">Apri la demo</button>
+      </div>
+      <p class="hint">Hai già uno spazio? <button type="button" class="link-btn" data-action="goto-login">Accedi col nome del tuo asilo</button></p>
+    </aside>
   </div>
 
-  <p class="login-foot">I dati di ogni asilo restano salvati solo in questo browser.</p>
+  <p class="login-foot">I dati di ogni asilo restano salvati solo nel browser che li ha creati.</p>
 </section>
 
 <!-- ============ LOGIN ============ -->
@@ -107,7 +137,7 @@
       <p><strong>Demo maestre:</strong> Asilo Nido Arcobaleno · <code>admin</code> · <code>nido2024</code></p>
       <p><strong>Demo genitori:</strong> stesso asilo · codice <code>B001</code></p>
     </div>
-    <button type="button" class="link-btn" data-action="switch-asilo" style="margin:.4rem auto 0">↩ Non è questo il tuo asilo? Scegline un altro</button>
+    <button type="button" class="link-btn" data-action="switch-asilo" style="margin:.4rem auto 0">↩ Torna alla home di Asilapp</button>
   </div>
   <p class="login-foot">I dati restano salvati solo in questo browser.</p>
 </section>

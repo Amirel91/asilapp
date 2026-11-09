@@ -1,20 +1,58 @@
 /* ============================================================
-   landing.css — home Asilapp: scelta e registrazione dell'asilo
+   landing.css — home Asilapp: descrizione e registrazione asilo
    Riusa il design system di style.css (variabili, .card, .btn…)
    ============================================================ */
-.landing-view { max-width: 1080px; margin: 0 auto; padding: 0 .85rem 3rem; display: grid; gap: 1.2rem; align-content: start; }
+.landing-view { max-width: 1080px; margin: 0 auto; padding: 0 .85rem 3rem; display: grid; gap: 1.6rem; align-content: start; }
 
-.landing-top { display: flex; align-items: center; justify-content: space-between; gap: .6rem; padding-top: calc(.9rem + env(safe-area-inset-top)); }
+/* ---------- barra di navigazione landing ---------- */
+.landing-nav {
+  display: flex; align-items: center; justify-content: space-between; gap: .6rem;
+  padding-top: calc(.9rem + env(safe-area-inset-top));
+}
+.landing-nav .actions { display: flex; gap: .45rem; flex-wrap: wrap; }
 
+.brand {
+  display: flex; align-items: center; gap: .6rem; min-width: 0;
+}
+.brand-txt { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
+.brand-txt strong { font-size: 1.02rem; letter-spacing: -.01em; }
+.brand-txt small { font-size: .72rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 46vw; }
+
+/* ---------- hero ---------- */
 .landing-hero {
   background: linear-gradient(135deg, var(--sage-soft), var(--sky-soft));
   border: 1px solid var(--line); border-radius: var(--r-lg);
-  padding: 1.6rem 1.3rem; display: grid; gap: .8rem;
+  padding: 1.6rem 1.3rem; display: grid; gap: 1rem;
 }
 .landing-hero h1 { font-size: clamp(1.4rem, 4vw, 2rem); letter-spacing: -.02em; line-height: 1.2; }
 .landing-hero > p { color: var(--ink-soft); font-size: .95rem; max-width: 56ch; }
 
-.landing-feats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: .6rem; margin-top: .4rem; }
+.hero-badge {
+  display: inline-flex; align-items: center; gap: .35rem;
+  font-size: .74rem; font-weight: 700; letter-spacing: .02em;
+  background: var(--card); color: var(--sage-ink);
+  border: 1px solid #d6e1d8; border-radius: 999px; padding: .3rem .75rem;
+  box-shadow: var(--sh-sm); width: fit-content;
+}
+
+.hero-copy { display: grid; gap: .8rem; align-content: start; }
+.hero-copy > p { color: var(--ink-soft); font-size: .97rem; max-width: 52ch; }
+
+.hero-cta { display: flex; gap: .55rem; flex-wrap: wrap; }
+
+.hero-art { display: none; }
+@media (min-width: 760px) {
+  .landing-hero { grid-template-columns: 1.2fr .8fr; align-items: center; }
+  .hero-art {
+    display: block; border-radius: var(--r); overflow: hidden;
+    border: 1px solid var(--line); box-shadow: var(--sh-md);
+    max-height: 300px;
+  }
+  .hero-art img { display: block; width: 100%; height: 100%; object-fit: cover; }
+}
+
+/* ---------- griglia funzioni ---------- */
+.landing-feats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: .6rem; }
 .landing-feats li {
   background: var(--card); border: 1px solid var(--line); border-radius: var(--r);
   padding: .8rem .85rem; display: grid; grid-template-columns: auto 1fr; gap: .2rem .55rem; align-items: center;
@@ -24,8 +62,39 @@
 .landing-feats strong { font-size: .88rem; letter-spacing: -.01em; }
 .landing-feats small { color: var(--muted); line-height: 1.35; }
 
+/* ---------- titoli di sezione ---------- */
+.landing-sec-title { font-size: 1.1rem; letter-spacing: -.01em; margin-bottom: .1rem; }
+.landing-sec-sub { color: var(--muted); font-size: .86rem; margin-bottom: .8rem; }
+
+/* ---------- come funziona: 3 step ---------- */
+.landing-steps { margin-top: .3rem; }
+.steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: .7rem; }
+.step {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--r);
+  padding: 1rem .9rem; display: grid; gap: .4rem; box-shadow: var(--sh-sm);
+}
+.step-num {
+  width: 30px; height: 30px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--sage); color: #fff; font-weight: 700; font-size: .85rem;
+  box-shadow: var(--sh-sm);
+}
+.step strong { font-size: .92rem; letter-spacing: -.01em; }
+.step small { color: var(--muted); line-height: 1.45; font-size: .82rem; }
+
+/* ---------- perk: perché Asilapp ---------- */
+.perk-list { display: grid; gap: .5rem; }
+.perk-list li {
+  display: flex; gap: .55rem; align-items: flex-start;
+  font-size: .88rem; color: var(--ink-soft); line-height: 1.5;
+}
+.perk-list li > span { font-size: 1.1rem; flex-shrink: 0; }
+
+/* ---------- colonne finali ---------- */
 .landing-cols { display: grid; gap: 1rem; align-items: start; }
 @media (min-width: 800px) { .landing-cols { grid-template-columns: 1fr 1fr; } }
+
+.landing-cols .card.signup { border-left: 4px solid var(--sage); }
 
 .asilo-list { display: grid; gap: .4rem; margin-top: .6rem; }
 .asilo-list li {
@@ -37,3 +106,5 @@
 .asilo-list .tpl-txt { flex: 1; min-width: 0; overflow-wrap: anywhere; font-size: .92rem; }
 
 .demo-strip { display: flex; align-items: center; justify-content: space-between; gap: .6rem; flex-wrap: wrap; border-top: 1px dashed var(--line); margin-top: .8rem; padding-top: .7rem; }
+
+.login-foot { font-size: .72rem; color: var(--muted); text-align: center; }

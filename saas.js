@@ -63,23 +63,9 @@ window.ASILO = (function () {
 (function () {
   if (typeof ASILO === 'undefined') return;
 
-  function renderAsili() {
-    const list = document.getElementById('asiloList');
-    const empty = document.getElementById('asiloEmpty');
-    if (!list) return;
-    const reg = ASILO.registry();
-    if (empty) empty.hidden = reg.length > 0;
-    list.innerHTML = reg.map(a =>
-      `<li>
-        <span class="tpl-txt"><strong>${esc(a.name)}</strong></span>
-        <button type="button" class="btn btn-primary btn-sm" data-action="asilo-enter" data-id="${a.id}">Entra</button>
-      </li>`).join('');
-  }
-
   function showLanding() {
     if (typeof show !== 'function') return;
     show('viewLanding');
-    renderAsili();
     const n = document.getElementById('signupName');
     if (n) n.focus();
   }
@@ -114,6 +100,17 @@ window.ASILO = (function () {
     const b = t.closest('[data-action="asilo-enter"]');
     if (b) { enter(b.getAttribute('data-id')); return; }
     if (t.closest('[data-action="goto-demo"]')) { enter('demo'); return; }
+    if (t.closest('[data-action="goto-login"]')) {
+      if (typeof show === 'function') show('viewLogin');
+      const a = document.getElementById('loginAsilo');
+      if (a) a.focus();
+      return;
+    }
+    if (t.closest('[data-action="goto-signup"]')) {
+      const f = document.getElementById('signupName');
+      if (f) { f.scrollIntoView({ behavior: 'smooth', block: 'center' }); f.focus({ preventScroll: true }); }
+      return;
+    }
     if (t.closest('[data-action="switch-asilo"]')) { ASILO.exit(); location.reload(); }
   });
   document.addEventListener('submit', e => {
