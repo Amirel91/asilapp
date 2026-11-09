@@ -88,9 +88,11 @@ window.ASILO = (function () {
     if (pw !== pw2) return fail('Le due password non coincidono.');
     const r = ASILO.signup(name, pw);
     if (r.err) return fail(r.err);
+    const btn = document.getElementById('signupBtn');
+    if (btn) { btn.disabled = true; btn.textContent = '\u2713 Asilo creato: preparo lo spazio\u2026'; }
     ASILO.enter(r.id);
     if (typeof toast === 'function') toast('Asilo registrato! Benvenute \u2713');
-    setTimeout(() => location.reload(), 400);
+    setTimeout(() => location.reload(), 500);
   }
 
   function enter(id) {

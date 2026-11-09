@@ -8,6 +8,7 @@
 <meta name="theme-color" content="#faf9f7">
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="landing.css">
+<link rel="stylesheet" href="landing-extra.css">
 </head>
 <body>
 
@@ -38,10 +39,14 @@
         <button type="button" class="btn btn-primary" data-action="goto-signup">Crea lo spazio del tuo asilo</button>
         <button type="button" class="btn btn-ghost" data-action="goto-login">Ho già un asilo</button>
       </div>
-      <p class="hint">Funziona dal browser: i dati restano sul dispositivo dell'asilo.</p>
+      <ul class="trust-row" aria-label="Perché è semplice iniziare">
+        <li>⏱️ Pronto in un minuto</li>
+        <li>📲 Nessuna installazione</li>
+        <li>🔒 Dati solo nel vostro browser</li>
+      </ul>
     </div>
     <figure class="hero-art">
-      <img src="![[EVOCI|illustrazione in acquerello morbido di un'educatrice che legge un libro a tre bambini piccoli seduti su un tappeto in un asilo luminoso e ordinato, colori caldi salvia terracotta e crema, luce naturale dalla finestra, atmosfera serena e dolce|1152x864]]" alt="Un'educatrice racconta una storia a tre bambini in un asilo luminoso" width="1152" height="864">
+      <img src="![[EVOCI|illustrazione ad acquerello morbido di una maestra che racconta una storia a tre bambini piccoli seduti su un tappeto rotondo in un asilo luminoso e ordinato, palette salvia terracotta e crema, luce naturale dalla finestra, atmosfera serena e dolce|1152x864]]" alt="Una maestra racconta una storia a tre bambini seduti su un tappeto in un asilo luminoso" width="1152" height="864">
     </figure>
   </div>
 
@@ -53,6 +58,33 @@
     <li><span aria-hidden="true">📣</span><strong>Avvisi a tutte le famiglie</strong><small>Un tocco e il messaggio arriva a tutti</small></li>
     <li><span aria-hidden="true">🏫</span><strong>Multi-asilo</strong><small>Ogni struttura con dati e accessi separati</small></li>
   </ul>
+
+  <section class="landing-audience" aria-labelledby="audTitle">
+    <h2 id="audTitle" class="landing-sec-title">Due mani sulla stessa giornata</h2>
+    <p class="landing-sec-sub">Le maestre scrivono, le famiglie leggono: Asilapp tiene insieme le due parti con strumenti semplici.</p>
+    <div class="aud-grid">
+      <article class="aud-card">
+        <span class="aud-ico" aria-hidden="true">👩‍🏫</span>
+        <h3>Per le maestre</h3>
+        <ul>
+          <li>Scheda bambino con memo, diario e nota salute</li>
+          <li>Menù del mese in un calendario da toccare</li>
+          <li>Bollettino pasti con totali pronti per l'export</li>
+          <li>Un avviso e tutte le famiglie sono informate</li>
+        </ul>
+      </article>
+      <article class="aud-card aud-card-fam">
+        <span class="aud-ico" aria-hidden="true">👨‍👩‍👧</span>
+        <h3>Per le famiglie</h3>
+        <ul>
+          <li>Si entra col solo codice del bambino</li>
+          <li>Cosa serve domani, con conferma in un tap</li>
+          <li>Menù e diario della giornata sempre aggiornati</li>
+          <li>Niente da installare: funziona dal browser</li>
+        </ul>
+      </article>
+    </div>
+  </section>
 
   <section class="landing-steps" aria-labelledby="stepsTitle">
     <h2 id="stepsTitle" class="landing-sec-title">Come funziona</h2>
@@ -72,13 +104,24 @@
           <input type="text" class="input" id="signupName" maxlength="40" placeholder="es. Asilo Nido Arcobaleno" autocomplete="organization" required>
         </label>
         <label class="field"><span>Password maestre</span>
-          <input type="password" class="input" id="signupPass" minlength="6" maxlength="40" placeholder="almeno 6 caratteri" autocomplete="new-password" required>
+          <span class="pw-wrap">
+            <input type="password" class="input" id="signupPass" minlength="6" maxlength="40" placeholder="almeno 6 caratteri" autocomplete="new-password" required>
+            <button type="button" class="pw-toggle" data-pw-toggle="signupPass" aria-label="Mostra la password" aria-pressed="false">👁</button>
+          </span>
         </label>
         <label class="field"><span>Ripeti la password</span>
-          <input type="password" class="input" id="signupPass2" maxlength="40" placeholder="ancora la stessa password" autocomplete="new-password" required>
+          <span class="pw-wrap">
+            <input type="password" class="input" id="signupPass2" maxlength="40" placeholder="ancora la stessa password" autocomplete="new-password" required>
+            <button type="button" class="pw-toggle" data-pw-toggle="signupPass2" aria-label="Mostra la password" aria-pressed="false">👁</button>
+          </span>
         </label>
+        <ul class="pw-check" id="pwCheck" aria-label="Requisiti per completare la registrazione">
+          <li data-need="name">Nome dell'asilo di almeno 3 lettere</li>
+          <li data-need="len">Password di almeno 6 caratteri</li>
+          <li data-need="match">Le due password coincidono</li>
+        </ul>
         <p class="login-err" id="signupErr" hidden></p>
-        <button type="submit" class="btn btn-primary btn-block">Crea lo spazio del mio asilo</button>
+        <button type="submit" class="btn btn-primary btn-block" id="signupBtn">Crea lo spazio del mio asilo</button>
       </form>
       <p class="hint">Dopo la registrazione entri subito: username <code>admin</code> e la password scelta. I genitori accedono col codice bambino.</p>
     </section>
@@ -98,7 +141,46 @@
     </aside>
   </div>
 
-  <p class="login-foot">I dati di ogni asilo restano salvati solo nel browser che li ha creati.</p>
+  <section class="landing-faq" aria-labelledby="faqTitle">
+    <h2 id="faqTitle" class="landing-sec-title">Domande frequenti</h2>
+    <div class="faq">
+      <details>
+        <summary>Quanto costa Asilapp?</summary>
+        <p>Niente abbonamenti e nessuna carta di credito: registri l'asilo in un minuto e lo spazio è subito tuo, gratis e senza pubblicità.</p>
+      </details>
+      <details>
+        <summary>Dove finiscono i dati del mio asilo?</summary>
+        <p>Solo nel browser che li ha creati: ogni asilo ha la sua chiave di salvataggio separata e i nomi delle strutture non vengono mai mostrati in giro. Dalle Impostazioni puoi scaricare un backup e ripristinarlo quando vuoi.</p>
+      </details>
+      <details>
+        <summary>Le famiglie devono installare qualcosa?</summary>
+        <p>No: basta aprire Asilapp dal browser e inserire il nome dell'asilo insieme al codice famiglia del bambino, per esempio B001. Nessuna app, nessuna registrazione con email.</p>
+      </details>
+      <details>
+        <summary>Posso provarlo prima di registrare il mio asilo?</summary>
+        <p>Certo: la demo «Asilo Nido Arcobaleno» è già pronta con bambini, memo e menù. Entra come maestra con admin e nido2024, o come genitore col codice B001.</p>
+      </details>
+      <details>
+        <summary>Se cambio telefono o computer?</summary>
+        <p>Scarica il backup dalle Impostazioni del vecchio dispositivo e ripristinalo sul nuovo: tornano bambini, classi, memo, menù e bollettini pasti.</p>
+      </details>
+    </div>
+  </section>
+
+  <footer class="landing-footer">
+    <div class="brand">
+      <span class="logo logo-sm" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-8"/><path d="M12 13c0-4 3-7 8-7 0 5-3 8-8 8z"/><path d="M12 10C12 6.5 9.5 4 5 4c0 4.5 2.5 7 7 7z"/></svg>
+      </span>
+      <div class="brand-txt"><strong>Asilapp</strong><small>il nido, in tasca alle famiglie</small></div>
+    </div>
+    <nav class="landing-links" aria-label="Link rapidi">
+      <button type="button" class="link-btn" data-action="goto-signup">Crea il tuo asilo</button>
+      <button type="button" class="link-btn" data-action="goto-login">Accedi</button>
+      <button type="button" class="link-btn" data-action="goto-demo">Demo</button>
+    </nav>
+  </footer>
+  <p class="login-foot">I dati di ogni asilo restano salvati solo nel browser che li ha creati: nessun server, nessun cloud.</p>
 </section>
 
 <!-- ============ LOGIN ============ -->

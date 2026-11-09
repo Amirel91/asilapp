@@ -1,12 +1,14 @@
 'use strict';
 /* ============================================================
-   login.js — rifinitura UX del login
-   - campo «Nome dell'asilo» sempre primo e attivo, per maestre
-     e genitori: ogni accesso parte dalla struttura giusta
-   - autocompletamento dal nome già usato in questo browser
-   - bottone «Prova demo» che riempie i campi giusti per ruolo
-   Zero modifiche a script.js: usa i globali show, setRoleTab, ASILO.
+   login.js — UX di accesso e registrazione
+   Modulo 1 (esistente): campo «Nome dell'asilo» primo e attivo,
+     autocompletamento dall'ultimo asilo usato, riempimento demo.
+   Modulo 2 (nuovo): form di registrazione user-friendly —
+     password visibile/nascosta e checklist live dei requisiti.
+   Zero modifiche a script.js e saas.js: solo DOM ed eventi propri.
    ============================================================ */
+
+/* ---------- modulo 1: login ---------- */
 (function () {
   if (typeof ASILO === 'undefined') return;
 
@@ -99,4 +101,49 @@
     const v = document.getElementById('viewLogin');
     if (v && !v.hidden) requestAnimationFrame(focusFirst);
   });
+})();
+
+/* ---------- modulo 2: registrazione user-friendly ---------- */
+(function () {
+  const form = document.getElementById('signupForm');
+  if (!form) return;
+
+  /* mostra/nascondi password */
+  function togglePw(btn) {
+    const inp = document.getElementById(btn.getAttribute('data-pw-toggle'));
+    if (!inp) return;
+    const show = inp.type === 'password';
+    inp.type = show ? 'text' : 'password';
+    btn.textContent = show ? '🙈' : '👁';
+    btn.setAttribute('aria-pressed', String(show));
+    btn.setAttribute('aria-label', show ? 'Nascondi la password' : 'Mostra la password');
+  }
+
+  /* checklist live: riflette le regole vere di validazione */
+  function refreshChecks() {
+    const ul = document.getElementById('pwCheck');
+    if (!ul) return;
+    const name = (((document.getElementById('signupName') || {}).value) || '').trim().replace(/\s+/g, ' ');
+    const p1 = ((document.getElementById('signupPass') || {}).value) || '';
+    const p2 = ((document.getElementById('signupPass2') || {}).value) || '';
+    const set = (need, ok) => {
+      const li = ul.querySelector('[data-need="' + need + '"]');
+      if (li) li.classList.toggle('ok', !!ok);
+    };
+    set('name', name.length >= 3);
+    set('len', p1.length >= 6);
+    set('match', p1.length > 0 && p1 === p2);
+  }
+
+  document.addEventListener('click', e => {
+    const t = e.target;
+    if (t instanceof Element) {
+      const btn = t.closest('[data-pw-toggle]');
+      if (btn) togglePw(btn);
+    }
+  });
+
+  form.addEventListener('input', refreshChecks);
+  window.addEventListener('load', refreshChecks); // copia incollata di credenziali, autocomplit del browser
+  refreshChecks();
 })();
