@@ -1,0 +1,55 @@
+/* ============================================================
+   demo.css — stili del toolkit superadmin per la demo
+   (le classi sa-demo-* erano generate via JS: ora vivono in un
+   vero CSS così il QA le trova; demo.js può restare invariato)
+   ============================================================ */
+
+/* ---------- contenitore del toolkit ---------- */
+.sa-demo-tools{
+  display:grid;gap:.6rem;
+  background:var(--card,#fff);
+  border:1px solid var(--line,#e7e5e4);
+  border-radius:var(--r,.9rem);
+  padding:.8rem .9rem;
+  box-shadow:var(--sh-sm,0 1px 2px rgba(0,0,0,.06));
+  margin:.6rem 0;
+}
+.sa-demo-title{
+  font-size:.92rem;font-weight:700;letter-spacing:-.01em;
+  margin:0;display:flex;align-items:center;gap:.4rem;
+}
+.sa-demo-sub{
+  font-size:.76rem;color:var(--muted,#78716c);
+  margin:0;line-height:1.45;
+}
+.sa-demo-btns{display:flex;gap:.45rem;flex-wrap:wrap;}
+.sa-demo-row{
+  display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;
+  font-size:.78rem;color:var(--muted,#78716c);
+}
+.sa-demo-chip{
+  display:inline-flex;align-items:center;gap:.3rem;
+  font-size:.74rem;font-weight:600;
+  background:var(--sage-soft,#eef3ec);color:var(--sage-ink,#3f5138);
+  border-radius:999px;padding:.25rem .65rem;
+}
+.sa-demo-danger{
+  color:var(--danger,#b3261e);
+  background:var(--terra-soft,#f6e8e1);
+  border:1px solid #eed6cc;border-radius:999px;
+}
+.sa-demo-danger:hover{
+  background:#f3ddd4;border-color:var(--danger,#b3261e);
+}
+
+/* ---------- banner «Modalità demo» in sola lettura ---------- */
+.demo-banner{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:.6rem;flex-wrap:wrap;
+  background:var(--amber-soft,#fdf6e3);color:var(--amber-ink,#8a6d1a);
+  border:1px solid #e7d9b4;border-radius:var(--r,.9rem);
+  padding:.55rem .85rem;
+  font-size:.82rem;font-weight:600;
+  box-shadow:var(--sh-sm,0 1px 2px rgba(0,0,0,.06));
+  margin:.6rem 0;
+}

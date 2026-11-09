@@ -8,9 +8,18 @@
 <meta name="theme-color" content="#faf9f7">
  <link rel="stylesheet" href="style.css">
  <script src="demo.js" defer></script>
- <script src="demo-parent.js" defer></script><link rel="stylesheet" href="landing.css">
-<link rel="stylesheet" href="landing-extra.css">
-</head>
+ <script src="demo-parent.js" defer></script>
+ <script src="install.js" defer></script>
+ <link rel="stylesheet" href="landing.css">
+ <link rel="manifest" href="manifest.webmanifest">
+ <link rel="icon" href="icon.svg" type="image/svg+xml" sizes="any">
+ <link rel="apple-touch-icon" href="![[EVOCI|icona quadrata per app mobile, germoglio con due foglie stilizzato color crema su sfondo verde salvia pieno, flat design minimale, soggetto centrato grande, nessun testo, nessun bordo|1024x1024]]">
+ <meta name="apple-mobile-web-app-capable" content="yes">
+ <meta name="mobile-web-app-capable" content="yes">
+ <meta name="apple-mobile-web-app-status-bar-style" content="default">
+ <meta name="apple-mobile-web-app-title" content="Asilapp">
+ <link rel="stylesheet" href="landing-extra.css">
+<link rel="stylesheet" href="demo.css"></head>
 <body>
 
 <!-- TOAST -->
@@ -41,7 +50,7 @@
       </div>
       <ul class="trust-row" aria-label="Perché è semplice iniziare">
         <li>⏱️ Pronto in un minuto</li>
-        <li>📲 Nessuna installazione</li>
+        <li>📲 Si installa con un tap</li>
         <li>🔒 Dati solo nel vostro browser</li>
       </ul>
     </div>
@@ -373,7 +382,7 @@
           <p class="drawer-sec">Classi, sezioni e sedi</p>
           <button type="button" class="link-btn" data-action="sec-new">+ Nuova</button>
         </div>
-        <p class="hint">Crea qui le classi, le sezioni o le sedi dell'asilo: ogni bambino viene iscritto a una di queste classi dalla propria scheda.</p> una di queste e si può spostare dal suo pannelino.</p>
+        <p class="hint">Crea qui le classi, le sezioni o le sedi dell'asilo: ogni bambino viene iscritto a una di queste classi quando lo aggiungi dall'elenco Bambini.</p> una di queste e le famiglie le vedono nell'area riservata.</p> una di queste classi dalla propria scheda.</p> una di queste e si può spostare dal suo pannelino.</p>
 
         <form class="add-form" id="secForm" hidden novalidate>
           <label class="field"><span>Nome classe, sezione o sede</span>
