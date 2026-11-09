@@ -92,9 +92,8 @@
 }
 .perk-list li > span { font-size: 1.1rem; flex-shrink: 0; }
 
-/* ---------- colonne finali ---------- */
-.landing-cols { display: grid; gap: 1rem; align-items: start; }
-@media (min-width: 800px) { .landing-cols { grid-template-columns: 1fr 1fr; } }
+/* ---------- fascia finale: colonna unica centrata (la landing snella ha solo l'aside) ---------- */
+.landing-cols { display: grid; gap: 1rem; align-items: start; width: 100%; max-width: 660px; margin: 0 auto; }
 
 .landing-cols .card.signup { border-left: 4px solid var(--sage); }
 
