@@ -1,65 +1,175 @@
 /* ============================================================
-   pages.css — pagine secondarie (info, registrazione, contatti)
-   Riusa variabili e componenti di style.css / landing.css
+   pages.css — pagine statiche: info.html, contatti.html,
+   registrazione.html. Porta il design system della landing
+   (hero, card, step, FAQ) nel namespace page-*, mobile-first.
    ============================================================ */
 
+/* ---------- scheletro della pagina ---------- */
 .page-body {
   min-height: 100vh;
-  background: var(--bg);
-  color: var(--ink);
-  font-family: inherit;
+  display: flex; flex-direction: column;
+  background: var(--bg); color: var(--ink);
 }
 
-/* ---------- barra superiore ---------- */
+/* ---------- barra superiore con brand e navigazione ---------- */
 .page-top {
-  max-width: 880px; margin: 0 auto;
-  padding: calc(.9rem + env(safe-area-inset-top)) .85rem .4rem;
+  position: sticky; top: 0; z-index: 30;
   display: flex; align-items: center; justify-content: space-between;
   gap: .8rem; flex-wrap: wrap;
+  padding: .7rem .9rem;
+  padding-top: calc(.7rem + env(safe-area-inset-top));
+  background: var(--card);
+  border-bottom: 1px solid var(--line);
 }
-.page-top .brand { text-decoration: none; color: inherit; }
-.page-nav { display: flex; gap: .55rem; flex-wrap: wrap; align-items: center; }
+.page-top .page-nav {
+  display: flex; gap: .45rem; flex-wrap: wrap; align-items: center;
+}
 
-/* ---------- struttura pagina ---------- */
+/* ---------- contenuto centrale ---------- */
 .page-main {
-  max-width: 880px; margin: 0 auto;
-  padding: 0 .85rem calc(2.4rem + env(safe-area-inset-bottom));
-  display: grid; gap: 1.4rem; align-content: start;
+  width: 100%; max-width: 920px; margin: 0 auto;
+  padding: 1.4rem .9rem 2.5rem;
+  display: grid; gap: 1.5rem; align-content: start;
+  flex: 1 1 auto; /* spinge il footer in fondo anche su pagine corte */
 }
-.page-main-narrow { max-width: 560px; }
+.page-main-narrow { max-width: 620px; }
 
-.page-hero h1 { font-size: clamp(1.4rem, 4.5vw, 2rem); letter-spacing: -.02em; line-height: 1.2; margin: 0 0 .4rem; }
-.page-hero p { color: var(--ink-soft); font-size: .95rem; line-height: 1.55; margin: 0; max-width: 60ch; }
+/* ---------- hero: stesso gradiente salvia/cielo della landing ---------- */
+.page-hero {
+  background: linear-gradient(135deg, var(--sage-soft), var(--sky-soft));
+  border: 1px solid var(--line); border-radius: var(--r-lg);
+  padding: 1.5rem 1.2rem;
+  display: grid; gap: .55rem;
+  box-shadow: var(--sh-sm);
+}
+.page-hero h1 {
+  margin: 0;
+  font-size: clamp(1.45rem, 4.5vw, 2.05rem);
+  letter-spacing: -.02em; line-height: 1.15;
+}
+.page-hero p {
+  margin: 0; color: var(--ink-soft);
+  font-size: .95rem; line-height: 1.6; max-width: 58ch;
+}
 
-.page-sec { display: grid; gap: .7rem; }
-.page-sec > h2 { font-size: 1.15rem; letter-spacing: -.01em; margin: 0; }
+/* ---------- sezioni ---------- */
+.page-sec { display: grid; gap: .8rem; }
+.page-sec > h2 { margin: 0; font-size: 1.12rem; letter-spacing: -.01em; }
 
-/* griglia di card informative */
-.page-grid { display: grid; gap: .7rem; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
-.page-grid .card { padding: .95rem .95rem; display: grid; gap: .35rem; align-content: start; box-shadow: var(--sh-sm); }
-.page-grid .card h3 { font-size: .95rem; margin: 0; display: flex; align-items: baseline; gap: .35rem; }
-.page-grid .card p { margin: 0; color: var(--ink-soft); font-size: .86rem; line-height: 1.5; }
-
+/* griglia di card funzionali */
+.page-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: .7rem;
+}
+.page-grid .card {
+  padding: .95rem;
+  display: grid; gap: .4rem; align-content: start;
+}
+.page-grid .card h3 { margin: 0; font-size: .95rem; letter-spacing: -.01em; }
+.page-grid .card p {
+  margin: 0; color: var(--ink-soft);
+  font-size: .86rem; line-height: 1.55;
+}
 /* variante famiglie: filo terracotta */
-.page-card-terra { border-left: 4px solid var(--terra, #c2704e); }
+.page-card-terra { border-left: 4px solid var(--terra); }
 
-/* card CTA finale */
-.page-cta { text-align: center; padding: 1.3rem 1rem; display: grid; gap: .5rem; justify-items: center; }
-.page-cta h2 { margin: 0; font-size: 1.1rem; }
-.page-cta p { margin: 0; color: var(--ink-soft); font-size: .9rem; }
-.page-cta-btns { display: flex; gap: .55rem; flex-wrap: wrap; justify-content: center; margin-top: .3rem; }
-.page-cta .btn { text-decoration: none; }
-
-/* footer */
-.page-foot {
-  border-top: 1px solid var(--line);
-  padding: 1rem .85rem calc(1.2rem + env(safe-area-inset-bottom));
-  text-align: center; font-size: .78rem; color: var(--muted);
+/* ---------- tre passi numerati (stessa ricetta della landing) ---------- */
+.steps-grid {
+  list-style: none; margin: 0; padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: .7rem;
 }
-.page-foot a { color: var(--sage-ink); }
+.step {
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: var(--r); padding: 1rem .9rem;
+  display: grid; gap: .45rem;
+  box-shadow: var(--sh-sm);
+}
+.step-num {
+  width: 30px; height: 30px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--sage); color: #fff;
+  font-weight: 700; font-size: .85rem;
+  box-shadow: var(--sh-sm);
+}
+.step strong { font-size: .93rem; letter-spacing: -.01em; }
+.step small { color: var(--muted); line-height: 1.5; font-size: .82rem; }
 
-/* link stilizzati come bottoni ghost nelle nav */
-.page-nav .link-btn, .page-top .link-btn { text-decoration: none; }
+/* ---------- FAQ a fisarmonica ---------- */
+.faq { display: grid; gap: .55rem; max-width: 760px; }
+.faq details {
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: var(--r); padding: .75rem .95rem;
+  box-shadow: var(--sh-sm);
+}
+.faq details[open] { border-color: #ddd7d0; }
+.faq summary {
+  cursor: pointer; font-weight: 600; font-size: .92rem;
+  list-style: none;
+  display: flex; justify-content: space-between; align-items: center; gap: .6rem;
+}
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: '+'; font-size: 1.1rem; color: var(--muted); font-weight: 400; }
+.faq details[open] summary::after { content: '–'; }
+.faq details p {
+  margin: .55rem 0 0; color: var(--ink-soft);
+  font-size: .87rem; line-height: 1.55;
+}
 
-/* textarea allineata agli input */
-textarea.input { resize: vertical; min-height: 6.5rem; font: inherit; }
+/* ---------- blocco CTA finale ---------- */
+.page-cta {
+  display: grid; gap: .6rem; justify-items: center; text-align: center;
+  padding: 1.4rem 1rem;
+  border-left: 4px solid var(--sage);
+}
+.page-cta h2 { margin: 0; font-size: 1.15rem; letter-spacing: -.01em; }
+.page-cta p { margin: 0; color: var(--ink-soft); font-size: .9rem; }
+.page-cta-btns { display: flex; gap: .55rem; flex-wrap: wrap; justify-content: center; }
+
+/* ---------- footer + credito MecaLab ---------- */
+.page-foot {
+  width: 100%; max-width: 920px; margin: 0 auto;
+  padding: 1.2rem .9rem calc(1.4rem + env(safe-area-inset-bottom));
+  display: grid; gap: .35rem;
+  border-top: 1px solid var(--line);
+  font-size: .8rem; color: var(--muted);
+}
+.page-foot p { margin: 0; }
+.page-credit {
+  margin: .55rem 0 0; padding-top: .55rem;
+  border-top: 1px dashed var(--line);
+  font-size: .74rem; color: var(--muted);
+}
+.page-credit a { color: var(--sage-ink); font-weight: 600; text-decoration: underline; }
+
+/* ---------- indicatore robustezza password (registrazione) ---------- */
+.pw-check { display: grid; gap: .3rem; margin-top: .1rem; }
+.pw-bar {
+  height: 6px; border-radius: 999px;
+  background: var(--bg); border: 1px solid var(--line); overflow: hidden;
+}
+.pw-bar > span {
+  display: block; height: 100%; width: 0;
+  background: var(--danger); border-radius: 999px;
+  transition: width 250ms ease-out, background 250ms ease-out;
+}
+.pw-bar > span.lv1 { width: 33%; background: #e11d48; }
+.pw-bar > span.lv2 { width: 66%; background: #d97706; }
+.pw-bar > span.lv3 { width: 100%; background: var(--sage); }
+.pw-check small { font-size: .74rem; color: var(--muted); }
+
+/* ---------- accessibilità e movimento ---------- */
+.page-body :is(a, button, summary, input):focus-visible {
+  outline: 2px solid var(--sage); outline-offset: 2px; border-radius: 4px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pw-bar > span { transition: none; }
+}
+
+/* ---------- respiro in più sui tablet/desktop ---------- */
+@media (min-width: 768px) {
+  .page-main { padding: 1.8rem 1rem 3rem; gap: 1.8rem; }
+  .page-hero { padding: 1.9rem 1.5rem; }
+}
