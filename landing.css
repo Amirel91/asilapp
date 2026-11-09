@@ -219,6 +219,22 @@
 }
 .landing-links { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
 
+/* ---------- credito MecaLab: riga finale dei footer ---------- */
+.landing-footer .page-credit,
+.page-foot .page-credit {
+  flex: 1 1 100%;
+  margin: .55rem 0 0;
+  padding-top: .55rem;
+  border-top: 1px dashed var(--line);
+  font-size: .74rem;
+  color: var(--muted);
+}
+.landing-footer .page-credit a,
+.page-foot .page-credit a {
+  color: var(--sage-ink); font-weight: 600;
+  text-decoration: underline;
+}
+
 /* ============================================================
    LANDING v2 — trust row, sezione «Per chi», iscrizione guidata,
    FAQ e footer. Riusa il design system (variabili e ombre).
