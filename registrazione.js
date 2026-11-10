@@ -1,114 +1,86 @@
 'use strict';
-/* ============================================================
-   registrazione.js — crea lo spazio di un asilo e rientra
-   Usa l'API ASILO di login.js quando c'è (enter + keyFor);
-   in assenza ripiega sulla convenzione delle chiavi asilapp_vN.
-   Stato salvato nel formato v1 condiviso con script.js:
-   kids, sections, memos, menu, diary, meals, notices.
-   ============================================================ */
+/* registrazione.js — crea lo spazio asilo (localStorage, nessun backend)
+   Riusa i globali di script.js quando presenti (ASILO); altrimenti
+   salva direttamente nella chiave dello spazio scelto. */
 (function () {
   const $ = id => document.getElementById(id);
   const form = $('regForm');
   if (!form) return;
 
-  const clean = v => String(v || '').trim().replace(/\s+/g, ' ');
-  const newId = () => 's' + Math.random().toString(36).slice(2, 8);
-  const say = (m) => { if (typeof toast === 'function') toast(m); };
+  const PREFIX = 'asilapp_v1_';
+  const norm = s => String(s || '').trim().replace(/\s+/g, ' ');
+  const slug = s => norm(s).toLowerCase();
 
-  /* ---------- robustezza password: barra + consiglio ---------- */
-  const pass = $('regPass');
-  const bar = $('regBar');
-  const msg = $('pwMsg');
-  const LEVELS = ['Almeno 6 caratteri, meglio con un numero.', 'Ok, ma un numero la rende più robusta.', 'Buona: ancora un po\u2019 pi\u00f9 lunga è perfetta.', 'Password robusta ✓'];
-
-  function level(v) {
+  /* ---------- indicatore robustezza password ---------- */
+  const pass = $('rgPass'), bar = $('rgBar'), meter = $('rgMeter'), txt = $('rgMeterTxt');
+  function score(v) {
     let s = 0;
-    if (v.length >= 6) s++;
-    if (/[A-Za-z]/.test(v) && /\d/.test(v)) s++;
-    if (v.length >= 10 || /[^A-Za-z0-9]/.test(v)) s++;
-    return s;
+    if (v.length >= 8) s++;
+    if (v.length >= 12) s++;
+    if (/[a-z]/.test(v) && /[A-Z]/.test(v)) s++;
+    if (/\d/.test(v)) s++;
+    if (/[^a-zA-Z0-9]/.test(v)) s++;
+    return Math.min(s, 4); // 0-4
   }
-  if (pass && bar) pass.addEventListener('input', () => {
-    const s = level(pass.value);
-    bar.className = s > 0 ? 'lv' + s : '';
-    if (msg) msg.textContent = pass.value ? LEVELS[s] : LEVELS[0];
+  pass && pass.addEventListener('input', () => {
+    const v = pass.value;
+    if (!bar || !meter || !txt) return;
+    meter.hidden = false;
+    const lv = score(v);
+    bar.dataset.lv = String(lv);
+    txt.textContent = ['Scegli una password che ricorderai: non è recuperabile.',
+      'Debole: allunga la password.',
+      'Ci siamo: aggiungi numeri o maiuscole.',
+      'Buona: ancora un simbolo e siamo a posto.',
+      'Ottima: difficile da indovinare.'][lv];
   });
-
-  /* ---------- slot di salvataggio ---------- */
-  function readSlot(key) {
-    try { return JSON.parse(localStorage.getItem(key)); } catch (e) { return null; }
-  }
-
-  /* con ASILO: enter assegna lo spazio, keyFor ne dà la chiave */
-  function saveWithAsilo(name, state, fail) {
-    if (!window.ASILO || typeof ASILO.keyFor !== 'function') return false;
-    let key = '';
-    try { key = ASILO.keyFor(name); } catch (e) { key = ''; }
-    if (key) {
-      const old = readSlot(key);
-      if (old && old.name && old.name !== name)
-        return fail('Esiste gi\u00e0 uno spazio con un nome simile: cambia nome o accedi dalla home.');
-      if (old && old.name === name)
-        return fail('Questo asilo \u00e8 gi\u00e0 registrato in questo browser: accedi dalla home.');
-    }
-    if (typeof ASILO.enter === 'function') {
-      try { ASILO.enter(name); } catch (e) {}
-      try { key = ASILO.keyFor(name) || key; } catch (e) {}
-    }
-    if (!key) key = 'asilapp_v1';
-    try { localStorage.setItem(key, JSON.stringify(state)); } catch (e) {
-      fail('Salvataggio non riuscito: memoria del browser piena?');
-      return true;
-    }
-    say('Spazio creato ✓ Ora entra con il tuo nome');
-    location.href = 'index.html';
-    return true;
-  }
-
-  /* fallback senza ASILO: prima chiave libera tra asilapp_v1..v12 */
-  function saveFallback(name, state, fail) {
-    let key = '';
-    for (let i = 1; i <= 12; i++) {
-      const k = 'asilapp_v' + i;
-      const cur = readSlot(k);
-      if (!cur) { if (!key) key = k; continue; }
-      if (cur.name === name)
-        return fail('Questo asilo \u00e8 gi\u00e0 registrato in questo browser: accedi dalla home.');
-    }
-    if (!key) return fail('Memoria piena: esporta un backup o libera spazio.');
-    try { localStorage.setItem(key, JSON.stringify(state)); } catch (e) {
-      return fail('Salvataggio non riuscito: memoria del browser piena?');
-    }
-    say('Spazio creato ✓ Ora entra con il tuo nome');
-    location.href = 'index.html';
-  }
 
   /* ---------- submit ---------- */
   form.addEventListener('submit', e => {
     e.preventDefault();
-    const err = $('regErr');
+    const err = $('rgErr');
     const fail = m => { if (err) { err.textContent = m; err.hidden = false; } };
     if (err) err.hidden = true;
 
-    const name = clean(($('regAsilo') || {}).value);
-    const user = clean(($('regUser') || {}).value);
-    const pw = String((pass || {}).value || '');
+    const school = norm($('rgSchool').value);
+    const user = norm($('rgUser').value);
+    const pw = $('rgPass').value;
 
-    if (name.length < 3) return fail('Il nome dell\u2019asilo richiede almeno 3 caratteri.');
+    if (school.length < 3) return fail('Scrivi il nome dell\u2019asilo (almeno 3 lettere).');
     if (user.length < 3) return fail('Lo username richiede almeno 3 caratteri.');
-    if (pw.length < 6) return fail('La password richiede almeno 6 caratteri.');
+    if (pw.length < 8) return fail('La password richiede almeno 8 caratteri.');
+
+    const key = PREFIX + slug(school);
+    let existing = null;
+    try { existing = JSON.parse(localStorage.getItem(key)); } catch (e) { existing = null; }
+    if (existing && existing.school) return fail('Esiste già uno spazio con questo nome su questo dispositivo: scegli un nome diverso o accedi.');
 
     const state = {
       v: 1,
-      name: name,
-      user: user,
-      pass: pw,
-      sections: [{ id: newId(), name: 'Sezione Unica' }],
-      kids: [], memos: [], notices: [],
-      menu: {}, diary: {}, meals: {},
+      school,
+      user,
+      pass: btoa(unescape(encodeURIComponent(pw))),
+      sections: [{ id: 'sec_' + Date.now().toString(36), name: 'Sezione Unica' }],
+      kids: [], memos: [], menu: {}, meals: {}, diary: {}, notices: [],
       role: null, parentKid: null
     };
+    try { localStorage.setItem(key, JSON.stringify(state)); } catch (e2) {
+      return fail('Salvataggio non riuscito: memoria del browser piena?');
+    }
 
-    if (!saveWithAsilo(name, state, fail)) saveFallback(name, state, fail);
+    /* seleziona lo spazio appena creato e vai al login */
+    try {
+      localStorage.setItem('asilapp_current', slug(school));
+    } catch (e3) {}
+    const btn = $('rgBtn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Spazio creato ✓ Ti porto al login…'; }
+    setTimeout(() => { location.href = 'index.html'; }, 900);
+  });
+
+  /* «Accedi col nome del tuo asilo» */
+  const loginLink = $('rgLogin');
+  loginLink && loginLink.addEventListener('click', () => {
+    try { localStorage.removeItem('asilapp_current'); } catch (e) {}
+    location.href = 'index.html';
   });
 })();
