@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Registra il tuo asilo — Asilapp</title>
-<meta name="description" content="Crea lo spazio digitale del tuo nido su Asilapp in un minuto: nome dell'asilo, password per le maestre e sei pronto ad accogliere le famiglie. Gratis, senza installare nulla.">
+<title>Crea lo spazio del tuo asilo — Asilapp</title>
+<meta name="description" content="Registra il tuo nido su Asilapp in un minuto: nome dell'asilo, una password, e lo spazio con memo, menù e diario è pronto.">
 <meta name="theme-color" content="#faf9f7">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="landing.css">
-<link rel="stylesheet" href="pages.css">
+<link rel="stylesheet" href="landing-extra.css">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 </head>
 <body class="page-body">
@@ -32,48 +32,52 @@
 
 <main class="page-main page-main-narrow">
 
-  <section class="page-hero">
-    <h1>Registra il tuo asilo</h1>
-    <p>Un minuto ed è pronto. Nessuna installazione, nessun costo: scegli il nome della struttura e una password per le maestre.</p>
+  <section class="page-hero reveal">
+    <span class="hero-badge">Gratis · un minuto</span>
+    <h1>Crea lo spazio del tuo asilo</h1>
+    <p>Tre campi, una password: memo, menù e diario pronti per le famiglie.</p>
   </section>
 
-  <section class="card signup-card" aria-labelledby="signupTitle">
-    <p class="drawer-sec" id="signupTitle">Crea lo spazio del tuo asilo</p>
-    <form id="signupForm" novalidate>
-      <label class="field"><span>Nome dell'asilo</span>
-        <input type="text" class="input" id="signupName" maxlength="40" placeholder="es. Asilo Nido Arcobaleno" autocomplete="organization" required>
-      </label>
-      <label class="field"><span>Password maestre</span>
-        <span class="pw-wrap">
-          <input type="password" class="input" id="signupPass" minlength="6" maxlength="40" placeholder="almeno 6 caratteri" autocomplete="new-password" required>
-          <button type="button" class="pw-toggle" data-pw-toggle="signupPass" aria-label="Mostra la password" aria-pressed="false">👁</button>
-        </span>
-      </label>
-      <label class="field"><span>Ripeti la password</span>
-        <span class="pw-wrap">
-          <input type="password" class="input" id="signupPass2" maxlength="40" placeholder="ancora la stessa password" autocomplete="new-password" required>
-          <button type="button" class="pw-toggle" data-pw-toggle="signupPass2" aria-label="Mostra la password" aria-pressed="false">👁</button>
-        </span>
-      </label>
-      <ul class="pw-check" id="pwCheck" aria-label="Requisiti per completare la registrazione">
-        <li data-need="name">Nome dell'asilo di almeno 3 lettere</li>
-        <li data-need="len">Password di almeno 6 caratteri</li>
-        <li data-need="match">Le due password coincidono</li>
+  <section class="contact-grid" aria-label="Registrazione del tuo asilo">
+    <div class="card contact-card reveal">
+      <p class="card-title">Il tuo asilo</p>
+      <form id="regForm" novalidate>
+        <label class="field"><span>Nome dell'asilo</span>
+          <input type="text" class="input" id="regAsilo" maxlength="40" placeholder="es. Asilo Nido Arcobaleno" autocomplete="organization" required>
+        </label>
+        <label class="field"><span>Nome maestra o username</span>
+          <input type="text" class="input" id="regUser" maxlength="24" placeholder="es. martina" autocomplete="username" required>
+        </label>
+        <label class="field"><span>Password</span>
+          <input type="password" class="input" id="regPass" maxlength="40" placeholder="almeno 6 caratteri" autocomplete="new-password" required>
+          <span class="pw-check">
+            <span class="pw-bar"><span id="regBar"></span></span>
+            <small id="pwMsg">Almeno 6 caratteri, meglio con un numero.</small>
+          </span>
+        </label>
+        <p class="login-err" id="regErr" hidden></p>
+        <button type="submit" class="btn btn-primary btn-block" id="regBtn">Crea lo spazio</button>
+      </form>
+      <p class="hint">Hai già uno spazio? <a class="link-btn" href="index.html">Accedi dalla home →</a></p>
+    </div>
+
+    <aside class="contact-aside" aria-label="Buono a sapersi">
+      <ul class="contact-meta">
+        <li class="reveal"><span aria-hidden="true">🔒</span><div><strong>Dati solo da voi</strong><small>Tutto resta nel browser dell'asilo.</small></div></li>
+        <li class="reveal"><span aria-hidden="true">🧒</span><div><strong>Subito operative</strong><small>Aggiungi bambini e classi al primo accesso.</small></div></li>
+        <li class="reveal"><span aria-hidden="true">💾</span><div><strong>Backup libero</strong><small>Esporta e ripristina quando vuoi.</small></div></li>
       </ul>
-      <p class="login-err" id="signupErr" hidden></p>
-      <button type="submit" class="btn btn-primary btn-block" id="signupBtn">Crea lo spazio del mio asilo</button>
-    </form>
-    <p class="hint">Dopo la registrazione entri subito: username <code>admin</code> e la password scelta. I genitori accedono col codice bambino.</p>
-    <p class="hint">I dati restano nel tuo browser: puoi scaricare un backup dalle Impostazioni in qualunque momento.</p>
+    </aside>
   </section>
 
 </main>
 
 <footer class="page-foot">
-  <p>Asilapp — il nido, in tasca alle famiglie. <a href="contatti.html">Contatti</a></p>
+  <p>Asilapp — il nido, in tasca alle famiglie. <a href="info.html">Come funziona</a></p>
   <p class="page-credit">Asilapp è un progetto di <a href="https://www.mecalab.org" target="_blank" rel="noopener">MecaLab</a> · <a href="https://www.mecalab.org" target="_blank" rel="noopener">www.mecalab.org</a></p>
 </footer>
 
 <script src="registrazione.js" defer></script>
+<script src="modern.js" defer></script>
 </body>
 </html>

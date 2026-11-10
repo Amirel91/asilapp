@@ -22,7 +22,7 @@ a.btn:focus-visible { outline: 2px solid var(--sage); outline-offset: 2px; borde
 }
 .brand-txt { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
 .brand-txt strong { font-size: 1.02rem; letter-spacing: -.01em; }
-.brand-txt small { font-size: .72rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 46vw; }
+.brand-txt small { font-size: .72rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* ---------- hero ---------- */
 .landing-hero {
@@ -297,60 +297,33 @@ a.btn:focus-visible { outline: 2px solid var(--sage); outline-offset: 2px; borde
 .signup-steps .sg-step.done { color: var(--sage-ink); background: var(--sage-soft); border-color: #d6e1d8; }
 .signup-steps .sg-sep { color: var(--muted); font-size: .7rem; }
 
-/* barra di robustezza della password */
+/* barra di robustezza della password — UNICA casa di questo componente */
 .pw-meter { display: grid; gap: .3rem; }
+.pw-check { display: grid; gap: .3rem; margin-top: .1rem; }
+.pw-check small { font-size: .74rem; color: var(--muted); }
 .pw-bar { height: 6px; border-radius: 999px; background: var(--bg); border: 1px solid var(--line); overflow: hidden; }
 .pw-bar > span {
   display: block; height: 100%; width: 0;
   background: var(--danger); border-radius: 999px;
   transition: width var(--t), background var(--t);
 }
-.pw-bar > span.lv1 { width: 33%; background: #d97706; }
-.pw-bar > span.lv2 { width: 66%; background: #6a8f5a; }
+.pw-bar > span.lv1 { width: 33%; background: #e11d48; }
+.pw-bar > span.lv2 { width: 66%; background: #d97706; }
 .pw-bar > span.lv3 { width: 100%; background: var(--sage); }
-.pw-hint { font-size: .72rem; color: var(--muted); }
+.pw-meter small { font-size: .74rem; color: var(--muted); }
 
-/* hint live sotto il campo nome asilo */
-.field-hint { font-size: .74rem; color: var(--muted); line-height: 1.4; }
-.field-hint.ok { color: var(--sage-ink); font-weight: 600; }
-
-/* bottone mostra/nascondi password */
-.pw-wrap { position: relative; }
-.pw-wrap .input { padding-right: 2.6rem; }
-.pw-toggle {
-  position: absolute; right: .45rem; top: 50%; transform: translateY(-50%);
-  background: none; border: 0; cursor: pointer; padding: .3rem;
-  font-size: .95rem; line-height: 1; color: var(--muted);
-}
-.pw-toggle:hover { color: var(--ink); }
-
-/* ---------- FAQ ---------- */
-.landing-faq { display: grid; gap: .5rem; }
-.faq-item {
+/* ---------- FAQ landing ---------- */
+.landing-faq { display: grid; gap: .55rem; max-width: 760px; margin: 0 auto; }
+.landing-faq details {
   background: var(--card); border: 1px solid var(--line); border-radius: var(--r);
-  box-shadow: var(--sh-sm); overflow: hidden;
+  padding: .75rem .95rem; box-shadow: var(--sh-sm);
 }
-.faq-item summary {
-  cursor: pointer; list-style: none;
-  padding: .8rem .9rem; font-size: .9rem; font-weight: 600; letter-spacing: -.01em;
-  display: flex; align-items: center; justify-content: space-between; gap: .6rem;
+.landing-faq details[open] { border-color: #ddd7d0; }
+.landing-faq summary {
+  cursor: pointer; font-weight: 600; font-size: .92rem; letter-spacing: -.01em;
+  list-style: none; display: flex; justify-content: space-between; align-items: center; gap: .6rem;
 }
-.faq-item summary::-webkit-details-marker { display: none; }
-.faq-item summary::after { content: '+'; font-size: 1.1rem; font-weight: 700; color: var(--muted); transition: transform var(--t); }
-.faq-item[open] summary::after { transform: rotate(45deg); }
-.faq-item summary:hover { background: var(--bg); }
-.faq-item p { margin: 0; padding: 0 .9rem .85rem; font-size: .85rem; color: var(--ink-soft); line-height: 1.55; }
-
-/* ---------- footer landing ---------- */
-.landing-foot {
-  border-top: 1px solid var(--line); margin-top: .4rem; padding-top: 1rem;
-  display: flex; align-items: center; justify-content: space-between; gap: .8rem; flex-wrap: wrap;
-  font-size: .78rem; color: var(--muted);
-}
-.landing-foot nav { display: flex; gap: .9rem; flex-wrap: wrap; }
-.landing-foot .link-btn { font-size: .78rem; }
-
-/* ---------- riduzione movimento ---------- */
-@media (prefers-reduced-motion: reduce) {
-  .pw-bar > span, .sg-step, .faq-item summary::after { transition: none; }
-}
+.landing-faq summary::-webkit-details-marker { display: none; }
+.landing-faq summary::after { content: '+'; font-size: 1.1rem; color: var(--muted); font-weight: 400; }
+.landing-faq details[open] summary::after { content: '–'; }
+.landing-faq details p { margin: .55rem 0 0; color: var(--ink-soft); font-size: .87rem; line-height: 1.55; }

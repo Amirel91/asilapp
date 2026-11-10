@@ -1,9 +1,6 @@
 /* pages.css — DEPRECATO
-   Tutte le regole delle pagine pubbliche (page-*, contact-*,
-   card-title…) sono state consolidate nella sezione D di
-   landing-extra.css, terzo strato dell'unico design system
-   (style.css → landing.css → landing-extra.css).
-   Questo file resta come stub vuoto per non rompere eventuali
-   <link> residui: nessuna regola necessaria vive più qui.
-   Può essere eliminato a mano insieme ad app-extra.css,
-   demo.css e modern.css. */
+   Tutte le regole delle pagine pubbliche (page-top, page-hero,
+   page-grid, contact-*, faq, steps-grid…) vivono nella sezione D
+   di landing-extra.css, caricato da ogni pagina insieme a
+   style.css e landing.css.
+   Stub vuoto: eventuali <link> residui non producono regole. */

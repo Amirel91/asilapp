@@ -5,7 +5,7 @@
    2) landing.css      → landing + pannello superadmin
    3) landing-extra.css → completamenti (questo file)
    Qui vivono, in ordine:
-   A) completamento landing v2 (trust, audience, pw-check, FAQ…)
+   A) completamento landing v2 (trust, audience, FAQ…)
    B) classi del pannello maestre e dell'area famiglie
    C) toolkit demo superadmin + banner sola lettura
    D) classi delle pagine pubbliche (info, contatti,
@@ -46,21 +46,8 @@
 .aud-card-fam { border-left: 4px solid var(--terra); }
 .aud-card-fam ul li::before { color: var(--terra); }
 
-/* ---------- indicatore robustezza password in iscrizione ---------- */
-.pw-check { display: grid; gap: .3rem; margin-top: .1rem; }
-.pw-bar {
-  height: 6px; border-radius: 999px; background: var(--bg);
-  border: 1px solid var(--line); overflow: hidden;
-}
-.pw-bar > span {
-  display: block; height: 100%; width: 0;
-  background: var(--danger); border-radius: 999px;
-  transition: width var(--t), background var(--t);
-}
-.pw-bar > span.lv1 { width: 33%; background: #e11d48; }
-.pw-bar > span.lv2 { width: 66%; background: #d97706; }
-.pw-bar > span.lv3 { width: 100%; background: var(--sage); }
-.pw-check small { font-size: .74rem; color: var(--muted); }
+/* indicatore robustezza password (.pw-meter / .pw-check / .pw-bar):
+   unica casa in landing.css — nessuna regola duplicata qui */
 
 /* ---------- FAQ ---------- */
 .faq { display: grid; gap: .55rem; max-width: 760px; margin: 0 auto; }
@@ -205,6 +192,10 @@
    D) PAGINE PUBBLICHE (info, contatti, registrazione)
    Regole assorbite da pages.css, ora stub deprecato.
    ============================================================ */
+
+/* ---------- brand come link (header pagine pubbliche): mai blu sottolineato ---------- */
+a.brand { text-decoration: none; color: inherit; }
+a.brand:focus-visible { outline: 2px solid var(--sage); outline-offset: 2px; border-radius: var(--r-sm); }
 
 /* ---------- struttura comune: header sticky + main + footer ---------- */
 .page-body {
