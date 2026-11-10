@@ -1,8 +1,19 @@
 /* ============================================================
-   landing-extra.css — completamento stili landing v2
-   (audience, password check, FAQ, footer, trust row)
-   + classi del pannello maestre e dell'area famiglie
-   + stili del toolkit demo (consolidati qui da demo.css)
+   landing-extra.css — terzo e ultimo strato dell'UNICO design
+   system di Asilapp. Ordine di caricamento su OGNI pagina:
+   1) style.css        → base: variabili, reset, componenti
+   2) landing.css      → landing + pannello superadmin
+   3) landing-extra.css → completamenti (questo file)
+   Qui vivono, in ordine:
+   A) completamento landing v2 (trust, audience, pw-check, FAQ…)
+   B) classi del pannello maestre e dell'area famiglie
+   C) toolkit demo superadmin + banner sola lettura
+   D) classi delle pagine pubbliche (info, contatti,
+      registrazione) — assorbite da pages.css, ora stub
+   ============================================================ */
+
+/* ============================================================
+   A) COMPLETAMENTO LANDING v2
    ============================================================ */
 
 /* ---------- micro-badge sotto la CTA dell'hero ---------- */
@@ -79,7 +90,7 @@
 /* ---------- coppia di bottoni nella fascia demo della landing ---------- */
 .demo-strip-btns { display: flex; gap: .45rem; flex-wrap: wrap; }
 
-/* ---------- animazioni d'ingresso (reveal) usate dalle pagine pubbliche ---------- */
+/* ---------- animazioni d'ingresso (reveal) ---------- */
 .reveal {
   opacity: 0;
   transform: translateY(14px);
@@ -94,7 +105,7 @@
 }
 
 /* ============================================================
-   Classi del pannello maestre e dell'area famiglie
+   B) PANNELLO MAESTRE E AREA FAMIGLIE
    ============================================================ */
 
 /* ---------- calendario menù del mese ---------- */
@@ -149,8 +160,7 @@
 .parent-hello small { color: var(--muted); font-size: .8rem; }
 
 /* ============================================================
-   Stili del toolkit superadmin per la demo (classi sa-demo-*)
-   — consolidati qui da demo.css
+   C) TOOLKIT SUPERADMIN DEMO + BANNER SOLA LETTURA
    ============================================================ */
 .sa-demo-tools {
   display: grid; gap: .6rem;
@@ -190,3 +200,128 @@
   font-size: .82rem; font-weight: 600;
   box-shadow: var(--sh-sm); margin: .6rem 0;
 }
+
+/* ============================================================
+   D) PAGINE PUBBLICHE (info, contatti, registrazione)
+   Regole assorbite da pages.css, ora stub deprecato.
+   ============================================================ */
+
+/* ---------- struttura comune: header sticky + main + footer ---------- */
+.page-body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-top {
+  position: sticky; top: 0; z-index: 30;
+  width: 100%; max-width: 1080px; margin: 0 auto;
+  box-sizing: border-box;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: .8rem; flex-wrap: wrap;
+  padding: .75rem clamp(.85rem, 3vw, 1.6rem);
+  padding-top: calc(.75rem + env(safe-area-inset-top));
+  background: var(--card);
+  border-bottom: 1px solid var(--line);
+  box-shadow: var(--sh-sm);
+}
+
+.page-nav { display: flex; align-items: center; gap: .55rem; flex-wrap: wrap; }
+
+.page-main {
+  flex: 1;
+  width: 100%; max-width: 1080px; margin: 0 auto;
+  box-sizing: border-box;
+  display: grid; gap: clamp(1.6rem, 4vw, 2.6rem); align-content: start;
+  padding: clamp(1.5rem, 4vw, 2.8rem) clamp(.85rem, 3vw, 1.6rem) 3.2rem;
+}
+.page-main-narrow { max-width: 860px; }
+
+.page-foot {
+  width: 100%; max-width: 1080px; margin: 0 auto;
+  box-sizing: border-box;
+  display: flex; flex-direction: column; align-items: center; gap: .35rem;
+  text-align: center;
+  padding: 1.2rem clamp(.85rem, 3vw, 1.6rem) calc(1.4rem + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
+}
+.page-foot p { margin: 0; font-size: .82rem; color: var(--ink-soft); }
+.page-foot a { color: var(--sage-ink); font-weight: 600; }
+
+/* ---------- hero interno delle pagine ---------- */
+.page-hero { display: grid; justify-items: center; gap: .7rem; text-align: center; }
+.page-hero h1 {
+  margin: 0; color: var(--ink);
+  font-size: clamp(1.9rem, 5vw, 2.9rem);
+  letter-spacing: -.02em; line-height: 1.12;
+}
+.page-hero p {
+  margin: 0; color: var(--ink-soft);
+  font-size: 1.02rem; line-height: 1.55; max-width: 54ch;
+}
+
+/* ---------- sezioni e griglie di card ---------- */
+.page-sec { display: grid; gap: .9rem; }
+.page-sec > h2 {
+  margin: 0; color: var(--ink);
+  font-size: clamp(1.15rem, 2.6vw, 1.45rem); letter-spacing: -.015em;
+}
+
+.page-grid {
+  display: grid; gap: .8rem;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+}
+.page-grid .card {
+  padding: 1rem .95rem;
+  transition: transform 220ms ease-out, box-shadow 220ms ease-out, border-color 220ms ease-out;
+}
+.page-grid .card:hover { transform: translateY(-3px); border-color: #ddd7d0; box-shadow: var(--sh-md); }
+.page-grid .card h3 {
+  margin: 0 0 .3rem; font-size: .95rem; letter-spacing: -.01em;
+  display: flex; align-items: center; gap: .4rem;
+}
+.page-grid .card p { margin: 0; color: var(--ink-soft); font-size: .88rem; line-height: 1.5; }
+
+/* variante terracotta per le card «famiglie» */
+.page-card-terra { border-top: 3px solid var(--terra); }
+
+/* lista numerata dei passi (info.html): niente numeri di default */
+ol.steps-grid { list-style: none; margin: 0; padding: 0; }
+
+/* ---------- blocco CTA finale ---------- */
+.page-cta {
+  display: grid; justify-items: center; gap: .7rem; text-align: center;
+  padding: clamp(1.5rem, 4vw, 2.4rem);
+  background: linear-gradient(135deg, var(--sage-soft), var(--sky-soft));
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-md);
+}
+.page-cta h2 { margin: 0; font-size: clamp(1.2rem, 3vw, 1.6rem); letter-spacing: -.02em; }
+.page-cta p { margin: 0; color: var(--ink-soft); }
+.page-cta-btns { display: flex; justify-content: center; gap: .55rem; flex-wrap: wrap; }
+
+/* ---------- pagina contatti ---------- */
+.contact-grid {
+  display: grid; gap: 1rem; align-items: start;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, .9fr);
+}
+@media (max-width: 820px) { .contact-grid { grid-template-columns: 1fr; } }
+
+.contact-card { padding: 1.1rem 1rem; display: grid; gap: .8rem; }
+.card-title { margin: 0; font-size: 1rem; letter-spacing: -.01em; color: var(--ink); }
+
+.contact-aside { display: grid; gap: .6rem; }
+.contact-meta { list-style: none; margin: 0; padding: 0; display: grid; gap: .6rem; }
+.contact-meta li {
+  display: flex; gap: .7rem; align-items: flex-start;
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: var(--r); padding: .8rem .9rem;
+  box-shadow: var(--sh-sm);
+  transition: transform 220ms ease-out, box-shadow 220ms ease-out, border-color 220ms ease-out;
+}
+.contact-meta li:hover { transform: translateY(-2px); border-color: #ddd7d0; box-shadow: var(--sh-md); }
+.contact-meta li > span { font-size: 1.25rem; line-height: 1; flex-shrink: 0; margin-top: .15rem; }
+.contact-meta strong { display: block; font-size: .9rem; letter-spacing: -.01em; }
+.contact-meta small { display: block; margin-top: .15rem; color: var(--ink-soft); font-size: .82rem; line-height: 1.45; }
