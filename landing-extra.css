@@ -1,6 +1,8 @@
 /* ============================================================
    landing-extra.css — completamento stili landing v2
    (audience, password check, FAQ, footer, trust row)
+   + classi del pannello maestre e dell'area famiglie
+   + stili del toolkit demo (consolidati qui da demo.css)
    ============================================================ */
 
 /* ---------- micro-badge sotto la CTA dell'hero ---------- */
@@ -93,7 +95,6 @@
 
 /* ============================================================
    Classi del pannello maestre e dell'area famiglie
-   (prima usate nel markup di index.html senza definizione CSS)
    ============================================================ */
 
 /* ---------- calendario menù del mese ---------- */
@@ -113,14 +114,15 @@
 /* ---------- riepilogo del bollettino pasti ---------- */
 .meals-stats { display: flex; flex-wrap: wrap; gap: .4rem; margin: .6rem 0; }
 
-/* ---------- tabella pasti del mese ---------- */
+/* ---------- tabella pasti del mese (scroll orizzontale su mobile) ---------- */
+.meals-table-wrap { overflow-x: auto; border-radius: var(--r); box-shadow: var(--sh-sm); }
 .meals-table {
   width: 100%; border-collapse: collapse; font-size: .84rem;
-  background: var(--card); border: 1px solid var(--line);
-  border-radius: var(--r); overflow: hidden; box-shadow: var(--sh-sm);
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--r);
 }
 .meals-table th, .meals-table td {
   padding: .5rem .65rem; text-align: left; border-bottom: 1px solid var(--line);
+  white-space: nowrap;
 }
 .meals-table th { font-size: .74rem; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); background: var(--bg); }
 .meals-table td.num, .meals-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
@@ -145,3 +147,46 @@
 }
 .parent-hello strong { font-size: 1.05rem; letter-spacing: -.01em; }
 .parent-hello small { color: var(--muted); font-size: .8rem; }
+
+/* ============================================================
+   Stili del toolkit superadmin per la demo (classi sa-demo-*)
+   — consolidati qui da demo.css
+   ============================================================ */
+.sa-demo-tools {
+  display: grid; gap: .6rem;
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: var(--r); padding: .8rem .9rem;
+  box-shadow: var(--sh-sm); margin: .6rem 0;
+}
+.sa-demo-title {
+  font-size: .92rem; font-weight: 700; letter-spacing: -.01em;
+  margin: 0; display: flex; align-items: center; gap: .4rem;
+}
+.sa-demo-sub { font-size: .76rem; color: var(--muted); margin: 0; line-height: 1.45; }
+.sa-demo-btns { display: flex; gap: .45rem; flex-wrap: wrap; }
+.sa-demo-row {
+  display: flex; align-items: center; gap: .5rem; flex-wrap: wrap;
+  font-size: .78rem; color: var(--muted);
+}
+.sa-demo-chip {
+  display: inline-flex; align-items: center; gap: .3rem;
+  font-size: .74rem; font-weight: 600;
+  background: var(--sage-soft); color: var(--sage-ink);
+  border-radius: 999px; padding: .25rem .65rem;
+}
+.sa-demo-danger {
+  color: var(--danger); background: var(--terra-soft);
+  border: 1px solid #eed6cc; border-radius: 999px;
+}
+.sa-demo-danger:hover { background: #f3ddd4; border-color: var(--danger); }
+
+/* ---------- banner «Modalità demo» in sola lettura ---------- */
+.demo-banner {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: .6rem; flex-wrap: wrap;
+  background: var(--amber-soft); color: var(--amber-ink);
+  border: 1px solid #e7d9b4; border-radius: var(--r);
+  padding: .55rem .85rem;
+  font-size: .82rem; font-weight: 600;
+  box-shadow: var(--sh-sm); margin: .6rem 0;
+}
