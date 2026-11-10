@@ -4,6 +4,10 @@
    + stili del pannello superadmin (sa-*)
    + sezioni landing v2 (trust, audience, iscrizione guidata, FAQ)
    ============================================================ */
+/* ---------- fix QA: i bottoni fatti con <a> non devono mai vedersi sottolineati ---------- */
+a.btn { text-decoration: none; }
+a.btn:focus-visible { outline: 2px solid var(--sage); outline-offset: 2px; border-radius: var(--r-sm); }
+
 .landing-view { max-width: 1080px; margin: 0 auto; padding: 0 .85rem 3rem; display: grid; gap: 1.6rem; align-content: start; }
 
 /* ---------- barra di navigazione landing ---------- */
