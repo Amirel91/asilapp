@@ -261,3 +261,10 @@ ol.steps-grid { list-style: none; margin: 0; padding: 0; }
 .contact-meta li > span { font-size: 1.25rem; line-height: 1; flex-shrink: 0; margin-top: .15rem; }
 .contact-meta strong { display: block; font-size: .9rem; letter-spacing: -.01em; }
 .contact-meta small { display: block; margin-top: .15rem; color: var(--ink-soft); font-size: .82rem; line-height: 1.45; }
+
+/* completamenti pagina Contatti */
+.contact-form textarea.input { resize: vertical; min-height: 132px; line-height: 1.5; }
+.contact-form .login-err { margin: 0; }
+.contact-card { transition: border-color var(--t), box-shadow 240ms cubic-bezier(.2,.7,.3,1); }
+.contact-card:focus-within { border-color: #cddcda; box-shadow: var(--sh-md); }
+.page-credit { margin: 0; font-size: .76rem; color: var(--muted); }
