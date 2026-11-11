@@ -89,13 +89,13 @@ ul { list-style: none; }
 .login-foot { font-size: .72rem; color: var(--muted); text-align: center; }
 
 /* ---------- bottoni ---------- */
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: .45rem; padding: .65rem 1.1rem; border-radius: var(--r-sm); font-weight: 600; font-size: .92rem; transition: transform var(--t), box-shadow var(--t), background var(--t), color var(--t), border-color var(--t); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: .45rem; padding: .65rem 1.1rem; border-radius: var(--r-sm); font-weight: 600; font-size: .92rem; text-decoration: none; transition: transform var(--t), box-shadow var(--t), background var(--t), color var(--t), border-color var(--t); }
 .btn:active { transform: scale(.97); }
-.btn-primary { background: var(--sage); color: #fff; }
+.btn-primary { background: var(--sage); color: #fff; text-decoration: none; }
 .btn-primary:hover { background: #628b70; box-shadow: var(--sh-md); }
-.btn-ghost { border: 1px solid var(--line); background: var(--card); color: var(--ink-soft); }
+.btn-ghost { border: 1px solid var(--line); background: var(--card); color: var(--ink-soft); text-decoration: none; }
 .btn-ghost:hover { border-color: #d5cfc8; box-shadow: var(--sh-sm); color: var(--ink); }
-.btn-outline { border: 1px solid var(--sage); color: var(--sage-ink); background: var(--card); }
+.btn-outline { border: 1px solid var(--sage); color: var(--sage-ink); background: var(--card); text-decoration: none; }
 .btn-outline:hover { background: var(--sage-soft); box-shadow: var(--sh-sm); }
 .btn-sm { padding: .45rem .8rem; font-size: .82rem; }
 .btn[data-action="toggle-settings"].on { background: var(--sage-soft); border-color: var(--sage); color: var(--sage-ink); box-shadow: inset 0 0 0 1px var(--sage); }
@@ -103,6 +103,7 @@ ul { list-style: none; }
 
 .link-btn {
   display: inline-flex; align-items: center; gap: .25rem;
+  text-decoration: none;
   font-size: .72rem; font-weight: 600; white-space: nowrap;
   color: var(--sage-ink); background: var(--sage-soft);
   border: 1px solid #d6e1d8; border-radius: 999px; padding: .3rem .7rem;
