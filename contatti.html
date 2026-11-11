@@ -35,13 +35,19 @@
   <section class="page-hero reveal">
     <span class="hero-badge">Supporto per maestre e famiglie</span>
     <h1>Parliamone</h1>
-    <p>Una domanda, un dubbio o un'idea per il vostro nido: due righe e rispondiamo entro un giorno lavorativo.</p>
+    <p>Una domanda, un dubbio o un'idea per il vostro nido: due righe bastano, il resto lo vediamo insieme.</p>
   </section>
 
   <section class="contact-grid" aria-label="Modulo di contatto e informazioni pratiche">
     <div class="card contact-card reveal">
-      <p class="card-title" id="ccTitle">Scrivici un messaggio</p>
-      <form id="contactForm" novalidate>
+      <div class="contact-head">
+        <span class="contact-ico" aria-hidden="true">✉️</span>
+        <div>
+          <p class="card-title" id="ccTitle">Scrivici un messaggio</p>
+          <p class="contact-sub">Compili i campi e la mail si prepara da sola nella tua posta: un tocco e parte.</p>
+        </div>
+      </div>
+      <form id="contactForm" class="contact-form" aria-labelledby="ccTitle" novalidate>
         <label class="field"><span>Il tuo nome</span>
           <input type="text" class="input" id="ccName" maxlength="60" placeholder="es. Martina Rossi" autocomplete="name" required>
         </label>
@@ -49,21 +55,21 @@
           <input type="email" class="input" id="ccMail" maxlength="80" placeholder="es. martina@example.it" autocomplete="email" required>
         </label>
         <label class="field"><span>Messaggio</span>
-          <textarea class="input" id="ccMsg" rows="4" maxlength="600" placeholder="Raccontaci di cosa hai bisogno…" required></textarea>
+          <textarea class="input" id="ccMsg" rows="5" maxlength="600" placeholder="Raccontaci di cosa avete bisogno…" required></textarea>
         </label>
         <p class="login-err" id="ccErr" hidden></p>
         <button type="submit" class="btn btn-primary btn-block" id="ccBtn">Invia il messaggio</button>
       </form>
       <p class="hint" id="ccOk" hidden>✓ Si apre la tua posta con il testo già pronto: basta inviare da lì.</p>
-      <p class="hint">Oppure scrivi direttamente a <a href="mailto:ciao@asilapp.it">ciao@asilapp.it</a>.</p>
+      <p class="contact-alt">Preferisci scrivere direttamente? <a href="mailto:ciao@asilapp.it">ciao@asilapp.it</a></p>
     </div>
 
     <aside class="contact-aside" aria-label="Informazioni pratiche">
       <ul class="contact-meta">
-        <li class="reveal"><span aria-hidden="true">✉️</span><div><strong>Email diretta</strong><small>ciao@asilapp.it</small></div></li>
-        <li class="reveal"><span aria-hidden="true">⏱️</span><div><strong>Risposta</strong><small>Entro un giorno lavorativo, di solito molto prima.</small></div></li>
-        <li class="reveal"><span aria-hidden="true">🔒</span><div><strong>Privacy</strong><small>Il form apre la tua posta: il messaggio non passa da server esterni.</small></div></li>
-        <li class="reveal"><span aria-hidden="true">🏫</span><div><strong>Più sedi o sezioni</strong><small>Raccontateci com'è fatto il nido: troviamo la soluzione.</small></div></li>
+        <li class="reveal"><span aria-hidden="true">⏱️</span><div><strong>Tempi di risposta</strong><small>Scrivete quando volete: rispondiamo entro un giorno lavorativo.</small></div></li>
+        <li class="reveal"><span aria-hidden="true">🔒</span><div><strong>Privacy</strong><small>Il messaggio non passa da server esterni: resta tra voi e noi.</small></div></li>
+        <li class="reveal"><span aria-hidden="true">🏫</span><div><strong>Più sedi o sezioni</strong><small>Raccontateci com'è fatto il nido: troviamo la soluzione giusta.</small></div></li>
+        <li class="reveal"><span aria-hidden="true">💡</span><div><strong>Idee e suggerimenti</strong><small>Se una funzione manca, ditecelo: se torna utile a più nidi la costruiamo.</small></div></li>
       </ul>
     </aside>
   </section>
@@ -74,7 +80,7 @@
       <details><summary>Ho perso la password dell'area maestre</summary><p>I dati restano nel tuo browser e la password non è recuperabile: è questo che li tiene al sicuro. Con un backup recente ripristini tutto, altrimenti lo spazio si ricrea in un minuto.</p></details>
       <details><summary>I genitori non riescono a entrare</summary><p>Servono due cose: il nome esatto dell'asilo (come l'avete registrato) e il codice bambino, ad esempio B001. Lo trovate sulla scheda del bambino nell'area maestre.</p></details>
       <details><summary>Abbiamo più sezioni o sedi</summary><p>Nessun problema: dalle Impostazioni si creano tutte le classi necessarie e ogni bambino viene assegnato alla sua.</p></details>
-      <details><summary>Vorremmo una funzione in più</summary><p>Ditecelo: se torna utile a più nidi la valutiamo volentieri. Due righe bastano.</p></details>
+      <details><summary>Funziona anche sul telefono delle famiglie?</summary><p>Sì: l'area famiglie si apre dal browser e con un tap si aggiunge alla Home, come un'app.</p></details>
     </div>
   </section>
 
