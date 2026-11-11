@@ -1,339 +1,109 @@
 /* ============================================================
-   landing.css — home Asilapp: descrizione e registrazione asilo
-   Riusa il design system di style.css (variabili, .card, .btn…)
-   + stili del pannello superadmin (sa-*)
-   + sezioni landing v2 (trust, audience, iscrizione guidata, FAQ)
+   landing.css — home Asilapp: landing + pannello superadmin
+   + indicatore robustezza password (.pw-meter/.pw-bar:
+   unica casa) + stati mobile di .landing-top/.landing-nav/
+   .landing-hero (unica casa: qui, dove nascono i selettori).
+   Ordine di caricamento su OGNI pagina:
+   1) style.css         → base: variabili, reset, componenti
+   2) landing.css       → questo foglio
+   3) landing-extra.css → rifiniture + completamenti
    ============================================================ */
 
-/* ---------- stati mobile della testata e dell'hero della landing ----------
-   Unica casa dei tre selettori (qui nascono a righe ~14/28/118):
-   desktop resta come le regole base, sotto 640px la testata si
-   compatta, la nav si centra e l'hero diventa una colonna.        */
-@media (max-width: 640px) {
-  .landing-top  { gap: .55rem; }
-  .landing-nav  { justify-content: center; }
-  .landing-hero { grid-template-columns: 1fr; }
+/* ---------- testata landing ---------- */
+.landing-top {
+  display: flex; align-items: center; justify-content: space-between; gap: .8rem;
+  padding: .8rem clamp(.85rem, 3vw, 1.6rem);
+  padding-top: calc(.8rem + env(safe-area-inset-top));
 }
-/* ---------- fix QA: i bottoni fatti con <a> non devono mai vedersi sottolineati ---------- */
-a.btn { text-decoration: none; }
-a.btn:focus-visible { outline: 2px solid var(--sage); outline-offset: 2px; border-radius: var(--r-sm); }
-
-.landing-view { max-width: 1080px; margin: 0 auto; padding: 0 .85rem 3rem; display: grid; gap: 1.6rem; align-content: start; }
-
-/* ---------- barra di navigazione landing ---------- */
-.landing-nav {
-  display: flex; align-items: center; justify-content: space-between; gap: .6rem;
-  padding-top: calc(.9rem + env(safe-area-inset-top));
-}
-.landing-nav .actions { display: flex; gap: .45rem; flex-wrap: wrap; }
-
-.brand {
-  display: flex; align-items: center; gap: .6rem; min-width: 0;
-}
-.brand-txt { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
-.brand-txt strong { font-size: 1.02rem; letter-spacing: -.01em; }
-.brand-txt small { font-size: .72rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.landing-nav { display: flex; align-items: center; gap: .55rem; flex-wrap: wrap; }
 
 /* ---------- hero ---------- */
 .landing-hero {
-  background: linear-gradient(135deg, var(--sage-soft), var(--sky-soft));
-  border: 1px solid var(--line); border-radius: var(--r-lg);
-  padding: 1.6rem 1.3rem; display: grid; gap: 1rem;
+  display: grid; grid-template-columns: 1.2fr .8fr; gap: 1rem;
+  align-items: center; padding: clamp(1.2rem, 4vw, 2.6rem) clamp(.85rem, 3vw, 1.6rem) 0;
 }
-.landing-hero h1 { font-size: clamp(1.9rem, 5vw, 2.9rem); letter-spacing: -.02em; line-height: 1.12; }
-.landing-hero > p { color: var(--ink-soft); font-size: .95rem; max-width: 56ch; }
-
+.hero-copy { display: grid; gap: .85rem; justify-items: start; }
 .hero-badge {
   display: inline-flex; align-items: center; gap: .35rem;
-  font-size: .74rem; font-weight: 700; letter-spacing: .02em;
-  background: var(--card); color: var(--sage-ink);
+  font-size: .74rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--sage-ink); background: var(--sage-soft);
   border: 1px solid #d6e1d8; border-radius: 999px; padding: .3rem .75rem;
-  box-shadow: var(--sh-sm); width: fit-content;
 }
-
-.hero-copy { display: grid; gap: .8rem; align-content: start; }
-.hero-copy > p { color: var(--ink-soft); font-size: 1.02rem; max-width: 54ch; }
-
+.hero-copy h1 {
+  margin: 0; color: var(--ink);
+  font-size: clamp(1.9rem, 5vw, 3rem); line-height: 1.1; letter-spacing: -.02em;
+  max-width: 18ch;
+}
+.hero-copy > p { margin: 0; color: var(--ink-soft); font-size: 1.02rem; line-height: 1.55; max-width: 50ch; }
 .hero-cta { display: flex; gap: .55rem; flex-wrap: wrap; }
 
-.hero-art { display: none; }
-@media (min-width: 760px) {
-  .landing-hero { grid-template-columns: 1.2fr .8fr; align-items: center; }
-  .hero-art {
-    display: block; border-radius: var(--r); overflow: hidden;
-    border: 1px solid var(--line); box-shadow: var(--sh-md);
-    max-height: 300px;
-  }
-  .hero-art img, .hero-art svg { display: block; width: 100%; height: 100%; object-fit: cover; }
+.hero-art {
+  margin: 0; border-radius: var(--r-lg); overflow: hidden;
+  border: 1px solid var(--line); box-shadow: var(--sh-md);
+  background: var(--card);
+}
+.hero-art svg { display: block; width: 100%; height: 100%; }
+
+/* ---------- colonna laterale + footer ---------- */
+.landing-cols {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: .9rem; align-items: start;
+  padding: 0 clamp(.85rem, 3vw, 1.6rem);
+}
+.landing-aside { padding: 1.1rem 1rem; display: grid; gap: .8rem; align-content: start; }
+.perk-list { list-style: none; margin: 0; padding: 0; display: grid; gap: .6rem; }
+.perk-list li { display: flex; gap: .6rem; align-items: flex-start; }
+.perk-list li > span { font-size: 1.2rem; line-height: 1; flex-shrink: 0; margin-top: .1rem; }
+.perk-list strong { display: block; font-size: .9rem; letter-spacing: -.01em; }
+.perk-list small { display: block; margin-top: .1rem; color: var(--ink-soft); font-size: .82rem; line-height: 1.45; }
+.demo-strip {
+  display: grid; gap: .5rem; background: var(--bg);
+  border: 1px dashed var(--line); border-radius: var(--r); padding: .75rem .8rem;
 }
 
-/* ---------- griglia funzioni ---------- */
-.landing-feats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: .6rem; }
-.landing-feats li {
+/* ---------- pannello superadmin ---------- */
+.sa-panel { display: grid; gap: .8rem; padding: 1rem; }
+.sa-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: .8rem; }
+.sa-card {
   background: var(--card); border: 1px solid var(--line); border-radius: var(--r);
-  padding: .8rem .85rem; display: grid; grid-template-columns: auto 1fr; gap: .2rem .55rem; align-items: center;
-  box-shadow: var(--sh-sm); font-size: .84rem;
+  padding: .95rem; display: grid; gap: .5rem; align-content: start; box-shadow: var(--sh-sm);
 }
-.landing-feats li > span { grid-row: span 2; font-size: 1.4rem; }
-.landing-feats strong { font-size: .88rem; letter-spacing: -.01em; }
-.landing-feats small { color: var(--muted); line-height: 1.35; }
+.sa-card h3 { margin: 0; font-size: .92rem; letter-spacing: -.01em; }
+.sa-card p { margin: 0; color: var(--ink-soft); font-size: .84rem; line-height: 1.5; }
+.sa-num { font-size: 1.6rem; font-weight: 700; color: var(--sage-ink); letter-spacing: -.02em; }
+.sa-actions { display: flex; gap: .45rem; flex-wrap: wrap; }
 
-/* ---------- titoli di sezione ---------- */
-.landing-sec-title { font-size: 1.1rem; letter-spacing: -.01em; margin-bottom: .1rem; }
-.landing-sec-sub { color: var(--muted); font-size: .86rem; margin-bottom: .8rem; }
-
-/* ---------- come funziona: 3 step ---------- */
-.landing-steps { margin-top: .3rem; }
-.steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: .7rem; }
-.step {
-  background: var(--card); border: 1px solid var(--line); border-radius: var(--r);
-  padding: 1rem .9rem; display: grid; gap: .4rem; box-shadow: var(--sh-sm);
-}
-.step-num {
-  width: 30px; height: 30px; border-radius: 50%;
-  display: inline-flex; align-items: center; justify-content: center;
-  background: var(--sage); color: #fff; font-weight: 700; font-size: .85rem;
-  box-shadow: var(--sh-sm);
-}
-.step strong { font-size: .92rem; letter-spacing: -.01em; }
-.step small { color: var(--muted); line-height: 1.45; font-size: .82rem; }
-
-/* ---------- perk: perché Asilapp ---------- */
-.perk-list { display: grid; gap: .5rem; }
-.perk-list li {
-  display: flex; gap: .55rem; align-items: flex-start;
-  font-size: .88rem; color: var(--ink-soft); line-height: 1.5;
-}
-.perk-list li > span { font-size: 1.1rem; flex-shrink: 0; }
-
-/* ---------- fascia finale: colonna unica centrata (la landing snella ha solo l'aside) ---------- */
-.landing-cols { display: grid; gap: 1rem; align-items: start; width: 100%; max-width: 660px; margin: 0 auto; }
-
-.landing-cols .card.signup { border-left: 4px solid var(--sage); }
-
-.asilo-list { display: grid; gap: .4rem; margin-top: .6rem; }
-.asilo-list li {
-  display: flex; align-items: center; justify-content: space-between; gap: .6rem; flex-wrap: wrap;
-  background: var(--bg); border: 1px solid var(--line); border-radius: var(--r-sm);
-  padding: .55rem .75rem; box-shadow: var(--sh-sm); transition: border-color var(--t), background var(--t);
-}
-.asilo-list li:hover { border-color: #ddd7d0; background: var(--card); }
-.asilo-list .tpl-txt { flex: 1; min-width: 0; overflow-wrap: anywhere; font-size: .92rem; }
-
-.demo-strip { display: flex; align-items: center; justify-content: space-between; gap: .6rem; flex-wrap: wrap; border-top: 1px dashed var(--line); margin-top: .8rem; padding-top: .7rem; }
-
-.login-foot { font-size: .72rem; color: var(--muted); text-align: center; }
-
-/* ---------- barra superiore landing ---------- */
-.landing-top {
-  display: flex; align-items: center; justify-content: space-between; gap: .8rem; flex-wrap: wrap;
-  padding-top: calc(1rem + env(safe-area-inset-top));
-}
-.landing-top .landing-nav { display: flex; gap: .5rem; flex-wrap: wrap; padding-top: 0; }
-
-/* ---------- card registrazione asilo ---------- */
-.signup-card { display: grid; gap: .7rem; border-left: 4px solid var(--sage); }
-
-/* ---------- aside informativo ---------- */
-.landing-aside { display: grid; gap: .8rem; align-content: start; }
-
-/* ============================================================
-   Pannello superadmin (classi sa-*)
-   ============================================================ */
-.sa-view { max-width: 980px; margin: 0 auto; padding: 0 .85rem 3rem; display: grid; gap: 1rem; align-content: start; }
-
-.sa-main { display: grid; gap: .8rem; align-content: start; }
-
-.sa-hint { font-size: .8rem; color: var(--muted); line-height: 1.45; }
-
-.sa-err {
-  color: var(--danger); background: var(--terra-soft);
-  border: 1px solid #eed6cc; border-radius: var(--r-sm);
-  font-size: .84rem; padding: .5rem .75rem;
-}
-
-/* griglia delle card asilo: collassa a colonna singola su schermi stretti */
-.sa-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: .7rem; }
-@media (max-width: 520px) { .sa-grid { grid-template-columns: 1fr; } }
-
-.sa-item {
-  background: var(--card); border: 1px solid var(--line); border-radius: var(--r);
-  padding: .9rem .95rem; display: grid; gap: .55rem; align-content: start;
-  box-shadow: var(--sh-sm); transition: border-color var(--t), box-shadow var(--t);
-}
-.sa-item:hover { border-color: #ddd7d0; box-shadow: var(--sh-md); }
-.sa-item strong { font-size: .95rem; letter-spacing: -.01em; }
-
-/* pillola statistica: bambini / classi */
-.sa-stat {
-  display: inline-flex; align-items: center; gap: .3rem;
-  font-size: .74rem; font-weight: 600;
-  background: var(--sky-soft); color: var(--sky-ink);
-  border-radius: 999px; padding: .25rem .65rem;
-  width: fit-content;
-}
-
-/* riga azioni della card asilo */
-.sa-actions { display: flex; gap: .45rem; flex-wrap: wrap; align-items: center; }
-
-/* bottone elimina in stile pericolo */
-.sa-del {
-  font-size: .74rem; font-weight: 600;
-  color: var(--danger); background: var(--terra-soft);
-  border: 1px solid #eed6cc; border-radius: 999px;
-  padding: .3rem .7rem; cursor: pointer;
-  transition: background var(--t), border-color var(--t);
-}
-.sa-del:hover { background: #f3ddd4; border-color: var(--danger); }
-
-/* lista classi dell'asilo dentro la card */
-.sa-sec-list { display: grid; gap: .35rem; margin: 0; padding: 0; list-style: none; }
-.sa-sec-list li {
-  display: flex; align-items: center; justify-content: space-between; gap: .5rem; flex-wrap: wrap;
-  background: var(--bg); border: 1px solid var(--line); border-radius: var(--r-sm);
-  padding: .45rem .65rem; font-size: .84rem;
-}
-.sa-sec-list .tpl-txt { flex: 1; min-width: 0; overflow-wrap: anywhere; }
-.sa-sec-list small { color: var(--muted); font-weight: 500; }
-
-/* ---------- banner «entrato come superadmin» nell'asilo ---------- */
-.sa-enter-bar {
-  display: flex; align-items: center; justify-content: space-between; gap: .6rem; flex-wrap: wrap;
-  background: var(--amber-soft); color: var(--amber-ink);
-  border: 1px solid #e7d9b4; border-radius: var(--r);
-  padding: .55rem .85rem; font-size: .82rem; font-weight: 600;
-  box-shadow: var(--sh-sm);
-}
-.sa-enter-bar .btn-ghost { background: var(--card); }
-
-/* ---------- superadmin extra: toolbar, statistiche, chip sulle card ---------- */
-.sa-tools {
-  display: grid; gap: .65rem;
-  background: var(--card); border: 1px solid var(--line); border-radius: var(--r);
-  padding: .85rem .9rem; box-shadow: var(--sh-sm);
-}
-.sa-stats { display: flex; flex-wrap: wrap; gap: .4rem; }
-.sa-stats .sa-stat { background: var(--sage-soft); color: var(--sage-ink); }
-.sa-stats .sa-stat.warn { background: var(--amber-soft); color: var(--amber-ink); }
-
-.sa-tools-row { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; }
-.sa-tools-row .input { width: auto; flex: 1 1 180px; padding: .5rem .7rem; font-size: .9rem; }
-.sa-tools-row .input:not([type="search"]) { flex: 0 0 auto; }
-
-.sa-chips { display: flex; flex-wrap: wrap; gap: .35rem; }
-.sa-chips .sa-stat { background: var(--bg); color: var(--ink-soft); border: 1px solid var(--line); }
-.sa-chips .sa-stat.warn { background: var(--amber-soft); color: var(--amber-ink); border-color: #e7d9b4; }
-
-/* ---------- link rapidi del footer landing ---------- */
-.landing-footer {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: .8rem; flex-wrap: wrap;
-  border-top: 1px solid var(--line); padding-top: 1rem;
-}
-.landing-links { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
-
-/* ---------- credito MecaLab: riga finale dei footer ---------- */
-.landing-footer .page-credit,
-.page-foot .page-credit {
-  flex: 1 1 100%;
-  margin: .55rem 0 0;
-  padding-top: .55rem;
-  border-top: 1px dashed var(--line);
-  font-size: .74rem;
-  color: var(--muted);
-}
-.landing-footer .page-credit a,
-.page-foot .page-credit a {
-  color: var(--sage-ink); font-weight: 600;
-  text-decoration: underline;
-}
-
-/* ============================================================
-   LANDING v2 — trust row, sezione «Per chi», iscrizione guidata,
-   FAQ e footer. Riusa il design system (variabili e ombre).
-   ============================================================ */
-
-/* ---------- micro-badge sotto la CTA dell'hero ---------- */
-.trust-row { display: flex; flex-wrap: wrap; gap: .35rem .95rem; list-style: none; margin: 0; padding: 0; }
-.trust-row li {
-  font-size: .78rem; font-weight: 600; color: var(--ink-soft);
-  display: inline-flex; align-items: center; gap: .3rem;
-}
-
-/* ---------- sezione «Per chi»: maestre vs famiglie ---------- */
-.landing-audience { display: grid; gap: .8rem; }
-@media (min-width: 760px) { .landing-audience { grid-template-columns: 1fr 1fr; } }
-
-.audience-card {
-  background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg);
-  padding: 1.1rem 1rem; display: grid; gap: .6rem; align-content: start;
-  box-shadow: var(--sh-sm);
-}
-.audience-card.maestre { border-top: 4px solid var(--sage); }
-.audience-card.famiglie { border-top: 4px solid var(--terra, #c2704e); }
-.audience-card h3 { font-size: 1rem; letter-spacing: -.01em; display: flex; align-items: center; gap: .45rem; }
-.audience-card h3 .aud-ico {
-  width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
-  display: inline-flex; align-items: center; justify-content: center; font-size: 1.05rem;
-  background: var(--sage-soft);
-}
-.famiglie h3 .aud-ico { background: var(--terra-soft); }
-
-.audience-list { display: grid; gap: .45rem; margin: 0; padding: 0; list-style: none; }
-.audience-list li {
-  display: flex; gap: .5rem; align-items: flex-start;
-  font-size: .86rem; color: var(--ink-soft); line-height: 1.45;
-}
-.audience-list li::before {
-  content: '✓'; flex-shrink: 0; font-weight: 700; font-size: .78rem;
-  color: var(--sage); margin-top: .1rem;
-}
-
-.audience-cta { margin-top: .2rem; }
-
-/* ---------- iscrizione guidata: step indicator ---------- */
-.signup-steps { display: flex; gap: .35rem; align-items: center; flex-wrap: wrap; }
-.signup-steps .sg-step {
-  display: inline-flex; align-items: center; gap: .3rem;
-  font-size: .72rem; font-weight: 700; letter-spacing: .01em;
-  color: var(--muted); background: var(--bg);
-  border: 1px solid var(--line); border-radius: 999px;
-  padding: .25rem .65rem; transition: color var(--t), background var(--t), border-color var(--t);
-}
-.signup-steps .sg-step.on {
-  color: #fff; background: var(--sage); border-color: var(--sage);
-  box-shadow: var(--sh-sm);
-}
-.signup-steps .sg-step.done { color: var(--sage-ink); background: var(--sage-soft); border-color: #d6e1d8; }
-.signup-steps .sg-sep { color: var(--muted); font-size: .7rem; }
-
-/* barra di robustezza della password — UNICA casa di questo componente */
+/* ---------- indicatore robustezza password (unica casa) ---------- */
 .pw-meter { display: grid; gap: .3rem; }
-.pw-check { display: grid; gap: .3rem; margin-top: .1rem; }
-.pw-check small { font-size: .74rem; color: var(--muted); }
-.pw-bar { height: 6px; border-radius: 999px; background: var(--bg); border: 1px solid var(--line); overflow: hidden; }
-.pw-bar > span {
+.pw-bar {
+  height: 6px; border-radius: 999px; background: var(--line);
+  overflow: hidden; transition: background-color var(--t);
+}
+.pw-bar > i {
   display: block; height: 100%; width: 0;
   background: var(--danger); border-radius: 999px;
-  transition: width var(--t), background var(--t);
+  transition: width 280ms cubic-bezier(.2,.7,.3,1), background-color 280ms ease-out;
 }
-.pw-bar > span.lv1 { width: 33%; background: #e11d48; }
-.pw-bar > span.lv2 { width: 66%; background: #d97706; }
-.pw-bar > span.lv3 { width: 100%; background: var(--sage); }
-.pw-meter small { font-size: .74rem; color: var(--muted); }
+.pw-bar.lv1 > i { width: 25%; background: var(--danger); }
+.pw-bar.lv2 > i { width: 50%; background: #d99b2e; }
+.pw-bar.lv3 > i { width: 75%; background: #7d9b76; }
+.pw-bar.lv4 > i { width: 100%; background: var(--sage); }
+.pw-label { font-size: .76rem; font-weight: 600; color: var(--muted); }
 
-/* ---------- FAQ landing ---------- */
-.landing-faq { display: grid; gap: .55rem; max-width: 760px; margin: 0 auto; }
-.landing-faq details {
-  background: var(--card); border: 1px solid var(--line); border-radius: var(--r);
-  padding: .75rem .95rem; box-shadow: var(--sh-sm);
+/* ---------- MOBILE: testata e hero della landing (unica casa) ---------- */
+@media (max-width: 640px) {
+  .landing-top {
+    flex-direction: column; align-items: center; gap: .55rem;
+    padding: .7rem .85rem calc(.7rem + env(safe-area-inset-top));
+  }
+  .landing-nav { justify-content: center; width: 100%; gap: .45rem; }
+
+  .landing-hero { grid-template-columns: 1fr; gap: 1.3rem; padding-top: 1rem; }
+  .hero-copy { justify-items: center; text-align: center; }
+  .hero-copy h1 { font-size: clamp(1.75rem, 8vw, 2.2rem); }
+  .hero-cta { justify-content: center; flex-direction: column; align-items: stretch; }
+  .hero-cta .btn { width: 100%; justify-content: center; }
+
+  .landing-cols { grid-template-columns: 1fr; }
+  .landing-aside { padding: .95rem .9rem; }
 }
-.landing-faq details[open] { border-color: #ddd7d0; }
-.landing-faq summary {
-  cursor: pointer; font-weight: 600; font-size: .92rem; letter-spacing: -.01em;
-  list-style: none; display: flex; justify-content: space-between; align-items: center; gap: .6rem;
-}
-.landing-faq summary::-webkit-details-marker { display: none; }
-.landing-faq summary::after { content: '+'; font-size: 1.1rem; color: var(--muted); font-weight: 400; }
-.landing-faq details[open] summary::after { content: '–'; }
-.landing-faq details p { margin: .55rem 0 0; color: var(--ink-soft); font-size: .87rem; line-height: 1.55; }
