@@ -268,3 +268,75 @@ ol.steps-grid { list-style: none; margin: 0; padding: 0; }
 .contact-card { transition: border-color var(--t), box-shadow 240ms cubic-bezier(.2,.7,.3,1); }
 .contact-card:focus-within { border-color: #cddcda; box-shadow: var(--sh-md); }
 .page-credit { margin: 0; font-size: .76rem; color: var(--muted); }
+
+/* ---------- E) MOBILE — testate su una riga, CTA a colonna, touch e zoom ---------- */
+
+/* comfort touch globale: niente rettangolo grigio al tap, niente auto-ingrandimento */
+.btn, .link-btn, .tab, .seg-btn, .menu-day, .kid-card, .faq summary, .contact-meta li {
+  -webkit-tap-highlight-color: transparent;
+}
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+.meals-table-wrap { -webkit-overflow-scrolling: touch; }
+
+@media (max-width: 640px) {
+
+  /* input a 16px reali: iOS non fa lo zoom della pagina a ogni focus */
+  .input, input.input, select.input, textarea.input { font-size: 1rem; }
+
+  /* testate delle pagine pubbliche: brand sopra, nav a pillola sotto */
+  .page-top {
+    flex-direction: column; align-items: center; gap: .5rem;
+    padding: .6rem .85rem calc(.6rem + env(safe-area-inset-top));
+  }
+  .page-nav { width: 100%; justify-content: center; overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .page-nav::-webkit-scrollbar { display: none; }
+  .page-nav .link-btn { flex-shrink: 0; }
+
+  /* hero e sezioni: aria più compatta ma mai schiacciata */
+  .page-hero h1 { font-size: clamp(1.65rem, 8vw, 2.1rem); }
+  .page-hero p { font-size: .95rem; }
+  .page-main { gap: 1.6rem; }
+
+  /* griglie: da auto-fit a colonna singola, niente card spelacchiate */
+  .page-grid { grid-template-columns: 1fr; }
+
+
+  /* CTA in colonna, bottone primario per primo e a piena larghezza */
+  .hero-cta, .page-cta-btns { flex-direction: column; align-items: stretch; }
+  .hero-cta .btn, .page-cta-btns .btn { width: 100%; justify-content: center; }
+
+  /* contact grid: aside dopo il form, meta compatti */
+  .contact-grid { grid-template-columns: 1fr; }
+  .contact-meta li { padding: .75rem .8rem; }
+  .contact-form textarea.input { min-height: 110px; }
+
+  /* footer: tutto centrato e leggibile */
+  .page-foot { gap: .5rem; }
+  .landing-footer { flex-direction: column; align-items: center; text-align: center; gap: .6rem; }
+  .landing-footer nav { justify-content: center; }
+
+  /* app maestre: tab scorrevoli su una riga, menù a 2 colonne */
+  .tabs { overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tabs .tab { flex-shrink: 0; }
+  .menu-grid { grid-template-columns: repeat(2, 1fr); gap: .45rem; }
+  .menu-grid .menu-day { min-height: 78px; font-size: .78rem; }
+
+  /* tabelle pasti: scroll orizzontale fluido, prima colonna sempre visibile */
+  .meals-table th, .meals-table td { padding: .45rem .55rem; font-size: .8rem; }
+  .meals-table td:first-child, .meals-table th:first-child { position: sticky; left: 0; background: var(--card); box-shadow: 1px 0 0 var(--line); }
+
+  /* touch target ≥ 44px su tutto ciò che si preme col pollice */
+  .btn { min-height: 44px; }
+  .btn-sm { min-height: 38px; }
+  .link-btn, .faq summary { min-height: 44px; display: inline-flex; align-items: center; }
+  .faq summary { display: flex; }
+
+  /* banner demo e toolkit: piena larghezza, testo che respira */
+  .demo-banner, .sa-demo-tools { padding: .7rem .8rem; font-size: .8rem; }
+  .sa-demo-btns .btn { flex: 1 1 auto; justify-content: center; }
+
+  /* drawer bambino: pieno schermo in verticale, chiusura facile */
+  .drawer { max-height: 92dvh; border-radius: var(--r-lg) var(--r-lg) 0 0; }
+  .drawer-foot { position: sticky; bottom: 0; background: var(--card); padding-bottom: calc(.7rem + env(safe-area-inset-bottom)); }
+}
