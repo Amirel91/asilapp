@@ -26,6 +26,18 @@ html { scroll-behavior: smooth; }
   border-radius: var(--r-sm);
 }
 
+/* voce attiva della testata: la pagina corrente si riconosce senza cambiare la pillola */
+.page-nav .link-btn[aria-current="page"],
+.landing-nav .link-btn[aria-current="page"] {
+  color: var(--sage-ink);
+  font-weight: 700;
+}
+
+/* mobile: testata identica su tutte le pagine — la nav scende sotto il brand, riga intera */
+@media (max-width: 640px) {
+  .page-top .page-nav { width: 100%; }
+}
+
 .meals-table-wrap { scrollbar-width: thin; scrollbar-color: #ddd7d0 transparent; }
 .meals-table-wrap::-webkit-scrollbar { height: 6px; }
 .meals-table-wrap::-webkit-scrollbar-thumb { background: #ddd7d0; border-radius: 999px; }
@@ -210,7 +222,7 @@ html { scroll-behavior: smooth; }
 
 /* ---------- D) PAGINE PUBBLICHE (info, contatti, registrazione) ---------- */
 
-a.brand { text-decoration: none; color: inherit; }
+a.brand, a.brand:visited { text-decoration: none; color: inherit; }
 a.brand:focus-visible { outline: 2px solid var(--sage); outline-offset: 2px; border-radius: var(--r-sm); }
 
 .page-body { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; }
@@ -341,6 +353,23 @@ ol.steps-grid { list-style: none; margin: 0; padding: 0; }
 }
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 .meals-table-wrap { -webkit-overflow-scrolling: touch; }
+
+/* ---------- F) TELEFONO — pagine pubbliche (info, contatti, registrazione) ---------- */
+/* La testata sticky su schermo stretto diventa troppo alta e sbilanciata:
+   brand centrato, tagline nascosta, nav compatto sulla riga sotto. */
+@media (max-width: 640px) {
+  .page-top { flex-direction: column; align-items: center; gap: .45rem; padding: .6rem .9rem; }
+  .page-top .brand-txt small { display: none; }
+  .page-nav { justify-content: center; gap: .45rem; }
+
+  /* griglia delle card: una colonna netta e card compatte, niente sorprese auto-fit */
+  .page-grid { grid-template-columns: 1fr; }
+  .page-grid .card { padding: .9rem .85rem; }
+
+  /* CTA finale: i due bottoni in colonna a piena larghezza, tap target generosi */
+  .page-cta-btns { flex-direction: column; width: 100%; }
+  .page-cta-btns .btn { width: 100%; justify-content: center; }
+}
 
 @media (max-width: 640px) {
 
