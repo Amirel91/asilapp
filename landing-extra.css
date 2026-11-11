@@ -4,7 +4,9 @@
    1) style.css         → base: variabili, reset, componenti
    2) landing.css       → landing + pannello superadmin + indicatore
                           robustezza password (.pw-meter/.pw-bar:
-                          unica casa, qui NON si duplica)
+                          unica casa, qui NON si duplica) + stati
+                          mobile di .landing-top/.landing-nav/
+                          .landing-hero (unica casa: lì, non qui)
    3) landing-extra.css → rifiniture + completamenti (questo file)
    ============================================================ */
 
@@ -270,6 +272,9 @@ ol.steps-grid { list-style: none; margin: 0; padding: 0; }
 .page-credit { margin: 0; font-size: .76rem; color: var(--muted); }
 
 /* ---------- E) MOBILE — testate su una riga, CTA a colonna, touch e zoom ---------- */
+/* Nota: gli stati mobile della LANDING (.landing-top, .landing-nav,
+   .landing-hero) vivono in landing.css, dove quei selettori nascono:
+   qui non si duplicano. Qui si regola solo ciò che nasce in questo foglio. */
 
 /* comfort touch globale: niente rettangolo grigio al tap, niente auto-ingrandimento */
 .btn, .link-btn, .tab, .seg-btn, .menu-day, .kid-card, .faq summary, .contact-meta li {
@@ -299,7 +304,6 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
   /* griglie: da auto-fit a colonna singola, niente card spelacchiate */
   .page-grid { grid-template-columns: 1fr; }
-
 
   /* CTA in colonna, bottone primario per primo e a piena larghezza */
   .hero-cta, .page-cta-btns { flex-direction: column; align-items: stretch; }
