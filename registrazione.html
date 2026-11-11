@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Crea lo spazio del tuo asilo — Asilapp</title>
-<meta name="description" content="Registra il tuo nido su Asilapp in un minuto: nome dell'asilo e password, poi aggiungi classi, bambini e codici famiglia. Gratis, senza installare nulla.">
+<meta name="description" content="Registra il tuo asilo su Asilapp in un minuto: nome, username e password. Memo, menù e pasti del nido subito pronti per le famiglie.">
 <meta name="theme-color" content="#faf9f7">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="landing.css">
 <link rel="stylesheet" href="landing-extra.css">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
+<noscript><style>.reveal{opacity:1!important;transform:none!important}</style></noscript>
 </head>
 <body class="page-body">
 
@@ -35,43 +36,53 @@
   <section class="page-hero reveal">
     <span class="hero-badge">Pronto in un minuto</span>
     <h1>Crea lo spazio del tuo asilo</h1>
-    <p>Serve solo un nome e una password: le classi e i bambini li aggiungi dopo, con calma.</p>
+    <p>Nome dell'asilo, username e password: da qui in poi memo, menù e pasti del nido sono subito pronti per le famiglie.</p>
   </section>
 
-  <section class="contact-grid" aria-label="Modulo di registrazione e informazioni">
+  <section class="contact-grid" aria-label="Registrazione e informazioni utili">
     <div class="card contact-card reveal">
-      <p class="card-title" id="rgTitle">Registra il tuo nido</p>
-      <form id="regForm" novalidate>
+      <div class="contact-head">
+        <span class="contact-ico" aria-hidden="true">🏫</span>
+        <div>
+          <p class="card-title" id="regTitle">Registra il tuo asilo</p>
+          <p class="contact-sub">Lo spazio nasce qui e resta in questo browser: nessun server, nessun cloud.</p>
+        </div>
+      </div>
+      <form id="regForm" class="contact-form" aria-labelledby="regTitle" novalidate>
         <label class="field"><span>Nome dell'asilo</span>
-          <input type="text" class="input" id="rgSchool" maxlength="40" placeholder="es. Asilo Nido Arcobaleno" autocomplete="organization" required>
+          <input type="text" class="input" id="regSchool" maxlength="40" placeholder="es. Asilo Nido Arcobaleno" autocomplete="organization" required>
         </label>
         <label class="field"><span>Username</span>
-          <input type="text" class="input" id="rgUser" maxlength="20" placeholder="es. maestra.sofia" autocomplete="username" required>
+          <input type="text" class="input" id="regUser" maxlength="24" placeholder="es. admin" autocomplete="username" required>
         </label>
         <label class="field"><span>Password</span>
-          <input type="password" class="input" id="rgPass" maxlength="40" placeholder="Almeno 8 caratteri" autocomplete="new-password" required>
-          <span class="pw-meter" id="rgMeter" aria-hidden="true"><span class="pw-bar" id="rgBar"></span></span>
-          <small class="hint" id="rgMeterTxt">Scegli una password che ricorderai: non è recuperabile.</small>
+          <input type="password" class="input" id="regPass" maxlength="64" autocomplete="new-password" placeholder="almeno 6 caratteri" required>
         </label>
-        <p class="login-err" id="rgErr" hidden></p>
-        <button type="submit" class="btn btn-primary btn-block" id="rgBtn">Crea lo spazio</button>
+        <div class="pw-meter" id="pwMeter" hidden>
+          <div class="pw-bar" id="pwBar" role="progressbar" aria-label="Robustezza della password" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+        </div>
+        <label class="field"><span>Ripeti la password</span>
+          <input type="password" class="input" id="regPass2" maxlength="64" autocomplete="new-password" placeholder="ancora la stessa password" required>
+        </label>
+        <p class="login-err" id="regErr" aria-live="polite" hidden></p>
+        <button type="submit" class="btn btn-primary btn-block" id="regBtn">Crea lo spazio</button>
       </form>
-      <p class="hint">Hai già uno spazio? <button type="button" class="link-btn" id="rgLogin">Accedi col nome del tuo asilo →</button></p>
+      <p class="contact-alt">Hai già uno spazio? <a href="index.html">Accedi col nome del tuo asilo</a>.</p>
     </div>
 
-    <aside class="contact-aside" aria-label="Cosa succede dopo la registrazione">
+    <aside class="contact-aside" aria-label="Come procede dopo la registrazione">
       <ul class="contact-meta">
-        <li class="reveal"><span aria-hidden="true">🏫</span><div><strong>Lo spazio è solo vostro</strong><small>Bambini, classi e codici famiglia separati da ogni altro asilo.</small></div></li>
-        <li class="reveal"><span aria-hidden="true">🔐</span><div><strong>La password resta nel browser</strong><small>Niente server, niente cloud: i dati non lasciano questo dispositivo.</small></div></li>
-        <li class="reveal"><span aria-hidden="true">💾</span><div><strong>Backup quando vuoi</strong><small>Dalle Impostazioni esporti una copia e la ripristini su un altro telefono.</small></div></li>
-        <li class="reveal"><span aria-hidden="true">🆓</span><div><strong>Gratis, per sempre</strong><small>Senza pubblicità, senza carte di credito.</small></div></li>
+        <li class="reveal"><span aria-hidden="true">1️⃣</span><div><strong>Aggiungi le classi</strong><small>Dalle Impostazioni crei sezioni e sedi, poi iscrivi i bambini alla loro classe.</small></div></li>
+        <li class="reveal"><span aria-hidden="true">2️⃣</span><div><strong>Consegna i codici famiglia</strong><small>Ogni bambino ha un codice (es. B001): i genitori entrano con asilo e codice.</small></div></li>
+        <li class="reveal"><span aria-hidden="true">3️⃣</span><div><strong>Pubblica memo e menù</strong><small>Basta scrivere: le famiglie leggono tutto dal telefono, senza installare nulla.</small></div></li>
+        <li class="reveal"><span aria-hidden="true">💾</span><div><strong>Backup consigliato</strong><small>Dato che i dati restano in questo browser, scarica una copia ogni tanto dalle Impostazioni.</small></div></li>
       </ul>
     </aside>
   </section>
 
   <section class="page-cta card reveal">
     <h2>Vuoi prima guardare?</h2>
-    <p>La demo contiene un asilo già pronto, in sola lettura: dai un'occhiata prima di registrarti.</p>
+    <p>La demo contiene un asilo già pronto, da maestra o da genitore, in sola lettura.</p>
     <div class="page-cta-btns">
       <a class="btn btn-primary" href="index.html">Apri la demo dalla home</a>
       <a class="btn btn-ghost" href="info.html">Scopri come funziona</a>
@@ -86,6 +97,6 @@
 </footer>
 
 <script src="registrazione.js" defer></script>
-<script src="modern.js" defer></script>
+<script src="reveal-safe.js" defer></script>
 </body>
 </html>
