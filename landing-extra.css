@@ -33,9 +33,21 @@ html { scroll-behavior: smooth; }
   font-weight: 700;
 }
 
-/* mobile: testata identica su tutte le pagine — la nav scende sotto il brand, riga intera */
+/* mobile: testata identica su tutte le pagine — la nav scende sotto il brand
+   come riga intera di pillole compatte: stanno su una riga a 375px e al
+   massimo vanno a capo centrate, mai sfrangate a sinistra */
 @media (max-width: 640px) {
-  .page-top .page-nav { width: 100%; }
+  .page-top { gap: .5rem .6rem; padding-bottom: .6rem; }
+  .page-top .page-nav {
+    width: 100%;
+    display: flex; flex-wrap: wrap; justify-content: center;
+    gap: .35rem .3rem;
+  }
+  .page-top .page-nav .link-btn {
+    font-size: .84rem; font-weight: 600;
+    padding: .42rem .6rem; white-space: nowrap;
+  }
+  .page-top .brand-txt small { font-size: .68rem; }
 }
 
 .meals-table-wrap { scrollbar-width: thin; scrollbar-color: #ddd7d0 transparent; }
@@ -281,6 +293,19 @@ a.brand:focus-visible { outline: 2px solid var(--sage); outline-offset: 2px; bor
 .page-sec .faq { margin: 0; max-width: 720px; }
 
 ol.steps-grid { list-style: none; margin: 0; padding: 0; }
+/* mobile: ogni passo è una card a riga intera — numero a sinistra, titolo e
+   descrizione incolonnati a destra: il testo non si fonde mai su una riga */
+@media (max-width: 767px) {
+  .steps-grid { display: grid; grid-template-columns: 1fr; gap: .6rem; }
+  .step {
+    display: flex; align-items: flex-start; gap: .7rem;
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--r); padding: .85rem .9rem; box-shadow: var(--sh-sm);
+  }
+  .step strong { display: block; font-size: .95rem; letter-spacing: -.01em; color: var(--ink); }
+  .step small { display: block; margin-top: .15rem; font-size: .875rem; line-height: 1.45; color: var(--ink-soft); }
+  .step-num { flex-shrink: 0; }
+}
 .step { transition: transform 240ms cubic-bezier(.2,.7,.3,1), box-shadow 240ms cubic-bezier(.2,.7,.3,1), border-color 240ms ease-out; }
 .step:hover { transform: translateY(-3px); border-color: #ddd7d0; box-shadow: var(--sh-md); }
 
@@ -341,6 +366,9 @@ ol.steps-grid { list-style: none; margin: 0; padding: 0; }
 .contact-card { transition: border-color var(--t), box-shadow 240ms cubic-bezier(.2,.7,.3,1); }
 .contact-card:focus-within { border-color: #cddcda; box-shadow: var(--sh-md); }
 .page-credit { margin: 0; font-size: .76rem; color: var(--muted); }
+.page-credit a { color: var(--sage-ink); font-weight: 600; text-decoration: none; }
+.page-credit a:hover { text-decoration: underline; }
+.page-credit a:focus-visible { outline: 2px solid var(--sage); outline-offset: 2px; border-radius: var(--r-sm); }
 
 /* ---------- E) MOBILE — testate su una riga, CTA a colonna, touch e zoom ---------- */
 /* Nota: gli stati mobile della testata, della nav e della hero della
