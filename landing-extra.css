@@ -270,6 +270,17 @@ a.brand:focus-visible { outline: 2px solid var(--sage); outline-offset: 2px; bor
 .page-foot p { margin: 0; font-size: .82rem; color: var(--ink-soft); }
 .page-foot a { color: var(--sage-ink); font-weight: 600; }
 
+/* crediti MecaLab: link vestiti, mai blu sottolineato di default */
+.page-credit { margin: 0; font-size: .78rem; color: var(--muted); }
+.page-credit a { color: var(--sage-ink); font-weight: 600; }
+.page-credit a, .page-foot a, .landing-footer a {
+  text-decoration: none;
+}
+.page-credit a:hover, .page-foot a:hover, .landing-footer a:hover { text-decoration: underline; }
+.page-credit a:focus-visible, .page-foot a:focus-visible, .landing-footer a:focus-visible {
+  outline: 2px solid var(--sage); outline-offset: 2px; border-radius: var(--r-sm);
+}
+
 .page-hero { display: grid; justify-items: center; gap: .7rem; text-align: center; }
 .page-hero h1 { margin: 0; color: var(--ink); font-size: clamp(1.9rem, 5vw, 2.9rem); letter-spacing: -.02em; line-height: 1.12; }
 .page-hero p { margin: 0; color: var(--ink-soft); font-size: 1.02rem; line-height: 1.55; max-width: 54ch; }
@@ -293,18 +304,22 @@ a.brand:focus-visible { outline: 2px solid var(--sage); outline-offset: 2px; bor
 .page-sec .faq { margin: 0; max-width: 720px; }
 
 ol.steps-grid { list-style: none; margin: 0; padding: 0; }
-/* mobile: ogni passo è una card a riga intera — numero a sinistra, titolo e
-   descrizione incolonnati a destra: il testo non si fonde mai su una riga */
-@media (max-width: 767px) {
-  .steps-grid { display: grid; grid-template-columns: 1fr; gap: .6rem; }
-  .step {
-    display: flex; align-items: flex-start; gap: .7rem;
-    background: var(--card); border: 1px solid var(--line);
-    border-radius: var(--r); padding: .85rem .9rem; box-shadow: var(--sh-sm);
-  }
-  .step strong { display: block; font-size: .95rem; letter-spacing: -.01em; color: var(--ink); }
-  .step small { display: block; margin-top: .15rem; font-size: .875rem; line-height: 1.45; color: var(--ink-soft); }
-  .step-num { flex-shrink: 0; }
+
+/* layout BASE di ogni passo, valido su OGNI viewport: numero a sinistra,
+   titolo e descrizione incolonnati a destra — mai testo fuso su una riga */
+.steps-grid { display: grid; grid-template-columns: 1fr; gap: .6rem; }
+.step {
+  display: flex; align-items: flex-start; gap: .7rem;
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: var(--r); padding: .85rem .9rem; box-shadow: var(--sh-sm);
+}
+.step strong { display: block; font-size: .95rem; letter-spacing: -.01em; color: var(--ink); }
+.step small { display: block; margin-top: .15rem; font-size: .875rem; line-height: 1.45; color: var(--ink-soft); }
+.step-num { flex-shrink: 0; }
+
+/* da tablet in su i tre passi si allineano in colonna affiancata */
+@media (min-width: 768px) {
+  .steps-grid { grid-template-columns: repeat(3, 1fr); gap: .8rem; }
 }
 .step { transition: transform 240ms cubic-bezier(.2,.7,.3,1), box-shadow 240ms cubic-bezier(.2,.7,.3,1), border-color 240ms ease-out; }
 .step:hover { transform: translateY(-3px); border-color: #ddd7d0; box-shadow: var(--sh-md); }
@@ -349,6 +364,11 @@ ol.steps-grid { list-style: none; margin: 0; padding: 0; }
 
 .contact-aside { display: grid; gap: .6rem; align-content: start; }
 .contact-meta { list-style: none; margin: 0; padding: 0; display: grid; gap: .6rem; }
+
+/* titoli e descrizioni delle voci contatti sempre incolonnati, mai fusi */
+.contact-meta li div { display: grid; gap: .15rem; min-width: 0; }
+.contact-meta li strong { display: block; font-size: .9rem; letter-spacing: -.01em; color: var(--ink); }
+.contact-meta li small { display: block; font-size: .82rem; line-height: 1.5; color: var(--ink-soft); }
 .contact-meta li {
   display: flex; gap: .7rem; align-items: flex-start;
   background: var(--card); border: 1px solid var(--line);
