@@ -16,7 +16,12 @@
   const local = ['localhost', '127.0.0.1'].indexOf(location.hostname) !== -1;
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || local)) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js').catch(() => {});
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => {
+          // forza subito il controllo di un nuovo worker, se il server ne ha uno
+          if (reg && typeof reg.update === 'function') reg.update().catch(() => {});
+        })
+        .catch(() => {});
     });
   }
 

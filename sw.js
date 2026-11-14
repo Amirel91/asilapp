@@ -1,88 +1,83 @@
 'use strict';
 /* ============================================================
-   sw.js — service worker di Asilapp
-   Precache dei file dell'app al primo avvio, poi:
-   - navigazione: network-first (gli aggiornamenti arrivano
-     subito) con fallback alla pagina in cache → offline ok
-   - asset (css/js/immagini): cache-first, la cache si riempie
-     anche a runtime (uploads compresi)
-   I DATI degli asili non passano da qui: restano in localStorage
-   del dispositivo, come sempre in Asilapp.
+   sw.js — service worker di Asilapp (PWA)
+   Strategia: PRIMA la rete, POI la cache.
+   Perché: con la vecchia cache-first i deploy non si vedevano
+   mai sui dispositivi che avevano già il worker installato.
+   Ora ogni visita aggiorna HTML e CSS dal server; la cache
+   serve solo da ripiego quando sei offline.
    ============================================================ */
-const VER = 'asilapp-sw-v1';
-const CORE = [
+
+const VERSION = 'asilapp-sw-v3';
+
+const PRECACHE = [
   './',
   './index.html',
+  './info.html',
+  './registrazione.html',
+  './contatti.html',
   './style.css',
   './landing.css',
   './landing-extra.css',
-  './script.js',
-  './saas.js',
-  './login.js',
-  './demo.js',
-  './demo-parent.js',
-  './diario.js',
-  './extra.js',
-  './settings.js',
-  './superadmin.js',
-  './install.js',
-  './manifest.webmanifest',
-  './icon.svg'
+  './icon.svg',
+  './manifest.webmanifest'
 ];
 
-self.addEventListener('install', e => {
-  e.waitUntil((async () => {
-    const c = await caches.open(VER);
-    /* allSettled: un file mancante non blocca l'installazione */
-    await Promise.allSettled(CORE.map(u => c.add(u)));
-    await self.skipWaiting();
-  })());
+/* install: precache best-effort (una risorsa mancante non blocca le altre)
+   e subentra subito, senza aspettare che le schede vecchie si chiudano */
+self.addEventListener('install', event => {
+  self.skipWaiting();
+  event.waitUntil(
+    caches.open(VERSION).then(cache =>
+      Promise.all(PRECACHE.map(u => cache.add(u).catch(() => null)))
+    )
+  );
 });
 
-self.addEventListener('activate', e => {
-  e.waitUntil((async () => {
+/* activate: BUTTA VIA tutte le cache che non sono di questa versione
+   (qui muore la vecchia cache con i CSS obsoleti) e prende il controllo
+   delle schede già aperte */
+self.addEventListener('activate', event => {
+  event.waitUntil((async () => {
     const keys = await caches.keys();
-    await Promise.all(keys.filter(k => k !== VER).map(k => caches.delete(k)));
+    await Promise.all(keys.filter(k => k !== VERSION).map(k => caches.delete(k)));
     await self.clients.claim();
   })());
 });
 
-self.addEventListener('fetch', e => {
-  const req = e.request;
+self.addEventListener('message', e => {
+  if (e.data === 'SKIP_WAITING') self.skipWaiting();
+});
+
+/* fetch: network-first per tutto ciò che è di questo origine.
+   Online → sempre la versione fresca (e la cache si aggiorna).
+   Offline → l'ultima copia salvata; per le navigazioni, la home. */
+self.addEventListener('fetch', event => {
+  const req = event.request;
   if (req.method !== 'GET') return;
+
   let url;
-  try { url = new URL(req.url); } catch (err) { return; }
-  if (url.origin !== self.location.origin) return;
+  try { url = new URL(req.url); } catch (e) { return; }
+  if (url.origin !== self.location.origin) return; // font Google: rete diretta
 
-  /* pagine: rete se c'è, cache altrimenti */
-  if (req.mode === 'navigate') {
-    e.respondWith((async () => {
-      try {
-        const fresh = await fetch(req);
-        const c = await caches.open(VER);
-        c.put('./index.html', fresh.clone());
-        return fresh;
-      } catch (err) {
-        const hit = (await caches.match(req)) || (await caches.match('./index.html'));
-        return hit || Response.error();
-      }
-    })());
-    return;
-  }
-
-  /* asset: cache-first, riempita a runtime */
-  e.respondWith((async () => {
-    const hit = await caches.match(req, { ignoreSearch: true });
-    if (hit) return hit;
+  event.respondWith((async () => {
     try {
       const fresh = await fetch(req);
-      if (fresh && fresh.ok && fresh.type === 'basic') {
-        const c = await caches.open(VER);
-        c.put(req, fresh.clone());
+      if (fresh && fresh.status === 200) {
+        try {
+          const cache = await caches.open(VERSION);
+          cache.put(req, fresh.clone());
+        } catch (e) { /* cache piena o non scrivibile: si prosegue */ }
       }
       return fresh;
     } catch (err) {
-      return hit || Response.error();
+      const cached = await caches.match(req, { ignoreSearch: true, ignoreVary: true });
+      if (cached) return cached;
+      if (req.mode === 'navigate') {
+        const home = await caches.match('./index.html', { ignoreSearch: true });
+        if (home) return home;
+      }
+      return new Response('Offline', { status: 503, statusText: 'Offline' });
     }
   })());
 });
