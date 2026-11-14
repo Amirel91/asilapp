@@ -1,21 +1,25 @@
 'use strict';
 /* ============================================================
-   sw.js — service worker di Asilapp (PWA)
-   Strategia: PRIMA la rete, POI la cache.
-   Perché: con la vecchia cache-first i deploy non si vedevano
-   mai sui dispositivi che avevano già il worker installato.
-   Ora ogni visita aggiorna HTML e CSS dal server; la cache
-   serve solo da ripiego quando sei offline.
+   sw.js — service worker di Asilapp, strategia anti-stallo
+   Il vecchio approccio cache-first teneva in vita CSS e HTML
+   stantii anche dopo i deploy: i fix erano online ma il browser
+   continuava a mostrare i file vecchi. Nuova strategia:
+   - HTML, CSS, JS e manifest → rete prima, cache come ripiego:
+     ogni deploy si vede dal primo reload, senza hard refresh
+   - Immagini, icone e font → cache-first (asset stabili, i nomi
+     dei file generati sono unici)
+   - activate → pulizia di TUTTE le cache che non sono quella
+     corrente + skipWaiting + clients.claim: anche chi era rimasto
+     bloccato sulla versione vecchia si sblocca da solo al
+     primo ritorno sul sito
    ============================================================ */
 
-const VERSION = 'asilapp-sw-v3';
+const CACHE = 'asilapp-net-1';
 
-const PRECACHE = [
+/* shell minima per l'offline: tutti i percorsi esistono nel progetto */
+const SHELL = [
   './',
   './index.html',
-  './info.html',
-  './registrazione.html',
-  './contatti.html',
   './style.css',
   './landing.css',
   './landing-extra.css',
@@ -23,61 +27,59 @@ const PRECACHE = [
   './manifest.webmanifest'
 ];
 
-/* install: precache best-effort (una risorsa mancante non blocca le altre)
-   e subentra subito, senza aspettare che le schede vecchie si chiudano */
 self.addEventListener('install', event => {
-  self.skipWaiting();
   event.waitUntil(
-    caches.open(VERSION).then(cache =>
-      Promise.all(PRECACHE.map(u => cache.add(u).catch(() => null)))
-    )
+    caches.open(CACHE)
+      .then(c => c.addAll(SHELL))
+      .then(() => self.skipWaiting())
+      .catch(() => self.skipWaiting()) // anche se un asset manca, il worker parte
   );
 });
 
-/* activate: BUTTA VIA tutte le cache che non sono di questa versione
-   (qui muore la vecchia cache con i CSS obsoleti) e prende il controllo
-   delle schede già aperte */
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {
-    const keys = await caches.keys();
-    await Promise.all(keys.filter(k => k !== VERSION).map(k => caches.delete(k)));
+    try {
+      const names = await caches.keys();
+      await Promise.all(names.filter(n => n !== CACHE).map(n => caches.delete(n)));
+    } catch (e) { /* pulizia best-effort */ }
     await self.clients.claim();
   })());
 });
 
-self.addEventListener('message', e => {
-  if (e.data === 'SKIP_WAITING') self.skipWaiting();
-});
-
-/* fetch: network-first per tutto ciò che è di questo origine.
-   Online → sempre la versione fresca (e la cache si aggiorna).
-   Offline → l'ultima copia salvata; per le navigazioni, la home. */
 self.addEventListener('fetch', event => {
   const req = event.request;
   if (req.method !== 'GET') return;
 
   let url;
   try { url = new URL(req.url); } catch (e) { return; }
-  if (url.origin !== self.location.origin) return; // font Google: rete diretta
+  if (url.origin !== location.origin) return; // font Google & co: gestiti dal browser
 
-  event.respondWith((async () => {
-    try {
-      const fresh = await fetch(req);
-      if (fresh && fresh.status === 200) {
-        try {
-          const cache = await caches.open(VERSION);
-          cache.put(req, fresh.clone());
-        } catch (e) { /* cache piena o non scrivibile: si prosegue */ }
-      }
-      return fresh;
-    } catch (err) {
-      const cached = await caches.match(req, { ignoreSearch: true, ignoreVary: true });
-      if (cached) return cached;
-      if (req.mode === 'navigate') {
-        const home = await caches.match('./index.html', { ignoreSearch: true });
-        if (home) return home;
-      }
-      return new Response('Offline', { status: 503, statusText: 'Offline' });
-    }
-  })());
+  /* asset stabili: cache-first */
+  if (/\.(?:png|jpe?g|webp|gif|svg|ico|woff2?)$/i.test(url.pathname)) {
+    event.respondWith(
+      caches.match(req).then(hit => hit || fetch(req).then(res => {
+        const copy = res.clone();
+        caches.open(CACHE).then(c => c.put(req, copy)).catch(() => {});
+        return res;
+      }))
+    );
+    return;
+  }
+
+  /* HTML, CSS, JS, manifest: rete prima, cache come ripiego offline */
+  event.respondWith(
+    fetch(req).then(res => {
+      const copy = res.clone();
+      caches.open(CACHE).then(c => c.put(req, copy)).catch(() => {});
+      return res;
+    }).catch(() =>
+      caches.match(req).then(hit =>
+        hit ||
+        caches.match('./index.html').then(shell => shell || new Response(
+          'Sei offline: riapri Asilapp quando torna la connessione.',
+          { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' } }
+        ))
+      )
+    )
+  );
 });
