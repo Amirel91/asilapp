@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Demo — Asilo Nido Arcobaleno · Asilapp</title>
+<meta name="description" content="La demo di Asilapp: guarda come si presenta lo spazio di un asilo, lato maestre e lato famiglie, senza registrarti e senza login.">
+<meta name="theme-color" content="#faf9f7">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="landing.css">
+<link rel="stylesheet" href="landing-extra.css">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<noscript><style>.reveal{opacity:1!important;transform:none!important}</style></noscript>
+<style>
+/* ---------- stili esclusivi della pagina demo (nessuna casa altrove) ---------- */
+.demo-seg{
+  display:flex;gap:.35rem;background:var(--bg);border:1px solid var(--line);
+  border-radius:999px;padding:.3rem;margin:0 auto .9rem;width:fit-content;max-width:100%;
+}
+.demo-seg button{
+  border:0;background:transparent;font:inherit;font-size:.88rem;font-weight:600;
+  color:var(--ink-soft);padding:.45rem 1rem;border-radius:999px;cursor:pointer;
+  transition:color var(--t),background-color var(--t),transform 200ms cubic-bezier(.2,.7,.3,1);
+  text-decoration:none;white-space:nowrap;
+}
+.demo-seg button:hover{transform:translateY(-1px);}
+.demo-seg button[aria-pressed="true"]{background:var(--card);color:var(--sage-ink);box-shadow:var(--sh-sm);}
+
+.demo-ro-bar{
+  display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;
+  background:var(--amber-soft);color:var(--amber-ink);
+  border:1px solid #e7d9b4;border-radius:var(--r);padding:.55rem .85rem;
+  font-size:.82rem;font-weight:600;box-shadow:var(--sh-sm);margin:.6rem 0;
+}
+
+.kid-flag{
+  display:block;margin-top:.35rem;font-size:.72rem;font-weight:600;color:var(--amber-ink);
+  background:var(--amber-soft);border:1px solid #e7d9b4;border-radius:999px;
+  padding:.2rem .55rem;width:fit-content;max-width:100%;overflow-wrap:anywhere;
+}
+
+.quick-item{
+  display:flex;align-items:flex-start;gap:.55rem;flex-wrap:wrap;
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r-sm);
+  padding:.6rem .75rem;box-shadow:var(--sh-sm);
+}
+.quick-item .q-ico{font-size:1rem;line-height:1.3;}
+.quick-item .q-txt{flex:1;min-width:180px;}
+.quick-item strong{display:block;font-size:.88rem;letter-spacing:-.01em;}
+.quick-item small{color:var(--muted);font-size:.78rem;line-height:1.4;display:block;margin-top:.15rem;}
+.quick-item .q-state{
+  font-size:.74rem;font-weight:700;color:var(--sage-ink);
+  background:var(--sage-soft);border-radius:999px;padding:.25rem .6rem;white-space:nowrap;
+}
+.quick-item .q-state.todo{color:var(--amber-ink);background:var(--amber-soft);}
+
+.demo-notice{
+  display:grid;gap:.2rem;padding:.7rem .85rem;
+}
+.demo-notice time{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);}
+.demo-notice strong{font-size:.9rem;letter-spacing:-.01em;}
+.demo-notice small{font-size:.82rem;color:var(--ink-soft);line-height:1.45;}
+
+.demo-diary{display:flex;gap:.4rem;flex-wrap:wrap;margin:.4rem 0 .2rem;}
+.demo-tag{
+  display:inline-flex;align-items:center;gap:.3rem;font-size:.76rem;font-weight:600;
+  background:var(--sage-soft);color:var(--sage-ink);border-radius:999px;padding:.28rem .65rem;
+}
+.demo-note-txt{font-size:.85rem;color:var(--ink-soft);margin:.35rem 0 0;line-height:1.5;}
+</style>
+</head>
+<body class="page-body">
+
+<header class="page-top">
+  <a class="brand" href="index.html">
+    <span class="logo logo-sm" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-8"/><path d="M12 13c0-4 3-7 8-7 0 5-3 8-8 8z"/><path d="M12 10C12 6.5 9.5 4 5 4c0 4.5 2.5 7 7 7z"/></svg>
+    </span>
+    <span class="brand-txt"><strong>Asilapp</strong><small>demo: Asilo Nido Arcobaleno</small></span>
+  </a>
+  <nav class="page-nav" aria-label="Navigazione del sito">
+    <a class="link-btn" href="index.html">Home</a>
+    <a class="link-btn" href="info.html">Come funziona</a>
+    <a class="link-btn" href="registrazione.html">Registrati</a>
+    <a class="link-btn" href="contatti.html">Contatti</a>
+  </nav>
+</header>
+
+<main class="page-main">
+
+  <section class="page-hero reveal">
+    <span class="hero-badge">Dimostrazione, senza login</span>
+    <h1>Guarda Asilapp dall'interno</h1>
+    <p>Questo è lo spazio dell'asilo inventato «Asilo Nido Arcobaleno»: scegli se guardarlo con gli occhi delle maestre o con quelli di una famiglia. Tutto in sola lettura.</p>
+  </section>
+
+  <div class="demo-seg" role="group" aria-label="Scegli la vista della demo">
+    <button type="button" data-demo-view="admin" aria-pressed="true">👩‍🏫 Vista maestre</button>
+    <button type="button" data-demo-view="parent" aria-pressed="false">👨‍👩‍👧 Vista famiglia</button>
+  </div>
+
+  <!-- ============ VISTA MAESTRE ============ -->
+  <section id="demoAdmin" aria-label="Demo, vista maestre">
+    <div class="demo-ro-bar">🔒 <strong>Modalità demo</strong> — tutto visibile, niente modificabile: lo spazio vero nasce in un minuto.</div>
+
+    <nav class="tabs" role="tablist" aria-label="Sezioni della demo maestre">
+      <button type="button" class="tab" role="tab" data-demo-tab="kids" aria-selected="true">Bambini</button>
+      <button type="button" class="tab" role="tab" data-demo-tab="memo" aria-selected="false">Memo</button>
+      <button type="button" class="tab" role="tab" data-demo-tab="menu" aria-selected="false">Menù</button>
+      <button type="button" class="tab" role="tab" data-demo-tab="pasti" aria-selected="false">Pasti</button>
+      <button type="button" class="tab" role="tab" data-demo-tab="avvisi" aria-selected="false">Avvisi</button>
+    </nav>
+
+    <div class="panel">
+      <!-- Bambini -->
+      <section class="tabpane" data-demo-pane="kids">
+        <div class="pane-head">
+          <h2>I bambini del nido</h2>
+          <div class="pane-tools"><button type="button" class="btn btn-primary btn-sm" data-demo-lock>+ Aggiungi bambino</button></div>
+        </div>
+        <p class="hint">Nella versione vera, un tocco sulla scheda apre memo, diario e nota salute del bambino. Il codice famiglia serve al genitore per entrare nella sua area.</p>
+        <div class="kid-grid">
+          <article class="kid-card">
+            <strong>Sofia Bianchi</strong>
+            <small>Sezione Farfalle · Codice famiglia <b>B001</b></small>
+            <span class="kid-flag">⚠️ Allergia alle uova</span>
+            <div class="demo-diary"><span class="demo-tag">🍝 Ha pranzato</span><span class="demo-tag">😴 Ha riposato</span></div>
+          </article>
+          <article class="kid-card">
+            <strong>Luca Ferrari</strong>
+            <small>Sezione Farfalle · Codice famiglia <b>B002</b></small>
+            <div class="demo-diary"><span class="demo-tag">🍝 Ha pranzato</span><span class="demo-tag">🚼 Cambio fatto</span></div>
+          </article>
+          <article class="kid-card">
+            <strong>Giulia Rossi</strong>
+            <small>Sezione Lucciole · Codice famiglia <b>B003</b></small>
+            <span class="kid-flag">⚠️ Dieta senza lattosio</span>
+            <div class="demo-diary"><span class="demo-tag">😴 Ha riposato</span></div>
+          </article>
+          <article class="kid-card">
+            <strong>Marco Esposito</strong>
+            <small>Sezione Lucciole · Codice famiglia <b>B004</b></small>
+            <div class="demo-diary"><span class="demo-tag">🍝 Ha pranzato</span><span class="demo-tag">😴 Ha riposato</span><span class="demo-tag">🚼 Cambio fatto</span></div>
+          </article>
+        </div>
+      </section>
+
+      <!-- Memo -->
+      <section class="tabpane" data-demo-pane="memo" hidden>
+        <div class="pane-head">
+          <h2>Memo per le famiglie</h2>
+          <div class="pane-tools"><button type="button" class="btn btn-primary btn-sm" data-demo-lock>+ Nuovo memo</button></div>
+        </div>
+        <p class="hint">I genitori vedono i memo nella loro area e li confermano con un tap: qui sotto lo stato di ogni conferma.</p>
+        <ul class="quick-manage">
+          <li class="quick-item">
+            <span class="q-ico" aria-hidden="true">🎒</span>
+            <span class="q-txt"><strong>Domani gita al parco: portare la giacca antipioggia</strong><small>Per Sofia Bianchi</small></span>
+            <span class="q-state todo">Da confermare</span>
+          </li>
+          <li class="quick-item">
+            <span class="q-ico" aria-hidden="true">👕</span>
+            <span class="q-txt"><strong>Portare il cambio completo nello zainetto</strong><small>Per Luca Ferrari</small></span>
+            <span class="q-state">Confermato ✓</span>
+          </li>
+          <li class="quick-item">
+            <span class="q-ico" aria-hidden="true">🎨</span>
+            <span class="q-txt"><strong>Venerdì laboratorio di pittura: vestiti comodi</strong><small>Per tutta la sezione Lucciole</small></span>
+            <span class="q-state">Confermato ✓</span>
+          </li>
+        </ul>
+      </section>
+
+      <!-- Menù -->
+      <section class="tabpane" data-demo-pane="menu" hidden>
+        <div class="pane-head">
+          <h2>Menù del mese</h2>
+          <div class="pane-tools"><span class="chip">Giugno</span></div>
+        </div>
+        <p class="hint">Il calendario dei pasti è visibile a tutte le famiglie nell'area riservata.</p>
+        <div class="menu-grid">
+          <div class="menu-day has-menu"><span class="menu-date">Lun 1</span><span class="menu-txt">Pasta al pomodoro e polpettine</span></div>
+          <div class="menu-day has-menu"><span class="menu-date">Mar 2</span><span class="menu-txt">Risotto alla zucca e formaggio</span></div>
+          <div class="menu-day has-menu"><span class="menu-date">Mer 3</span><span class="menu-txt">Minestrina e parmigiana</span></div>
+          <div class="menu-day has-menu"><span class="menu-date">Gio 4</span><span class="menu-txt">Pasta al pesto e pesce al forno</span></div>
+          <div class="menu-day has-menu"><span class="menu-date">Ven 5</span><span class="menu-txt">Riso e cotoletta con verdure</span></div>
+        </div>
+      </section>
+
+      <!-- Pasti -->
+      <section class="tabpane" data-demo-pane="pasti" hidden>
+        <div class="pane-head">
+          <h2>Bollettino pasti</h2>
+          <div class="pane-tools"><span class="chip">Giugno</span></div>
+        </div>
+        <p class="hint">Il totale del mese si calcola da solo ed è pronto per l'export.</p>
+        <div class="meals-stats">
+          <span class="chip">🧒 Bambini: 4</span>
+          <span class="chip">🍝 Pasti del mese: 76</span>
+          <span class="chip">💰 Previsto: 228,00 €</span>
+          <span class="chip warn">⚠️ Diete speciali: 2</span>
+        </div>
+        <div class="meals-table-wrap">
+          <table class="meals-table">
+            <thead><tr><th>Bambino</th><th>Classe</th><th class="num">Pasti</th><th class="num">Totale</th></tr></thead>
+            <tbody>
+              <tr><td>Sofia Bianchi</td><td>Farfalle</td><td class="num">20</td><td class="num">60,00 €</td></tr>
+              <tr><td>Luca Ferrari</td><td>Farfalle</td><td class="num">19</td><td class="num">57,00 €</td></tr>
+              <tr><td>Giulia Rossi</td><td>Lucciole</td><td class="num">18</td><td class="num">54,00 €</td></tr>
+              <tr><td>Marco Esposito</td><td>Lucciole</td><td class="num">19</td><td class="num">57,00 €</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Avvisi -->
+      <section class="tabpane" data-demo-pane="avvisi" hidden>
+        <div class="pane-head">
+          <h2>Avvisi a tutte le famiglie</h2>
+          <div class="pane-tools"><button type="button" class="btn btn-primary btn-sm" data-demo-lock>+ Nuovo avviso</button></div>
+        </div>
+        <p class="hint">Chiusure, feste e gite: un tocco e ogni famiglia lo vede nella propria area.</p>
+        <ul class="quick-manage">
+          <li class="demo-notice card">
+            <time datetime="2026-06-02">2 giugno</time>
+            <strong>Chiusura per la festa della Repubblica</strong>
+            <small>Il nido resta chiuso lunedì 2 giugno: riapriamo regolarmente mercoledì.</small>
+          </li>
+          <li class="demo-notice card">
+            <time datetime="2026-06-21">21 giugno</time>
+            <strong>Festa di fine anno</strong>
+            <small>Venerdì 21 alle 17:30 in giardino — merenda condivisa e foto di gruppo. Vi aspettiamo numerosi!</small>
+          </li>
+        </ul>
+      </section>
+    </div>
+  </section>
+
+  <!-- ============ VISTA FAMIGLIA ============ -->
+  <section id="demoParent" aria-label="Demo, vista famiglia" hidden>
+    <div class="demo-ro-bar">🔒 <strong>Area famiglie della demo</strong> — stai vedendo l'area di Sofia (codice B001), in sola lettura.</div>
+
+    <p class="parent-hello"><strong>Ciao, famiglia di Sofia 👋</strong><small>Sezione Farfalle · Asilo Nido Arcobaleno</small></p>
+
+    <section class="card" style="display:grid;gap:.5rem;margin:.6rem 0" aria-label="Memo da confermare">
+      <p class="drawer-sec">Memo da confermare</p>
+      <ul class="quick-manage">
+        <li class="quick-item">
+          <span class="q-ico" aria-hidden="true">🎒</span>
+          <span class="q-txt"><strong>Domani gita al parco: portare la giacca antipioggia</strong><small>Dalle maestre della sezione Farfalle</small></span>
+          <span class="q-state todo">Da confermare</span>
+        </li>
+        <li class="quick-item">
+          <span class="q-ico" aria-hidden="true">🎨</span>
+          <span class="q-txt"><strong>Venerdì laboratorio di pittura: vestiti comodi</strong><small>Per tutta la sezione</small></span>
+          <span class="q-state">Confermato ✓</span>
+        </li>
+      </ul>
+    </section>
+
+    <section class="card" style="display:grid;gap:.5rem;margin:.6rem 0" aria-label="Diario della giornata">
+      <p class="drawer-sec">Come è andata oggi</p>
+      <div class="demo-diary">
+        <span class="demo-tag">🍝 Ha pranzato</span>
+        <span class="demo-tag">😴 Ha riposato</span>
+      </div>
+      <p class="demo-note-txt">📝 Giornata serena: tanti giochi in giardino e una storia prima della merenda.</p>
+    </section>
+
+    <section class="card" style="display:grid;gap:.5rem;margin:.6rem 0" aria-label="Nota salute">
+      <p class="drawer-sec">Nota salute</p>
+      <p class="today-line warn">⚠️ Allergia alle uova: la cucina prepara il pasto alternativo.</p>
+    </section>
+
+    <section class="card" style="display:grid;gap:.5rem;margin:.6rem 0" aria-label="Menù del mese">
+      <p class="drawer-sec">Menù della settimana</p>
+      <div class="menu-grid">
+        <div class="menu-day has-menu"><span class="menu-date">Lun 1</span><span class="menu-txt">Pasta al pomodoro e polpettine</span></div>
+        <div class="menu-day has-menu"><span class="menu-date">Mar 2</span><span class="menu-txt">Risotto alla zucca e formaggio</span></div>
+        <div class="menu-day has-menu"><span class="menu-date">Mer 3</span><span class="menu-txt">Minestrina e parmigiana</span></div>
+        <div class="menu-day has-menu"><span class="menu-date">Gio 4</span><span class="menu-txt">Pasta al pesto e pesce al forno</span></div>
+        <div class="menu-day has-menu"><span class="menu-date">Ven 5</span><span class="menu-txt">Riso e cotoletta con verdure</span></div>
+      </div>
+    </section>
+
+    <section class="card" style="display:grid;gap:.5rem;margin:.6rem 0" aria-label="Avvisi del nido">
+      <p class="drawer-sec">Avvisi del nido</p>
+      <ul class="quick-manage">
+        <li class="demo-notice card" style="box-shadow:none">
+          <time datetime="2026-06-21">21 giugno</time>
+          <strong>Festa di fine anno</strong>
+          <small>Venerdì 21 alle 17:30 in giardino — merenda condivisa e foto di gruppo.</small>
+        </li>
+      </ul>
+    </section>
+  </section>
+
+  <section class="page-cta card reveal" style="margin-top:1rem">
+    <h2>Ti piace come si presenta?</h2>
+    <p>Lo spazio del tuo asilo nasce in un minuto: registralo e invita le famiglie con i loro codici.</p>
+    <div class="page-cta-btns">
+      <a class="btn btn-primary" href="registrazione.html">Crea lo spazio del mio asilo</a>
+      <a class="btn btn-ghost" href="index.html">Torna alla home</a>
+    </div>
+  </section>
+
+</main>
+
+<footer class="page-foot">
+  <p>Asilapp — il nido, in tasca alle famiglie. <a href="info.html">Come funziona</a></p>
+  <p class="page-credit">Asilapp è un progetto di <a href="https://www.mecalab.org" target="_blank" rel="noopener">MecaLab</a> · <a href="https://www.mecalab.org" target="_blank" rel="noopener">www.mecalab.org</a></p>
+</footer>
+
+<script>
+'use strict';
+/* demo.js interno — vista maestre/famiglia senza login, tutto in sola lettura */
+(function () {
+  var seg = document.querySelectorAll('[data-demo-view]');
+  var admin = document.getElementById('demoAdmin');
+  var parent = document.getElementById('demoParent');
+  if (!seg.length || !admin || !parent) return;
+
+  var toast = function (msg) {
+    if (typeof window.toast === 'function') { window.toast(msg); return; }
+    var t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = msg;
+    t.style.cssText = 'position:fixed;left:50%;bottom:1.2rem;transform:translateX(-50%);z-index:80;background:#292524;color:#fff;border-radius:999px;padding:.55rem 1rem;font-size:.84rem;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.2)';
+    document.body.appendChild(t);
+    setTimeout(function () { t.remove(); }, 2600);
+  };
+
+  /* switch maestre / famiglia */
+  Array.prototype.forEach.call(seg, function (b) {
+    b.addEventListener('click', function () {
+      var v = b.getAttribute('data-demo-view');
+      Array.prototype.forEach.call(seg, function (x) {
+        x.setAttribute('aria-pressed', x === b ? 'true' : 'false');
+      });
+      admin.hidden = v !== 'admin';
+      parent.hidden = v !== 'parent';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+
+  /* tab della vista maestre */
+  var tabs = document.querySelectorAll('[data-demo-tab]');
+  Array.prototype.forEach.call(tabs, function (t) {
+    t.addEventListener('click', function () {
+      var name = t.getAttribute('data-demo-tab');
+      Array.prototype.forEach.call(tabs, function (x) {
+        x.setAttribute('aria-selected', x === t ? 'true' : 'false');
+      });
+      Array.prototype.forEach.call(document.querySelectorAll('[data-demo-pane]'), function (p) {
+        p.hidden = p.getAttribute('data-demo-pane') !== name;
+      });
+    });
+  });
+
+  /* pulsanti di modifica: in demo non fanno nulla */
+  document.addEventListener('click', function (e) {
+    var b = e.target instanceof Element && e.target.closest('[data-demo-lock]');
+    if (b) e.preventDefault(), toast('🔒 Demo in sola lettura: crea il tuo asilo per modificare');
+  });
+})();
+</script>
+<script src="reveal-safe.js" defer></script>
+</body>
+</html>
