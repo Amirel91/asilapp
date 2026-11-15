@@ -2,6 +2,6 @@
   "name": "asilapp",
   "private": true,
   "dependencies": {
-    "@neondatabase/serverless": "^1"
+    "@neondatabase/serverless": "^0.10.4"
   }
 }
