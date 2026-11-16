@@ -11,13 +11,14 @@
   /* ---------- toast locale ---------- */
   function toast(msg) {
     const wrap = document.getElementById('toastWrap');
-    if (!wrap) return;
+    const host = wrap || document.body;
     const t = document.createElement('div');
     t.className = 'toast';
     t.textContent = msg;
-    wrap.appendChild(t);
-    setTimeout(() => t.classList.add('on'), 20);
-    setTimeout(() => { t.classList.remove('on'); setTimeout(() => t.remove(), 300); }, 2600);
+    if (!wrap) t.style.cssText = 'position:fixed;left:50%;bottom:1.2rem;transform:translateX(-50%);z-index:90';
+    host.appendChild(t);
+    setTimeout(() => t.classList.add('show'), 20);
+    setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 2600);
   }
 
   /* ---------- 1) vista maestre / famiglia ---------- */
@@ -51,7 +52,6 @@
     'Riso e cotoletta con verdure'
   ];
   const now = new Date();
-  const ym = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
   const mesi = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
   const ymLabel = mesi[now.getMonth()] + ' ' + now.getFullYear();
 
@@ -66,7 +66,7 @@
       html += '<div class="menu-day has-menu"><span class="menu-date">' + d + '</span><span class="menu-txt">' + txt + '</span></div>';
     }
     grid.innerHTML = html;
-    const chip = document.getElementById(ymChipId);
+    const chip = ymChipId && document.getElementById(ymChipId);
     if (chip) chip.textContent = '📅 ' + ymLabel;
   }
   buildMenu('demoMenuGrid', 'demoMenuYm');

@@ -178,23 +178,17 @@
       <section class="tabpane" data-demo-pane="menu" hidden>
         <div class="pane-head">
           <h2>Menù del mese</h2>
-          <div class="pane-tools"><span class="chip">Giugno</span></div>
+          <div class="pane-tools"><span class="chip" id="demoMenuYm">📅 questo mese</span></div>
         </div>
         <p class="hint">Il calendario dei pasti è visibile a tutte le famiglie nell'area riservata.</p>
-        <div class="menu-grid">
-          <div class="menu-day has-menu"><span class="menu-date">Lun 1</span><span class="menu-txt">Pasta al pomodoro e polpettine</span></div>
-          <div class="menu-day has-menu"><span class="menu-date">Mar 2</span><span class="menu-txt">Risotto alla zucca e formaggio</span></div>
-          <div class="menu-day has-menu"><span class="menu-date">Mer 3</span><span class="menu-txt">Minestrina e parmigiana</span></div>
-          <div class="menu-day has-menu"><span class="menu-date">Gio 4</span><span class="menu-txt">Pasta al pesto e pesce al forno</span></div>
-          <div class="menu-day has-menu"><span class="menu-date">Ven 5</span><span class="menu-txt">Riso e cotoletta con verdure</span></div>
-        </div>
+        <div class="menu-grid" id="demoMenuGrid"></div>
       </section>
 
       <!-- Pasti -->
       <section class="tabpane" data-demo-pane="pasti" hidden>
         <div class="pane-head">
           <h2>Bollettino pasti</h2>
-          <div class="pane-tools"><span class="chip">Giugno</span></div>
+          <div class="pane-tools"><span class="chip">mese corrente</span></div>
         </div>
         <p class="hint">Il totale del mese si calcola da solo ed è pronto per l'export.</p>
         <div class="meals-stats">
@@ -277,13 +271,7 @@
 
     <section class="card" style="display:grid;gap:.5rem;margin:.6rem 0" aria-label="Menù del mese">
       <p class="drawer-sec">Menù della settimana</p>
-      <div class="menu-grid">
-        <div class="menu-day has-menu"><span class="menu-date">Lun 1</span><span class="menu-txt">Pasta al pomodoro e polpettine</span></div>
-        <div class="menu-day has-menu"><span class="menu-date">Mar 2</span><span class="menu-txt">Risotto alla zucca e formaggio</span></div>
-        <div class="menu-day has-menu"><span class="menu-date">Mer 3</span><span class="menu-txt">Minestrina e parmigiana</span></div>
-        <div class="menu-day has-menu"><span class="menu-date">Gio 4</span><span class="menu-txt">Pasta al pesto e pesce al forno</span></div>
-        <div class="menu-day has-menu"><span class="menu-date">Ven 5</span><span class="menu-txt">Riso e cotoletta con verdure</span></div>
-      </div>
+      <div class="menu-grid" id="demoParentMenu"></div>
     </section>
 
     <section class="card" style="display:grid;gap:.5rem;margin:.6rem 0" aria-label="Avvisi del nido">
@@ -314,59 +302,7 @@
   <p class="page-credit">Asilapp è un progetto di <a href="https://www.mecalab.org" target="_blank" rel="noopener">MecaLab</a> · <a href="https://www.mecalab.org" target="_blank" rel="noopener">www.mecalab.org</a></p>
 </footer>
 
-<script>
-'use strict';
-/* demo.js interno — vista maestre/famiglia senza login, tutto in sola lettura */
-(function () {
-  var seg = document.querySelectorAll('[data-demo-view]');
-  var admin = document.getElementById('demoAdmin');
-  var parent = document.getElementById('demoParent');
-  if (!seg.length || !admin || !parent) return;
-
-  var toast = function (msg) {
-    if (typeof window.toast === 'function') { window.toast(msg); return; }
-    var t = document.createElement('div');
-    t.className = 'toast';
-    t.textContent = msg;
-    t.style.cssText = 'position:fixed;left:50%;bottom:1.2rem;transform:translateX(-50%);z-index:80;background:#292524;color:#fff;border-radius:999px;padding:.55rem 1rem;font-size:.84rem;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.2)';
-    document.body.appendChild(t);
-    setTimeout(function () { t.remove(); }, 2600);
-  };
-
-  /* switch maestre / famiglia */
-  Array.prototype.forEach.call(seg, function (b) {
-    b.addEventListener('click', function () {
-      var v = b.getAttribute('data-demo-view');
-      Array.prototype.forEach.call(seg, function (x) {
-        x.setAttribute('aria-pressed', x === b ? 'true' : 'false');
-      });
-      admin.hidden = v !== 'admin';
-      parent.hidden = v !== 'parent';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-  });
-
-  /* tab della vista maestre */
-  var tabs = document.querySelectorAll('[data-demo-tab]');
-  Array.prototype.forEach.call(tabs, function (t) {
-    t.addEventListener('click', function () {
-      var name = t.getAttribute('data-demo-tab');
-      Array.prototype.forEach.call(tabs, function (x) {
-        x.setAttribute('aria-selected', x === t ? 'true' : 'false');
-      });
-      Array.prototype.forEach.call(document.querySelectorAll('[data-demo-pane]'), function (p) {
-        p.hidden = p.getAttribute('data-demo-pane') !== name;
-      });
-    });
-  });
-
-  /* pulsanti di modifica: in demo non fanno nulla */
-  document.addEventListener('click', function (e) {
-    var b = e.target instanceof Element && e.target.closest('[data-demo-lock]');
-    if (b) e.preventDefault(), toast('🔒 Demo in sola lettura: crea il tuo asilo per modificare');
-  });
-})();
-</script>
+<script src="demo-page.js" defer></script>
 <script src="reveal-safe.js" defer></script>
 </body>
 </html>

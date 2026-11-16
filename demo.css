@@ -1,5 +1,5 @@
 /* demo.css — DEPRECATO
-   Gli stili del toolkit demo (sa-demo-*) e del banner in sola
-   lettura (demo-banner) sono stati consolidati in
-   landing-extra.css. Stub vuoto: eventuali <link> residui
-   non producono regole duplicate. */
+   Gli stili esclusivi della pagina demo (demo-seg, demo-ro-bar,
+   kid-flag, quick-item, demo-notice, demo-diary, demo-tag) vivono
+   nello <style> inline di demo.html: usati solo lì, non hanno senso
+   in un foglio condiviso. Stub vuoto per non rompere link residui. */
